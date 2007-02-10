@@ -11,6 +11,7 @@ class TexFBook(cbparser.XMLCbParser):
         cbparser.XMLCbParser.__init__(self)
         self.outfile = outfile
         self.author = None
+        self.author_name = None
         self.title = None
 
     def _uwrite(self, ustr):
@@ -42,14 +43,37 @@ class TexFBook(cbparser.XMLCbParser):
                     self.author_name = v
                 else:
                     self.author_name = self.author_name + u' ' + v
-        self.f.write("\\author{")
-        self._uwrite(self.author_name)
-        self.f.write("}\n");
+        self.author=None
 
     def chars_FictionBook_description_title__info_book__title(self, text):
-        self.f.write("\\title{")
-        self._uwrite(text)
-        self.f.write("}\n")
+        self.title = text
+
+    def end_FictionBook_description_title__info(self):
+        if self.author_name:
+            self.f.write("\\author{")
+            self._uwrite(self.author_name)
+            self.f.write("}\n");
+
+        if self.title:
+            self.f.write("\\title{")
+            self._uwrite(self.title)
+            self.f.write("}\n")
+
+        if self.author_name or self.title:
+            self.f.write("\n\\pdfinfo {\n")
+
+            if self.author_name:
+                self.f.write("\t/Title (")
+                self._uwrite(self.author_name) #TODO quoting, at least brackets
+                self.f.write(")\n")
+
+            if self.title:
+                self.f.write("\t/Author (")
+                self._uwrite(self.title) #TODO quoting, at least brackets
+                self.f.write(")\n")
+
+            self.f.write("}\n")
+        
 
     def start_FictionBook(self, attrs):
         self.f = open(self.outfile,"w")
@@ -60,9 +84,9 @@ class TexFBook(cbparser.XMLCbParser):
         self.f.write("\\usepackage[koi8-r]{inputenc}\n")
         self.f.write("\\usepackage[russian]{babel}\n")
         self.f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
-        self.f.write("\\begin{document}\n")
+        self.f.write("\n\\begin{document}\n\n")
 
     def end_FictionBook(self):
-        self.f.write("\\end{document}\n")
+        self.f.write("\n\\end{document}\n")
         self.f.close()
 
