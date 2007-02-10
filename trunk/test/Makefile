@@ -1,22 +1,7 @@
 # Makefile 
 
-T2AENC=/sw/share/texmf-dist/source/latex/t2/enc-maps/encfiles/t2a.enc
-
 all: test_opt.pdf
 
-# --- TeX->DVI->PS->PDF way --
-#test.dvi: test.tex 
-#	latex test.tex
-#	latex test.tex
-
-#test.ps: test.dvi
-#	dvips -o test.ps -Ppdf -tletter -G0 -j0 test.dvi
-#	#dvips -o test.ps -Ppdf -t9cm,12cm -G0 -j0 test.dvi
-
-#test.pdf: test.ps
-#	ps2pdf -dSubsetFonts=true -dEmbedAllFonts=true test.ps
-
-# --- PDFLatex way --
 test.pdf: test.tex
 	latex test.tex
 	pdflatex test.tex
