@@ -37,7 +37,7 @@ def main():
         usage()
         sys.exit(2)
 
-    fb = fictionbook.Book()
+    fb = fictionbook.TexFBook(outfile)
     fb.parseFile(infile)
 
 if __name__ == "__main__":
