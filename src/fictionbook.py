@@ -9,7 +9,6 @@ class TexFBook(cbparser.XMLCbParser):
 
     NONE = 0
     SECTION_STARTED = 1
-    
 
     def __init__(self, outfile):
         cbparser.XMLCbParser.__init__(self)
@@ -151,6 +150,7 @@ class TexFBook(cbparser.XMLCbParser):
         self.f.write("\\documentclass[11pt]{book}\n")
         self.f.write("\\usepackage{graphicx}\n")
         self.f.write("\\usepackage{url}\n")
+        self.f.write("\\usepackage{epigraph}\n")
         self.f.write("\\usepackage{verbatim}\n")
         self.f.write("\\usepackage[utf-8]{inputenc}\n")
         self.f.write("\\usepackage[russian]{babel}\n")
