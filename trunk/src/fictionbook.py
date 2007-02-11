@@ -7,12 +7,17 @@ import cbparser
 
 class TexFBook(cbparser.XMLCbParser):
 
+    NONE = 0
+    SECTION_STARTED = 1
+    
+
     def __init__(self, outfile):
         cbparser.XMLCbParser.__init__(self)
         self.outfile = outfile
         self.author = None
         self.author_name = None
         self.title = None
+        self.mode = self.NONE
 
     def _uwrite(self, ustr):
         self.f.write(ustr.encode('utf-8')) 
@@ -74,6 +79,40 @@ class TexFBook(cbparser.XMLCbParser):
 
             self.f.write("}\n")
         
+
+    def _emit_section_title(self):
+        if len(self.section_title):
+            self.f.write("\\section{")
+            self._uwrite(self.section_title)
+            self.f.write("}\n");
+            self.section_title=""
+    
+    def start__section(self, attrs):
+        if self.mode == self.SECTION_STARTED:
+            self._emit_section_title()
+        else:
+            self.mode = self.SECTION_STARTED
+
+    def start__section_title(self, attrs):
+        if self.mode == self.SECTION_STARTED:
+            self.section_title=""
+
+    def chars__section_title_p(self, text):
+        if len(self.section_title):
+            self.section_title = "\\\\" + self.section_title+text
+        else:
+            self.section_title = text
+
+    def chars__section_title_empty__line(self, text):
+        self.section_title = self.section_title+text + "\\\\"
+
+    def end__section_title(self):
+        if self.mode == self.SECTION_STARTED:
+            self._emit_section_title()
+            self.mode == self.NONE
+
+    def end_section(self):
+        self.mode = self.NONE
 
     def start_FictionBook(self, attrs):
         self.f = open(self.outfile,"w")
