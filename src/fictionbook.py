@@ -151,6 +151,11 @@ class TexFBook(cbparser.XMLCbParser):
             self._emit_section_start()
             self.mode == self.NONE
     start__section_annotation = start__section_p
+    start__section_poem = start__section_p
+    start__section_subtitle = start__section_p
+    start__section_cite = start__section_p
+    start__section_empty__line = start__section_p
+    start__section_table = start__section_p
 
     def start__section_title(self, attrs):
         if self.mode == self.SECTION_STARTED:
