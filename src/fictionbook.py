@@ -77,6 +77,10 @@ class TexFBook(cbparser.XMLCbParser):
             self._uwrite(self.title)
             self.f.write("}\n")
 
+        if self.author_name or self.title:
+            self.f.write("\\maketitle\n");
+
+
         # TODO: PDF info generation temporaty disabled. It seems that
         # non ASCII characters are not allowed there!
         if False and (self.author_name or self.title):
@@ -151,9 +155,11 @@ class TexFBook(cbparser.XMLCbParser):
         self.f.write("\\usepackage[utf-8]{inputenc}\n")
         self.f.write("\\usepackage[russian]{babel}\n")
         self.f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
+        self.f.write("\\setcounter{secnumdepth}{-2}\n"); # supress section numbering
         self.f.write("\n\\begin{document}\n\n")
 
     def end_FictionBook(self):
+        self.f.write("\\tableofcontents\n"); #TODO: move to beginning, make hyperlined index.
         self.f.write("\n\\end{document}\n")
         self.f.close()
 
