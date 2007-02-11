@@ -10,6 +10,32 @@ import getopt, sys, string
 
 from BeautifulSoup import BeautifulStoneSoup, Tag
 
+def processStyle(f, s):
+    if s.name == "strong":
+        pass
+    elif s.name == "emphasis":
+        f.write("\\emph{")
+        _uwrite(f,_pQuote(_text(s)))
+        f.write("}")
+    elif s.name == "style":
+        pass #TODO
+    elif s.name == "a":
+        pass #TODO
+    elif s.name == "strikethrough":
+        f.write("\\sout{")
+        _uwrite(f,_pQuote(_text(s)))
+        f.write("}")
+    elif s.name == "sub":
+        pass #TODO
+    elif s.name == "sup":
+        pass #TODO
+    elif s.name == "code":
+        f.write("\n\\begin{verbatim}\n")
+        _uwrite(f,_pQuote(_text(s)))
+        f.write("\n\\end{verbatim}\n")
+    elif s.name == "image":
+        pass #TODO
+
 def _pQuote(str):
     ''' Basic paragraph TeX quoting '''
     if len(str)==0:
@@ -27,7 +53,7 @@ def _uwrite(f, ustr):
 
 def fb2tex(infile, outfile):
     f = open(infile, 'r')
-    soup = BeautifulStoneSoup(f)
+    soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line'])
     f.close()
 
     f = open(outfile, 'w')
@@ -36,6 +62,7 @@ def fb2tex(infile, outfile):
     f.write("\\usepackage{url}\n")
     f.write("\\usepackage{epigraph}\n")
     f.write("\\usepackage{verbatim}\n")
+    f.write("\\usepackage{ulem}\n")
     f.write("\\usepackage[utf-8]{inputenc}\n")
     f.write("\\usepackage[russian]{babel}\n")
     f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
@@ -75,12 +102,15 @@ def processSection(s, f):
     _uwrite(f,title) # TODO quote
     f.write("}\n");
                         
-    for x in s:
+    for x in s.contents:
         if isinstance(x, Tag):
             if x.name == "section":
                 processSection(x,f)
             if x.name == "p":
-                _uwrite(f,_pQuote(_text(x)))
+                if len(x.contents) and isinstance(x.contents[0], Tag):
+                    processStyle(f, x.contents[0])
+                else:
+                    _uwrite(f,_pQuote(_text(x)))
                 f.write("\n\n")
             elif x.name == "empty-line":
                 f.write("\n\n") # TODO: not sure
