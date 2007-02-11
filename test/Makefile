@@ -4,6 +4,7 @@ all: test_opt.pdf biykov_orfografiya_opt.pdf
 
 test.pdf: test.tex
 	pdflatex test.tex
+	pdflatex test.tex
 
 test_opt.pdf: test.pdf
 	pdfopt test.pdf test_opt.pdf
@@ -24,4 +25,4 @@ runb: biykov_orfografiya_opt.pdf
 	open biykov_orfografiya_opt.pdf
 
 clean:
-	rm -f test.pdf test_opt.pdf *.dvi *.ps *.log *.toc *.aux biykov_orfografiya_opt.pdf biykov_orfografiya.pdf
+	rm -f test.pdf test_opt.pdf *.dvi *.ps *.log *.toc *.aux biykov_orfografiya_opt.pdf biykov_orfografiya.pdf biykov_orfografiya.tex
