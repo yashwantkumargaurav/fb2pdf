@@ -2,7 +2,7 @@
 FictionBook2 module
 '''
 
-import sys, string
+import sys, string, re
 import cbparser
 
 class TexFBook(cbparser.XMLCbParser):
@@ -21,8 +21,21 @@ class TexFBook(cbparser.XMLCbParser):
 
     def _uwrite(self, ustr):
         self.f.write(ustr.encode('utf-8')) 
-                
-    # callbacks
+
+    def _pQuote(self, str):
+        ''' Basic paragraph TeX quoting '''
+        if len(str)==0:
+            return str
+
+        # 'EN DASH' at the beginning of paragrapg - russian direct speach
+        if ord(str[0])==8211:
+            str="\\cdash--*" + str[1:]
+
+        return str
+    
+    # --- callbacks ---
+
+    # -- Dealing with book title --
 
     def start_FictionBook_description_title__info_author(self, attrs):
         self.author={}
@@ -64,7 +77,9 @@ class TexFBook(cbparser.XMLCbParser):
             self._uwrite(self.title)
             self.f.write("}\n")
 
-        if self.author_name or self.title:
+        # TODO: PDF info generation temporaty disabled. It seems that
+        # non ASCII characters are not allowed there!
+        if False and (self.author_name or self.title):
             self.f.write("\n\\pdfinfo {\n")
 
             if self.author_name:
@@ -80,10 +95,12 @@ class TexFBook(cbparser.XMLCbParser):
             self.f.write("}\n")
         
 
+    # -- dealing with section titles ---
+
     def _emit_section_title(self):
         if len(self.section_title):
             self.f.write("\\section{")
-            self._uwrite(self.section_title)
+            self._uwrite(self.section_title) # TODO quote
             self.f.write("}\n");
             self.section_title=""
     
@@ -103,7 +120,7 @@ class TexFBook(cbparser.XMLCbParser):
         else:
             self.section_title = text
 
-    def chars__section_title_empty__line(self, text):
+    def start__section_title_empty__line(self, text):
         self.section_title = self.section_title+text + "\\\\"
 
     def end__section_title(self):
@@ -114,13 +131,24 @@ class TexFBook(cbparser.XMLCbParser):
     def end_section(self):
         self.mode = self.NONE
 
+    # -- Dealing with section content
+
+    def start__section_empty__line(self, text):
+        self.f.write("\n")
+
+    def chars__section_p(self, text):
+        self._uwrite(self._pQuote(text))
+        self.f.write("\n\n")
+
+    # -- Dealing with book start and end
+
     def start_FictionBook(self, attrs):
         self.f = open(self.outfile,"w")
         self.f.write("\\documentclass[11pt]{book}\n")
         self.f.write("\\usepackage{graphicx}\n")
         self.f.write("\\usepackage{url}\n")
         self.f.write("\\usepackage{verbatim}\n")
-        self.f.write("\\usepackage[koi8-r]{inputenc}\n")
+        self.f.write("\\usepackage[utf-8]{inputenc}\n")
         self.f.write("\\usepackage[russian]{babel}\n")
         self.f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
         self.f.write("\n\\begin{document}\n\n")
