@@ -14,6 +14,9 @@ class TexFBook(cbparser.XMLCbParser):
         cbparser.XMLCbParser.__init__(self)
         self.outfile = outfile
         self.author = None
+        self.epigraphs = []
+        self.current_epigraph_text = None
+        self.current_epigraph_author = None
         self.author_name = None
         self.title = None
         self.mode = self.NONE
@@ -96,8 +99,37 @@ class TexFBook(cbparser.XMLCbParser):
                 self.f.write(")\n")
 
             self.f.write("}\n")
-        
 
+    # -- section stuff --        
+
+    def _emit_section_start(self):
+        self._emit_section_title()
+        self._emit_section_epigraphs()
+    
+    # -- dealing with epigraphs ---
+
+    def end__section_epigraph(self):
+        if self.current_epigraph_text:
+            self.epigraphs = self.epigraphs + [(self.current_epigraph_text, self.current_epigraph_author)]
+            self.current_epigraph_text = None
+            self.current_epigraph_author = None
+            
+    def chars__section_epigraph_p(self, text):
+        if self.current_epigraph_text:
+            self.current_epigraph_text = "\\\\" + self.current_epigraph_text+text
+        else:
+            self.current_epigraph_text = text
+
+    def chars__section_epigraph_text__author(self, text):
+        self.current_epigraph_author
+
+    def _emit_section_epigraphs(self):
+        if len(self.epigraphs):
+             # TODO:emit
+             self.epigraphs=[]
+        self.current_epigraph_text = None
+        self.current_epigraph_author = None
+    
     # -- dealing with section titles ---
 
     def _emit_section_title(self):
@@ -109,9 +141,16 @@ class TexFBook(cbparser.XMLCbParser):
     
     def start__section(self, attrs):
         if self.mode == self.SECTION_STARTED:
-            self._emit_section_title()
+            self._emit_section_start() # nested section
         else:
             self.mode = self.SECTION_STARTED
+
+    def start__section_p(self, attrs):
+        if self.mode == self.SECTION_STARTED:
+            # First non-title, non-epigraph element in the sesssion
+            self._emit_section_start()
+            self.mode == self.NONE
+    start__section_annotation = start__section_p
 
     def start__section_title(self, attrs):
         if self.mode == self.SECTION_STARTED:
@@ -125,11 +164,6 @@ class TexFBook(cbparser.XMLCbParser):
 
     def start__section_title_empty__line(self, text):
         self.section_title = self.section_title+text + "\\\\"
-
-    def end__section_title(self):
-        if self.mode == self.SECTION_STARTED:
-            self._emit_section_title()
-            self.mode == self.NONE
 
     def end_section(self):
         self.mode = self.NONE
