@@ -19,17 +19,25 @@ class XMLCbParser(handler.ContentHandler):
     def _callHandler(self, *args):
         prefix = args[0]
         args = args[1:]
-        methodname = prefix + "_" + string.join(self._path,"_")
-        method = None
-        try:
-            method = getattr(self, methodname)
-        except AttributeError:
-            pass
-        if method:
-            if len(args):
-                method(*args)
+        for i in range(0,len(self._path)):
+            if i==0:
+                # full path, sigle _ after prefix
+                methodname = prefix + "_" + string.join(self._path[i:],"_")
             else:
-                method()
+                # partial path, double _ after prefix
+                methodname = prefix + "__" + string.join(self._path[i:],"_")
+            method = None
+            try:
+                method = getattr(self, methodname)
+            except AttributeError:
+                pass
+            if method:
+                if len(args):
+                    method(*args)
+                else:
+                    method()
+                break
+ 
 
     def _quoteName(self, name):
         return string.replace(name,"-","__")
