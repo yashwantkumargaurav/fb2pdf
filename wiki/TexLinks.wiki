@@ -2,4 +2,6 @@
 
   * [http://help-csli.stanford.edu/tex/latex-sections.shtml Latex Sections]
   * [http://www.tex.ac.uk/cgi-bin/texfaq2html?label=epigraph Epigraphs]
-
+  * [http://tex.raleigh.ru/doku.php/faq/ttffonts using TTF fonts(rus)]
+  * [http://www.opennet.ru/base/rus/type1_latex.txt.html another article on using TTF fonts (rus)]
+  * [http://tex.raleigh.ru/doku.php/faq/freefonts Free Russian TeX fonts]
