@@ -4,5 +4,6 @@
   * Image support
   * Book epigraph
   * Hyperlinked index
-  * 'coverpage' element support
+  * 'description/coverpage' element support
+  * 'description/annotation' element support
   * PHP frontend
