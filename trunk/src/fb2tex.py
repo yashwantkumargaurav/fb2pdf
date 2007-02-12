@@ -110,7 +110,16 @@ def processSection(s, f):
                 f.write("\n\n")
             elif x.name == "empty-line":
                 f.write("\n\n") # TODO: not sure
-
+            elif x.name == "image":
+                pass # TODO
+            elif x.name == "poem":
+                pass # TODO
+            elif x.name == "subtitle":
+                pass # TODO
+            elif x.name == "cite":
+                pass # TODO
+            elif x.name == "table":
+                pass # TODO
 
 def getSectionTitle(t):
     ''' Section title consists of "p" and "empty-line" elements sequence'''
