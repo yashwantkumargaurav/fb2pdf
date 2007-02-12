@@ -10,29 +10,29 @@ import getopt, sys, string
 
 from BeautifulSoup import BeautifulStoneSoup, Tag
 
-def processStyle(f, s):
+def p(x):
+    if len(x.contents) and isinstance(x.contents[0], Tag):
+        return style(x.contents[0])
+    else:
+        return _pQuote(_text(x))
+
+def style(s):
     if s.name == "strong":
-        pass
+        return u'{\\bf '+ _pQuote(_text(s)) + u'}'
     elif s.name == "emphasis":
-        f.write("\\emph{")
-        _uwrite(f,_pQuote(_text(s)))
-        f.write("}")
+        return u'{\\it '+ _pQuote(_text(s)) + u'}'
     elif s.name == "style":
         pass #TODO
     elif s.name == "a":
         pass #TODO
     elif s.name == "strikethrough":
-        f.write("\\sout{")
-        _uwrite(f,_pQuote(_text(s)))
-        f.write("}")
+        return u'\\sout{' + _pQuote(_text(s)) + u'}'
     elif s.name == "sub":
         pass #TODO
     elif s.name == "sup":
         pass #TODO
     elif s.name == "code":
-        f.write("\n\\begin{verbatim}\n")
-        _uwrite(f,_pQuote(_text(s)))
-        f.write("\n\\end{verbatim}\n")
+        return u'\n\\begin{verbatim}\n' + _pQuote(_text(s)) + u'\n\\end{verbatim}\n'
     elif s.name == "image":
         pass #TODO
 
@@ -90,30 +90,63 @@ def processSection(s, f):
             if isinstance(tx, Tag):
                 if tx.name == "p":
                     if len(title):
-                        title = title + "\\\\" + _text(tx)
+                        title = title + "\\\\" + p(tx)
                     else:
-                        title = _text(tx)
+                        title = p(tx)
                 elif tx.name == "empty-line":
                     if len(title):
                         title = title + "\\\\"
 
-    # TODO: epigraphs
     f.write("\\section{")
     _uwrite(f,title) # TODO quote
     f.write("}\n");
-                        
+
+    #processEpigraphs(f,s)
+    
     for x in s.contents:
         if isinstance(x, Tag):
             if x.name == "section":
                 processSection(x,f)
             if x.name == "p":
-                if len(x.contents) and isinstance(x.contents[0], Tag):
-                    processStyle(f, x.contents[0])
-                else:
-                    _uwrite(f,_pQuote(_text(x)))
+                _uwrite(f,p(x))
                 f.write("\n\n")
             elif x.name == "empty-line":
                 f.write("\n\n") # TODO: not sure
+
+
+def processEpigraphText(f,e):
+    for x in e.contents:
+        if isinstance(x, Tag):
+            if x.name == "p":
+                _uwrite(f,p(x))
+                f.write("\n\n")
+            elif x.name == "empty-line":
+                f.write("\n\n") # TODO: not sure
+            elif x.name == "poem":
+                pass #TODO
+            elif x.name == "cite":
+                pass #TODO
+        
+def processEpigraphs(f,s):
+    ep = s.findAll("epigraph", recursive=False)
+    if len(ep)==0:
+        return
+    f.write("\\begin{epigraphs}\n")
+    for e in ep:
+        f.write("\\qitem{")
+        processEpigraphText(f, e)
+        f.write(" }%\n")
+
+        eauthor=""
+        ea=e.find("text-author")
+        if ea:
+            eauthor=_text(ea)
+        f.write("\t{")
+        _uwrite(f,eauthor)
+        f.write("}\n")
+        
+    f.write("\\end{epigraphs}\n")
+        
 
 def processTitleAndAuthor(fb,f):
 
