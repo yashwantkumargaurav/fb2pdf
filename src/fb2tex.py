@@ -6,7 +6,7 @@ FictionBook2 -> TeX converter
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
-import getopt, sys, string
+import getopt, sys, string, re
 
 from BeautifulSoup import BeautifulStoneSoup, Tag
 
@@ -14,35 +14,41 @@ def p(x):
     if len(x.contents) and isinstance(x.contents[0], Tag):
         return style(x.contents[0])
     else:
-        return _pQuote(_text(x))
+        return _textQuote(_text(x))
 
 def style(s):
     if s.name == "strong":
-        return u'{\\bf '+ _pQuote(_text(s)) + u'}'
+        return u'{\\bf '+ _textQuote(_text(s)) + u'}'
     elif s.name == "emphasis":
-        return u'{\\it '+ _pQuote(_text(s)) + u'}'
+        return u'{\\it '+ _textQuote(_text(s)) + u'}'
     elif s.name == "style":
         pass #TODO
     elif s.name == "a":
         pass #TODO
     elif s.name == "strikethrough":
-        return u'\\sout{' + _pQuote(_text(s)) + u'}'
+        return u'\\sout{' + _textQuote(_text(s)) + u'}'
     elif s.name == "sub":
         pass #TODO
     elif s.name == "sup":
         pass #TODO
     elif s.name == "code":
-        return u'\n\\begin{verbatim}\n' + _pQuote(_text(s)) + u'\n\\end{verbatim}\n'
+        return u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
     elif s.name == "image":
         pass #TODO
 
-def _pQuote(str):
+def _textQuote(str, code=False):
     ''' Basic paragraph TeX quoting '''
     if len(str)==0:
         return str
-    # 'EN DASH' at the beginning of paragrapg - russian direct speach
-    if ord(str[0])==8211:
-        str="\\cdash--*" + str[1:]
+    if not code:
+        # 'EN DASH' at the beginning of paragrapg - russian direct speach
+        if ord(str[0])==8211:
+            str="\\cdash--*" + str[1:]
+        # ellipses
+        str = string.replace(str,'...','\\ldots')
+        # em-dash
+        str = re.sub(r'(\s)--(\s)','---',str)
+
     return str
 
 def _text(t):
