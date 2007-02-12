@@ -107,7 +107,7 @@ def processSection(s, f):
     _uwrite(f,title) # TODO quote
     f.write("}\n");
 
-    #processEpigraphs(f,s)
+    processEpigraphs(f,s)
     
     for x in s.contents:
         if isinstance(x, Tag):
@@ -121,13 +121,18 @@ def processSection(s, f):
 
 
 def processEpigraphText(f,e):
+    first = True
     for x in e.contents:
         if isinstance(x, Tag):
             if x.name == "p":
+                if not first:
+                    f.write("\\linebreak")
+                else:
+                    first = False
                 _uwrite(f,p(x))
-                f.write("\n\n")
             elif x.name == "empty-line":
-                f.write("\n\n") # TODO: not sure
+                if not first:
+                    f.write("\\linebreak")
             elif x.name == "poem":
                 pass #TODO
             elif x.name == "cite":
