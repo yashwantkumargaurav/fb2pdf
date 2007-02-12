@@ -90,18 +90,10 @@ def processSections(b,f):
 
 def processSection(s, f):
     t = s.find("title", recursive=False)
-    title = ""
     if t:
-        for tx in t:
-            if isinstance(tx, Tag):
-                if tx.name == "p":
-                    if len(title):
-                        title = title + "\\\\" + p(tx)
-                    else:
-                        title = p(tx)
-                elif tx.name == "empty-line":
-                    if len(title):
-                        title = title + "\\\\"
+        title = getSectionTitle(t)
+    else:
+        t = ""
 
     f.write("\\section{")
     _uwrite(f,title) # TODO quote
@@ -120,8 +112,26 @@ def processSection(s, f):
                 f.write("\n\n") # TODO: not sure
 
 
+def getSectionTitle(t):
+    ''' Section title consists of "p" and "empty-line" elements sequence'''
+    first = True
+    res = u''
+    for x in t:
+        if isinstance(x, Tag):
+            if x.name == "p":
+                if not first:
+                    res = res + u"\\linebreak"
+                else:
+                    first = False
+                res = res + p(x)
+            elif x.name == "empty-line":
+                if not first:
+                    res = res + u"\\linebreak"
+    return res
+
 def processEpigraphText(f,e):
     first = True
+    ''' Epigaph text consists of "p", "empty-line", "poem" and "cite" elements sequence'''
     for x in e.contents:
         if isinstance(x, Tag):
             if x.name == "p":
