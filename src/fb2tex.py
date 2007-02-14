@@ -71,15 +71,21 @@ def fb2tex(infile, outfile):
     f.write("\\usepackage{ulem}\n")
     f.write("\\usepackage[utf-8]{inputenc}\n")
     f.write("\\usepackage[russian]{babel}\n")
+    f.write("\\usepackage{hyperref}\n")
     f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
     f.write("\\setcounter{secnumdepth}{-2}\n"); # supress section numbering
+
     f.write("\n\\begin{document}\n\n")
 
     fb = soup.find("fictionbook")
     processTitleAndAuthor(fb,f)
-    processSections(fb.find("body"), f)
+
+    f.write("\\tableofcontents\n");
     
-    f.write("\\tableofcontents\n"); #TODO: move to beginning, make hyperlined index.
+    body=fb.find("body")
+    processEpigraphs(body, f)
+    processSections(body, f)
+    
     f.write("\n\\end{document}\n")
     f.close()
 
@@ -99,7 +105,7 @@ def processSection(s, f):
     _uwrite(f,title) # TODO quote
     f.write("}\n");
 
-    processEpigraphs(f,s)
+    processEpigraphs(s, f)
     
     for x in s.contents:
         if isinstance(x, Tag):
@@ -159,7 +165,7 @@ def processEpigraphText(f,e):
             elif x.name == "cite":
                 pass #TODO
         
-def processEpigraphs(f,s):
+def processEpigraphs(s,f):
     ep = s.findAll("epigraph", recursive=False)
     if len(ep)==0:
         return
