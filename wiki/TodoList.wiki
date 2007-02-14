@@ -6,10 +6,10 @@
   * 'description/coverpage' element support
   * 'description/annotation' element support
   * PHP frontend
+  * multiple 'author' elements in 'title-info'
 
 == Buggy ==
 
   * Epigraphs does not always look good, especially if they do not fit page. Try alternative  epigraph packeages mentioned [http://www.tex.ac.uk/cgi-bin/texfaq2html?label=epigraph here]
   * Using 'hyperref' to enable links from TOC to sections causing pdfopt crash.
-
 
