@@ -195,7 +195,7 @@ def processTitleAndAuthor(fb,f):
         return
     ti = fb.find("title-info")
     if not ti:
-        return
+        return # Title-info is mandatory element!
     t = ti.find("book-title")
     if t:
         title = _text(t)
@@ -232,6 +232,8 @@ def processTitleAndAuthor(fb,f):
         f.write("\\title{")
         _uwrite(f, title)
         f.write("}\n")
+
+    f.write("\\date{}")
 
     if author_name or title:
         f.write("\\maketitle\n");
