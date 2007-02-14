@@ -2,7 +2,6 @@
 
 == Not yet implemented ==
 
-  * 'description/coverpage' element support
   * 'description/annotation' element support
   * PHP frontend
   * multiple 'author' elements in 'title-info'
