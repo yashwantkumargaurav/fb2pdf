@@ -87,7 +87,7 @@ def fb2tex(infile, outfile):
 
     fb = soup.find("fictionbook")
     findEnclosures(fb)
-    processTitleAndAuthor(fb,f)
+    processDescription(fb.find("description"), f)
 
     f.write("\\tableofcontents\n");
     
@@ -137,6 +137,32 @@ def processSection(s, f):
                 pass # TODO
             elif x.name == "table":
                 pass # TODO
+
+
+def processAnnotation(f, an):
+    if len(an):
+        f.write('\\section*{}\n')
+        f.write('\\begin{small}\n')
+        for x in an:
+            if isinstance(x, Tag):
+                if x.name == "p":
+                    _uwrite(f,p(x))
+                    f.write("\n\n")
+                elif x.name == "empty-line":
+                    f.write("\n\n") # TODO: not sure
+                elif x.name == "poem":
+                    pass # TODO
+                elif x.name == "subtitle":
+                    f.write("\\subsection*{")
+                    _uwrite(f,p(x))
+                    f.write("}\n")
+                elif x.name == "cite":
+                    pass # TODO
+                elif x.name == "table":
+                    pass # TODO
+        f.write('\\end{small}\n')
+        f.write('\\pagebreak\n')
+            
 
 def getSectionTitle(t):
     ''' Section title consists of "p" and "empty-line" elements sequence'''
@@ -195,15 +221,16 @@ def processEpigraphs(s,f):
     f.write("\\end{epigraphs}\n")
         
 
-def processTitleAndAuthor(fb,f):
-    #TODO: body/title
-    desc = fb.find("description")
-    if not desc:
-        return
 
+def processDescription(desc,f):
+    if not desc:
+        print "Warning, missing required 'description' element\n"
+        return
+    
     # title info, mandatory element
-    ti = fb.find("title-info")
+    ti = desc.find("title-info")
     if not ti:
+        print "Warning, missing required 'title-info' element\n"
         return 
     t = ti.find("book-title")
     if t:
@@ -270,11 +297,14 @@ def processTitleAndAuthor(fb,f):
         images = co.findAll("image", recursive=False)
         if len(images):
             #f.write("\\begin{titlepage}\n")
-            f.write("\centering\n")
             for image in images:
                 processInlineImage(f,image)
             #f.write("\\end{titlepage}\n")
 
+    # annontation, optional
+    an = desc.find("annotation")
+    if an:
+        processAnnotation(f,an)
 
 def findEnclosures(fb):
     encs = fb.findAll("binary", recursive=False)
