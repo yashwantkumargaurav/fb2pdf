@@ -1,6 +1,5 @@
 #summary Project TODO list
 
-  * 'subtitle' element support
   * Epigraphs does not always look good, especially if they do not fit page. Try alternative  epigraph packeages mentioned [http://www.tex.ac.uk/cgi-bin/texfaq2html?label=epigraph here]
   * Image support
   * Book epigraph
