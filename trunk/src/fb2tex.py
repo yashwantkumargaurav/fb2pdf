@@ -71,7 +71,8 @@ def fb2tex(infile, outfile):
     f.write("\\usepackage{ulem}\n")
     f.write("\\usepackage[utf-8]{inputenc}\n")
     f.write("\\usepackage[russian]{babel}\n")
-    f.write("\\usepackage{hyperref}\n")
+    # Temporary disabled, since it is causing 'pdfopt' crashes
+    #f.write("\\usepackage{hyperref}\n")
     f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
     f.write("\\setcounter{secnumdepth}{-2}\n"); # supress section numbering
 
