@@ -14,6 +14,7 @@ biykov_orfografiya_opt.pdf: biykov_orfografiya.pdf
 
 biykov_orfografiya.pdf: biykov_orfografiya.tex
 	pdflatex biykov_orfografiya.tex
+	pdflatex biykov_orfografiya.tex
 
 biykov_orfografiya.tex: biykov_orfografiya.fb2 ../src/*.py
 	../src/fb2tex.py -f biykov_orfografiya.fb2 -o biykov_orfografiya.tex
@@ -25,4 +26,4 @@ runb: biykov_orfografiya_opt.pdf
 	open biykov_orfografiya_opt.pdf
 
 clean:
-	rm -f test.pdf test_opt.pdf *.dvi *.ps *.log *.toc *.aux biykov_orfografiya_opt.pdf biykov_orfografiya.pdf biykov_orfografiya.tex
+	rm -f test.pdf test_opt.pdf *.out *.dvi *.ps *.log *.toc *.aux biykov_orfografiya_opt.pdf biykov_orfografiya.pdf biykov_orfografiya.tex
