@@ -26,4 +26,4 @@ runb: biykov_orfografiya_opt.pdf
 	open biykov_orfografiya_opt.pdf
 
 clean:
-	rm -f test.pdf test_opt.pdf *.out *.dvi *.ps *.log *.toc *.aux biykov_orfografiya_opt.pdf biykov_orfografiya.pdf biykov_orfografiya.tex
+	rm -f test.pdf test_opt.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux biykov_orfografiya_opt.pdf biykov_orfografiya.pdf biykov_orfografiya.tex

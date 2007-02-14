@@ -6,9 +6,16 @@ FictionBook2 -> TeX converter
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
-import getopt, sys, string, re
+import getopt,sys,string,re,binascii,os
 
 from BeautifulSoup import BeautifulStoneSoup, Tag
+
+# -- constants --
+
+image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
+
+# --- Globals --
+enclosures = {}
 
 def p(x):
     if len(x.contents) and isinstance(x.contents[0], Tag):
@@ -79,6 +86,7 @@ def fb2tex(infile, outfile):
     f.write("\n\\begin{document}\n\n")
 
     fb = soup.find("fictionbook")
+    findEnclosures(fb)
     processTitleAndAuthor(fb,f)
 
     f.write("\\tableofcontents\n");
@@ -188,14 +196,15 @@ def processEpigraphs(s,f):
         
 
 def processTitleAndAuthor(fb,f):
-
     #TODO: body/title
     desc = fb.find("description")
     if not desc:
         return
+
+    # title info, mandatory element
     ti = fb.find("title-info")
     if not ti:
-        return # Title-info is mandatory element!
+        return 
     t = ti.find("book-title")
     if t:
         title = _text(t)
@@ -254,6 +263,47 @@ def processTitleAndAuthor(fb,f):
             f.write(")\n")
 
         f.write("}\n")
+
+    # cover, optional
+    co = desc.find("coverpage")
+    if co:
+        images = co.findAll("image", recursive=False)
+        if len(images):
+            #f.write("\\begin{titlepage}\n")
+            f.write("\centering\n")
+            for image in images:
+                processInlineImage(f,image)
+            #f.write("\\end{titlepage}\n")
+
+
+def findEnclosures(fb):
+    encs = fb.findAll("binary", recursive=False)
+    for e in encs:
+        id=e['id']
+        ct=e['content-type']
+        global image_exts
+        if not image_exts.has_key(ct):
+            print "Warning, unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id)
+            continue
+        fname = os.tempnam('.', "enc") + "." + image_exts[ct]
+        f=open(fname,"w")
+        f.write(binascii.a2b_base64(e.contents[0]))
+        f.close()
+        global enclosures
+        enclosures[id]=(ct, fname)
+    
+def processInlineImage(f,image):
+        global enclosures
+        href = image['l:href']
+        if not href or href[0]!='#':
+            print "Invalid inline image ref '%s'\n" % href
+            return
+        href=str(href[1:])
+        if not enclosures.has_key(href):
+            print "Non-existing image ref '%s'\n" % href
+            return 
+        (ct,fname)=enclosures[href]
+        f.write("\\includegraphics{%s}\n" % fname)
 
 def usage():
     sys.stderr.write("Usage: fb2tex.py -f fb2file -o texfile\n")
