@@ -115,7 +115,9 @@ def processSection(s, f):
             elif x.name == "poem":
                 pass # TODO
             elif x.name == "subtitle":
-                pass # TODO
+                f.write("\\subsection{")
+                _uwrite(f,p(x))
+                f.write("}\n")
             elif x.name == "cite":
                 pass # TODO
             elif x.name == "table":
