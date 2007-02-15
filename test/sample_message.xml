@@ -1,0 +1,5 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<fb2pdfjob version="1">
+  <source url="http://fictionbook.ru/author/bunin_ivan_alekseevich/okayanniye_dni/bunin_okayanniye_dni.fb2" type="application/fb2+xml"/>
+  <result key="1111111"/>
+</fb2pdfjob>
