@@ -336,7 +336,7 @@ def processInlineImage(f,image):
         f.write("\\includegraphics{%s}\n" % fname)
 
 def usage():
-    sys.stderr.write("Usage: fb2tex.py -f fb2file -o texfile\n")
+    sys.stderr.write("Usage: fb2tex.py [-v] -f fb2file -o texfile\n")
 
 def main():
 
