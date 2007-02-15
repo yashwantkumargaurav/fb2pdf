@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.4
 
 '''
-FictionBook2 -> TeX converter daemon
+Simple Tool to send messages to the queue
 
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
@@ -17,26 +17,33 @@ from boto.exception import SQSError
 # --- Code ---
 
 def usage():
-    sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-v]\n")
+    sys.stderr.write("Usage: fbdaemon.py [-v] -c cfgfile -f file\n")
 
 def main():
       cfgfile = None
+      ifile = None
       verbose = False
       
       try:
-            opts, args = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile"])
+            opts, args = getopt.getopt(sys.argv[1:], "vc:f:", ["verbose", "cfgfile", "file"])
       except getopt.GetoptError:
             usage()
             sys.exit(2)
       for o, a in opts:
             if o in ("-c", "--cfgfile"):
                   cfgfile = a
+            if o in ("-f", "--file"):
+                  ifile = a
             if o in ("-v", "--verbose"):
                   verbose = True
 
-      if len(args) != 0 or cfgfile is None:
+      if len(args) != 0 or cfgfile is None or ifile is None:
             usage()
             sys.exit(2)
+
+      f=open(ifile)
+      msgtext=f.read()
+      f.close()
 
       cfg = ConfigParser()
       cfg.read(cfgfile)
@@ -44,24 +51,11 @@ def main():
       c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
       
       qname = cfg.get('queue','name')
-      qtimeout = int(cfg.get('queue','timeout'))
-      pdelay = int(cfg.get('queue','polling_delay'))
-      
       q = c.create_queue(qname)
-
-      while True:
-            m = q.read(qtimeout)
-            if m==None:
-                  time.sleep(pdelay)
-            else:
-                try:
-                    processMessage(m)
-                    q.delete_message(m)
-                except:
-                    print "Error processing message"
-
-def processMessage(m):
-    print m.get_body()
+      m = Message()
+      m.set_body(msgtext)
+      rs = q.write(m)
+      print "Message sent"
 
 if __name__ == "__main__":
     main()
