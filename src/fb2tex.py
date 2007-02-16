@@ -16,6 +16,7 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
 # --- Globals --
 enclosures = {}
+verbose = False
 
 def p(x):
     if len(x.contents) and isinstance(x.contents[0], Tag):
@@ -42,6 +43,8 @@ def style(s):
         return u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
     elif s.name == "image":
         pass #TODO
+    else:
+        print "*** Unknown style: %s" % s.name
 
 def _textQuote(str, code=False):
     ''' Basic paragraph TeX quoting '''
@@ -137,6 +140,8 @@ def processSection(s, f):
                 pass # TODO
             elif x.name == "table":
                 pass # TODO
+            elif x.name!="title" and x.name!="epigraph":
+                print "*** Unknown section element: %s" % x.name
 
 
 def processAnnotation(f, an):
@@ -160,6 +165,8 @@ def processAnnotation(f, an):
                     pass # TODO
                 elif x.name == "table":
                     pass # TODO
+                else:
+                    print "*** Unknown annotation element: %s" % x.name
         f.write('\\end{small}\n')
         f.write('\\pagebreak\n')
             
@@ -179,6 +186,8 @@ def getSectionTitle(t):
             elif x.name == "empty-line":
                 if not first:
                     res = res + u"\\linebreak"
+            else:
+                print "*** Unknown section title element: %s" % x.name
     return res
 
 def processEpigraphText(f,e):
@@ -199,6 +208,8 @@ def processEpigraphText(f,e):
                 pass #TODO
             elif x.name == "cite":
                 pass #TODO
+            elif x.name != "text-author":
+                print "*** Unknown epigraph element: %s" % x.name
         
 def processEpigraphs(s,f):
     ep = s.findAll("epigraph", recursive=False)
@@ -342,7 +353,7 @@ def main():
 
     infile = None
     outfile = None
-    verbose = False
+    global verbose
     
     try:
         opts, args = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file", "output"])
