@@ -8,7 +8,7 @@ Author: Vadim Zaliva <lord@crocodile.org>
 
 import getopt,sys,string,re,binascii,os
 
-from BeautifulSoup import BeautifulStoneSoup, Tag
+from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString
 
 # -- constants --
 
@@ -62,6 +62,10 @@ def _textQuote(str, code=False):
     return str
 
 def _text(t):
+    # Temporary check. TODO: remove
+    for x in t.contents:
+        if not isinstance(x, basestring) and not isinstance(x, unicode):
+            print "*** Unexpected element in _text: '%s'" % x
     return string.join(t.contents)
 
 def _uwrite(f, ustr):
@@ -111,7 +115,7 @@ def processSection(s, f):
     if t:
         title = getSectionTitle(t)
     else:
-        t = ""
+        title = ""
 
     f.write("\\section{")
     _uwrite(f,title) # TODO quote
