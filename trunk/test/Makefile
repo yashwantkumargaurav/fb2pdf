@@ -1,29 +1,18 @@
 # Makefile 
 
-all: test_opt.pdf biykov_orfografiya_opt.pdf
+all: $(alltex)
+	echo $(alltex)
 
-test.pdf: test.tex
-	pdflatex test.tex
-	pdflatex test.tex
+allfb := $(wildcard *.fb2)
+allpdf := $(patsubst %.fb2,%.pdf,$(wildcard *.fb2))
+alltex := $(patsubst %.fb2,%.tex,$(wildcard *.fb2))
 
-test_opt.pdf: test.pdf
-	pdfopt test.pdf test_opt.pdf
+%.pdf: %.tex
+	pdflatex $<
+	pdflatex $<
 
-biykov_orfografiya_opt.pdf: biykov_orfografiya.pdf
-	pdfopt biykov_orfografiya.pdf biykov_orfografiya_opt.pdf
-
-biykov_orfografiya.pdf: biykov_orfografiya.tex
-	pdflatex biykov_orfografiya.tex
-	pdflatex biykov_orfografiya.tex
-
-biykov_orfografiya.tex: biykov_orfografiya.fb2 ../src/*.py
-	../src/fb2tex.py -f biykov_orfografiya.fb2 -o biykov_orfografiya.tex
-
-run: test_opt.pdf
-	open test_opt.pdf
-
-runb: biykov_orfografiya_opt.pdf
-	open biykov_orfografiya_opt.pdf
+%.tex: %.fb2
+	../src/fb2tex.py -f $< -o $@
 
 clean:
-	rm -f test.pdf test_opt.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux biykov_orfografiya_opt.pdf biykov_orfografiya.pdf biykov_orfografiya.tex
+	rm -f *.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex
