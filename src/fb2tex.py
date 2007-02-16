@@ -18,33 +18,35 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 enclosures = {}
 verbose = False
 
-def p(x):
-    if len(x.contents) and isinstance(x.contents[0], Tag):
-        return style(x.contents[0])
-    else:
-        return _textQuote(_text(x))
-
-def style(s):
-    if s.name == "strong":
-        return u'{\\bf '+ _textQuote(_text(s)) + u'}'
-    elif s.name == "emphasis":
-        return u'{\\it '+ _textQuote(_text(s)) + u'}'
-    elif s.name == "style":
-        pass #TODO
-    elif s.name == "a":
-        pass #TODO
-    elif s.name == "strikethrough":
-        return u'\\sout{' + _textQuote(_text(s)) + u'}'
-    elif s.name == "sub":
-        pass #TODO
-    elif s.name == "sup":
-        pass #TODO
-    elif s.name == "code":
-        return u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
-    elif s.name == "image":
-        pass #TODO
-    else:
-        print "*** Unknown style: %s" % s.name
+def p(p):
+    res = u''
+    for s in p:
+        if isinstance(s, Tag):
+            if s.name == "strong":
+                res += u'{\\bf '+ _textQuote(_text(s)) + u'}'
+            elif s.name == "emphasis":
+                res += u'{\\it '+ _textQuote(_text(s)) + u'}'
+            elif s.name == "style":
+                res += "" #TODO
+            elif s.name == "a":
+                res += "" #TODO
+            elif s.name == "strikethrough":
+                res += u'\\sout{' + _textQuote(_text(s)) + u'}'
+            elif s.name == "sub":
+                res += "" #TODO
+            elif s.name == "sup":
+                res += "" #TODO
+            elif s.name == "code":
+                res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
+            elif s.name == "image":
+                res += "" #TODO
+            elif s.name == "l":
+                res += "" #TODO
+            else:
+                print "*** Unknown paragrpah element: %s" % s.name
+        elif isinstance(s, basestring) or isinstance(s, unicode):
+            res += _textQuote(unicode(s))
+    return res            
 
 def _textQuote(str, code=False):
     ''' Basic paragraph TeX quoting '''
