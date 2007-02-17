@@ -20,8 +20,8 @@ function toggleuploadmode(file) {
 
 <form enctype="multipart/form-data" action="uploader.php" method="POST">
 
- <input type="radio" name="uploadtype" onclick="toggleuploadmode(true);" checked> file
- <input type="radio" name="uploadtype" onclick="toggleuploadmode(false);"> url
+ <input type="radio" name="uploadtype" value="file" onclick="toggleuploadmode(true);" checked /> file
+ <input type="radio" name="uploadtype" value="url" onclick="toggleuploadmode(false);" /> url
 
  <div id="upfile">
  <input type="file" name="fileupload" size="30" id="fileupload"/>
