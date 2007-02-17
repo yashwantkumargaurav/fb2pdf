@@ -6,6 +6,8 @@
   * PHP frontend
   * multiple 'author' elements in 'title-info'
   * multiple 'body' elements
+  * Spaces in TOC
+  * center picture on 'coverpage'
 
 == Buggy ==
 
