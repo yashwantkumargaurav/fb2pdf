@@ -66,13 +66,17 @@ def _textQuote(str, code=False):
         return str
     if not code:
         # 'EN DASH' at the beginning of paragrapg - russian direct speach
-        if ord(str[0])==8211:
+        if ord(str[0])==0x2013:
             str="\\cdash--*" + str[1:]
         # ellipses
         str = string.replace(str,'...','\\ldots')
-        # em-dash
+        # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
+        str = string.replace(str,u'\u00ab','<<')
+        # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+        str = string.replace(str,u'\u00bb','>>') # replacing with frech/russian equvalent
+        # EM-DASH
         str = re.sub(r'(\s)--(\s)','---',str)
-        # double quotes
+        # preserve double quotes
         str = string.replace(str,'"','\\symbol{34}')
 
     return str
@@ -299,7 +303,9 @@ def getSectionTitle(t):
 def processEpigraphText(f,e):
     first = True
     ''' Epigaph text consists of "p", "empty-line", "poem" and "cite" elements sequence'''
+    i=0
     for x in e.contents:
+        i=i+1
         if isinstance(x, Tag):
             if x.name == "p":
                 if not first:
@@ -308,7 +314,8 @@ def processEpigraphText(f,e):
                     first = False
                 _uwrite(f,par(x))
             elif x.name == "empty-line":
-                if not first:
+                if not first and i!=len(e.contents):
+                    # not first, not last
                     f.write("\\\\")
             elif x.name == "poem":
                 # TODO: test how verse plays with epigraph evn.
