@@ -6,7 +6,7 @@ allfb := $(wildcard *.fb2)
 allpdf := $(patsubst %.fb2,%.pdf,$(wildcard *.fb2))
 alltex := $(patsubst %.fb2,%.tex,$(wildcard *.fb2))
 
-.pdf: %.tex
+%.pdf: %.tex
 	pdflatex $<
 	pdflatex $<
 

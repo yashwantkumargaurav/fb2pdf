@@ -211,13 +211,13 @@ def getSectionTitle(t):
         if isinstance(x, Tag):
             if x.name == "p":
                 if not first:
-                    res = res + u"\\linebreak"
+                    res = res + u"\\\\"
                 else:
                     first = False
                 res = res + par(x)
             elif x.name == "empty-line":
                 if not first:
-                    res = res + u"\\linebreak"
+                    res = res + u"\\\\"
             else:
                 print "*** Unknown section title element: %s" % x.name
     return res
@@ -229,13 +229,13 @@ def processEpigraphText(f,e):
         if isinstance(x, Tag):
             if x.name == "p":
                 if not first:
-                    f.write("\\linebreak")
+                    f.write("\\\\")
                 else:
                     first = False
                 _uwrite(f,par(x))
             elif x.name == "empty-line":
                 if not first:
-                    f.write("\\linebreak")
+                    f.write("\\\\")
             elif x.name == "poem":
                 if verbose:
                     print "* Unsupported element: %s" % x.name
