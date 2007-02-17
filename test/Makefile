@@ -11,7 +11,7 @@ alltex := $(patsubst %.fb2,%.tex,$(wildcard *.fb2))
 	pdflatex $<
 
 %.tex: %.fb2
-	../src/fb2tex.py -f $< -o $@
+	../src/fb2tex.py -v -f $< -o $@
 
 clean:
 	rm -f *.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex
