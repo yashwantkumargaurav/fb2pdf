@@ -2,7 +2,7 @@
 
 == Not yet implemented ==
 
-  * 'cite', 'poem', 'table'
+  * 'cite', 'table'
   * PHP frontend
   * multiple 'author' elements in 'title-info'
   * multiple 'body' elements
