@@ -170,16 +170,30 @@ def processPoem(p,f):
     d = p.find("date", recursive=False)
     if d:
         pdate = _text(d)
+        if verbose:
+            print "* Unsupported element: date"
         #TODO find a nice way to print date
         
     f.write('\\end{verse}\n')
 
 def processStanza(s, f):
     # title (optional)
-    # TODO: implement
+    t = s.find("title", recursive=False)
+    if t:
+        title = getSectionTitle(t)
+        if title and len(title):
+            # TODO: implement
+            if verbose:
+                print "* Unsupported element: stanza 'title'"
     
     # subtitle (optional)
-    # TODO: implement
+    st = s.find("subtitle", recursive=False)
+    if st:
+        subtitle = getSectionTitle(st)
+        if subtitle and len(subtitle):
+            # TODO: implement
+            if verbose:
+                print "* Unsupported element: stanza 'subtitle'"
 
     # 'v' - multiple    
     vv = s.findAll("v", recursive=False)
