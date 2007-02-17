@@ -72,6 +72,8 @@ def _textQuote(str, code=False):
         str = string.replace(str,'...','\\ldots')
         # em-dash
         str = re.sub(r'(\s)--(\s)','---',str)
+        # double quotes
+        str = string.replace(str,'"','\\symbol{34}')
 
     return str
 
@@ -124,6 +126,59 @@ def processSections(b,f):
     for s in ss:
         processSection(s, f)
 
+def processPoem(p,f):
+    f.write('\\begin{verse}\n')
+    
+    # title (optinal)
+    t = p.find("title", recursive=False)
+    if t:
+        title = getSectionTitle(t)
+        if title and len(title):
+            f.write("\\poemtitle{")
+            _uwrite(f,title)
+            f.write("}\n")
+
+    
+    # epigraphs (multiple, optional)
+    processEpigraphs(p, f)
+
+    # stanza (at least one!) - { title?, subtitle?, v*}
+    ss = p.findAll("stanza", recursive=False)
+    for s in ss:
+        processStanza(s, f)
+    
+    # text-author (optional)
+    # TODO: check, see if there is a better way to list multiple authors
+    #    perhaps comma, separated.
+    aa = p.findAll("text-author", recursive=False)
+    for a in aa:
+        author = par(a)
+        f.write('\\attrib{')
+        _uwrite(f,author)
+        f.write("}\n")
+
+    # date
+    d = p.find("date", recursive=False)
+    if d:
+        pdate = _text(d)
+        #TODO find a nice way to print date
+        
+    f.write('\\end{verse}\n')
+
+def processStanza(s, f):
+    # title (optional)
+    # TODO: implement
+    
+    # subtitle (optional)
+    # TODO: implement
+
+    # 'v' - multiple    
+    vv = s.findAll("v", recursive=False)
+    for v in vv:
+        vt = par(v)
+        _uwrite(f,vt)
+        f.write(" \\\\\n")
+    
 def processSection(s, f):
     t = s.find("title", recursive=False)
     if t:
@@ -151,9 +206,7 @@ def processSection(s, f):
                     print "* Unsupported element: %s" % x.name
                 pass # TODO
             elif x.name == "poem":
-                if verbose:
-                    print "* Unsupported element: %s" % x.name
-                pass # TODO
+                processPoem(x,f)
             elif x.name == "subtitle":
                 f.write("\\subsection{")
                 _uwrite(f,par(x))
@@ -182,9 +235,7 @@ def processAnnotation(f, an):
                 elif x.name == "empty-line":
                     f.write("\n\n") # TODO: not sure
                 elif x.name == "poem":
-                    if verbose:
-                        print "* Unsupported element: %s" % x.name
-                    pass # TODO
+                    processPoem(x,f)
                 elif x.name == "subtitle":
                     f.write("\\subsection*{")
                     _uwrite(f,par(x))
@@ -237,9 +288,8 @@ def processEpigraphText(f,e):
                 if not first:
                     f.write("\\\\")
             elif x.name == "poem":
-                if verbose:
-                    print "* Unsupported element: %s" % x.name
-                pass #TODO
+                # TODO: test how verse plays with epigraph evn.
+                processPoem(x,f)
             elif x.name == "cite":
                 if verbose:
                     print "* Unsupported element: %s" % x.name
