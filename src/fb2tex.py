@@ -18,14 +18,14 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 enclosures = {}
 verbose = False
 
-def p(p):
+def par(p):
     res = u''
     for s in p:
         if isinstance(s, Tag):
             if s.name == "strong":
-                res += u'{\\bf '+ _textQuote(_text(s)) + u'}'
+                res += u'{\\bf '+ par(s) + u'}'
             elif s.name == "emphasis":
-                res += u'{\\it '+ _textQuote(_text(s)) + u'}'
+                res += u'{\\it '+ par(s) + u'}'
             elif s.name == "style":
                 if verbose:
                     print "* Unsupported element: %s" % s.name
@@ -35,7 +35,7 @@ def p(p):
                     print "* Unsupported element: %s" % s.name
                 res += "" #TODO
             elif s.name == "strikethrough":
-                res += u'\\sout{' + _textQuote(_text(s)) + u'}'
+                res += u'\\sout{' + par(s) + u'}'
             elif s.name == "sub":
                 if verbose:
                     print "* Unsupported element: %s" % s.name
@@ -87,7 +87,7 @@ def _uwrite(f, ustr):
 
 def fb2tex(infile, outfile):
     f = open(infile, 'r')
-    soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line'])
+    soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"])
     f.close()
 
     f = open(outfile, 'w')
@@ -142,7 +142,7 @@ def processSection(s, f):
             if x.name == "section":
                 processSection(x,f)
             if x.name == "p":
-                _uwrite(f,p(x))
+                _uwrite(f,par(x))
                 f.write("\n\n")
             elif x.name == "empty-line":
                 f.write("\n\n") # TODO: not sure
@@ -156,7 +156,7 @@ def processSection(s, f):
                 pass # TODO
             elif x.name == "subtitle":
                 f.write("\\subsection{")
-                _uwrite(f,p(x))
+                _uwrite(f,par(x))
                 f.write("}\n")
             elif x.name == "cite":
                 if verbose:
@@ -177,7 +177,7 @@ def processAnnotation(f, an):
         for x in an:
             if isinstance(x, Tag):
                 if x.name == "p":
-                    _uwrite(f,p(x))
+                    _uwrite(f,par(x))
                     f.write("\n\n")
                 elif x.name == "empty-line":
                     f.write("\n\n") # TODO: not sure
@@ -187,7 +187,7 @@ def processAnnotation(f, an):
                     pass # TODO
                 elif x.name == "subtitle":
                     f.write("\\subsection*{")
-                    _uwrite(f,p(x))
+                    _uwrite(f,par(x))
                     f.write("}\n")
                 elif x.name == "cite":
                     if verbose:
@@ -214,7 +214,7 @@ def getSectionTitle(t):
                     res = res + u"\\linebreak"
                 else:
                     first = False
-                res = res + p(x)
+                res = res + par(x)
             elif x.name == "empty-line":
                 if not first:
                     res = res + u"\\linebreak"
@@ -232,7 +232,7 @@ def processEpigraphText(f,e):
                     f.write("\\linebreak")
                 else:
                     first = False
-                _uwrite(f,p(x))
+                _uwrite(f,par(x))
             elif x.name == "empty-line":
                 if not first:
                     f.write("\\linebreak")
