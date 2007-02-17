@@ -27,20 +27,32 @@ def p(p):
             elif s.name == "emphasis":
                 res += u'{\\it '+ _textQuote(_text(s)) + u'}'
             elif s.name == "style":
+                if verbose:
+                    print "* Unsupported element: %s" % s.name
                 res += "" #TODO
             elif s.name == "a":
+                if verbose:
+                    print "* Unsupported element: %s" % s.name
                 res += "" #TODO
             elif s.name == "strikethrough":
                 res += u'\\sout{' + _textQuote(_text(s)) + u'}'
             elif s.name == "sub":
+                if verbose:
+                    print "* Unsupported element: %s" % s.name
                 res += "" #TODO
             elif s.name == "sup":
+                if verbose:
+                    print "* Unsupported element: %s" % s.name
                 res += "" #TODO
             elif s.name == "code":
                 res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
             elif s.name == "image":
+                if verbose:
+                    print "* Unsupported element: %s" % s.name
                 res += "" #TODO
             elif s.name == "l":
+                if verbose:
+                    print "* Unsupported element: %s" % s.name
                 res += "" #TODO
             else:
                 print "*** Unknown paragrpah element: %s" % s.name
@@ -135,16 +147,24 @@ def processSection(s, f):
             elif x.name == "empty-line":
                 f.write("\n\n") # TODO: not sure
             elif x.name == "image":
+                if verbose:
+                    print "* Unsupported element: %s" % x.name
                 pass # TODO
             elif x.name == "poem":
+                if verbose:
+                    print "* Unsupported element: %s" % x.name
                 pass # TODO
             elif x.name == "subtitle":
                 f.write("\\subsection{")
                 _uwrite(f,p(x))
                 f.write("}\n")
             elif x.name == "cite":
+                if verbose:
+                    print "* Unsupported element: %s" % x.name
                 pass # TODO
             elif x.name == "table":
+                if verbose:
+                    print "* Unsupported element: %s" % x.name
                 pass # TODO
             elif x.name!="title" and x.name!="epigraph":
                 print "*** Unknown section element: %s" % x.name
@@ -162,14 +182,20 @@ def processAnnotation(f, an):
                 elif x.name == "empty-line":
                     f.write("\n\n") # TODO: not sure
                 elif x.name == "poem":
+                    if verbose:
+                        print "* Unsupported element: %s" % x.name
                     pass # TODO
                 elif x.name == "subtitle":
                     f.write("\\subsection*{")
                     _uwrite(f,p(x))
                     f.write("}\n")
                 elif x.name == "cite":
+                    if verbose:
+                        print "* Unsupported element: %s" % x.name
                     pass # TODO
                 elif x.name == "table":
+                    if verbose:
+                        print "* Unsupported element: %s" % x.name
                     pass # TODO
                 else:
                     print "*** Unknown annotation element: %s" % x.name
@@ -211,8 +237,12 @@ def processEpigraphText(f,e):
                 if not first:
                     f.write("\\linebreak")
             elif x.name == "poem":
+                if verbose:
+                    print "* Unsupported element: %s" % x.name
                 pass #TODO
             elif x.name == "cite":
+                if verbose:
+                    print "* Unsupported element: %s" % x.name
                 pass #TODO
             elif x.name != "text-author":
                 print "*** Unknown epigraph element: %s" % x.name
