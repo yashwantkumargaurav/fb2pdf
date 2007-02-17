@@ -5,6 +5,7 @@
   * 'cite', 'poem', 'table'
   * PHP frontend
   * multiple 'author' elements in 'title-info'
+  * multiple 'body' elements
 
 == Buggy ==
 
