@@ -57,7 +57,7 @@ def par(p):
             else:
                 print "*** Unknown paragrpah element: %s" % s.name
         elif isinstance(s, basestring) or isinstance(s, unicode):
-            res += _textQuote(unicode(s))
+            res += _textQuote(_text(s))
     return res            
 
 def _textQuote(str, code=False):
@@ -77,19 +77,28 @@ def _textQuote(str, code=False):
 
     return str
 
+def convXMLentities(s):
+    #TODO: proper conversion
+    return s.replace('&lt;','<') \
+           .replace('&gt;','>') \
+           .replace('&amp;','&')
+           
 def _text(t):
+    if isinstance(t, basestring) or isinstance(t, unicode):
+        return convXMLentities(unicode(t))
+    
     # Temporary check. TODO: remove
     for x in t.contents:
         if not isinstance(x, basestring) and not isinstance(x, unicode):
             print "*** Unexpected element in _text: '%s'" % x
-    return string.join(t.contents)
+    return string.join([convXMLentities(e) for e in  t.contents])
 
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
 
 def fb2tex(infile, outfile):
     f = open(infile, 'r')
-    soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"])
+    soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
     f.close()
 
     f = open(outfile, 'w')
