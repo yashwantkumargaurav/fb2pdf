@@ -72,14 +72,23 @@ def _textQuote(str, code=False):
             str="\\cdash--*" + str[1:]
         # ellipses
         str = string.replace(str,'...','\\ldots')
+        # backslash
+        str = string.replace(str,'\\','\\textbackslash')
+        # caret
+        str = string.replace(str,'\^','\\textasciicircum')
+        # tilde
+        str = string.replace(str,'\~','\\textasciitilde')
         # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
         str = string.replace(str,u'\u00ab','<<')
         # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-        str = string.replace(str,u'\u00bb','>>') # replacing with frech/russian equvalent
+        str = string.replace(str,u'\u00bb','>>') # replacing with french/russian equivalent
         # EM-DASH
         str = re.sub(r'(\s)--(\s)','---',str)
         # preserve double quotes
         str = string.replace(str,'"','\\symbol{34}')
+        # escape meta symbols
+        meta = re.compile('([{}%&$#_])')
+        str = meta.sub(r'\\\1', str)
 
     return str
 
@@ -117,7 +126,7 @@ def fb2tex(infile, outfile):
     f.write("\\usepackage[utf-8]{inputenc}\n")
     f.write("\\usepackage[russian]{babel}\n")
     # Temporary disabled, since it is causing 'pdfopt' crashes
-    #f.write("\\usepackage{hyperref}\n")
+    f.write("\\usepackage{hyperref}\n")
     f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
     f.write("\\setcounter{secnumdepth}{-2}\n"); # suppress section numbering
 
@@ -127,7 +136,7 @@ def fb2tex(infile, outfile):
     findEnclosures(fb)
     processDescription(fb.find("description"), f)
 
-    f.write("\\tableofcontents\n");
+    f.write("\\tableofcontents\n\\newpage\n");
     
     body=fb.find("body")
     processEpigraphs(body, f)
@@ -414,7 +423,9 @@ def processDescription(desc,f):
         if len(images):
             #f.write("\\begin{titlepage}\n")
             for image in images:
+                f.write("\\begin{center}\n")
                 processInlineImage(f,image)
+                f.write("\\end{center}\n")
             #f.write("\\end{titlepage}\n")
 
     # annotation, optional

@@ -6,7 +6,10 @@ FictionBook2 -> TeX converter daemon
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
-import getopt,sys,string,time
+import getopt
+import sys
+import string
+import time
 from xml.dom.minidom import parse, parseString
 from ConfigParser import ConfigParser
 
