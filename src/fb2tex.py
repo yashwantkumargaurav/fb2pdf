@@ -6,17 +6,25 @@ FictionBook2 -> TeX converter
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
-import getopt,sys,string,re,binascii,os
+import getopt
+import logging
+import traceback
+import os
+import sys
+import string
+import re
+import binascii
 
 from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString
 
 # -- constants --
-
 image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
-# --- Globals --
+# --- globals --
 enclosures = {}
-verbose = False
+logfile = 'fb2tex.log'
+verbosity = logging.ERROR
+log_verbosity = logging.DEBUG
 
 def par(p):
     res = u''
@@ -27,35 +35,29 @@ def par(p):
             elif s.name == "emphasis":
                 res += u'{\\it '+ par(s) + u'}'
             elif s.name == "style":
-                if verbose:
-                    print "* Unsupported element: %s" % s.name
+                logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "a":
-                if verbose:
-                    print "* Unsupported element: %s" % s.name
+                logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "strikethrough":
                 res += u'\\sout{' + par(s) + u'}'
             elif s.name == "sub":
-                if verbose:
-                    print "* Unsupported element: %s" % s.name
+                logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "sup":
-                if verbose:
-                    print "* Unsupported element: %s" % s.name
+                logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "code":
                 res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
             elif s.name == "image":
-                if verbose:
-                    print "* Unsupported element: %s" % s.name
+                logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "l":
-                if verbose:
-                    print "* Unsupported element: %s" % s.name
+                logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             else:
-                print "*** Unknown paragrpah element: %s" % s.name
+                logging.error("Unknown paragrpah element: %s" % s.name)
         elif isinstance(s, basestring) or isinstance(s, unicode):
             res += _textQuote(_text(s))
     return res            
@@ -65,7 +67,7 @@ def _textQuote(str, code=False):
     if len(str)==0:
         return str
     if not code:
-        # 'EN DASH' at the beginning of paragrapg - russian direct speach
+        # 'EN DASH' at the beginning of paragraph - russian direct speech
         if ord(str[0])==0x2013:
             str="\\cdash--*" + str[1:]
         # ellipses
@@ -94,7 +96,7 @@ def _text(t):
     # Temporary check. TODO: remove
     for x in t.contents:
         if not isinstance(x, basestring) and not isinstance(x, unicode):
-            print "*** Unexpected element in _text: '%s'" % x
+            logging.error("Unexpected element in _text: '%s'" % x)
     return string.join([convXMLentities(e) for e in  t.contents])
 
 def _uwrite(f, ustr):
@@ -117,7 +119,7 @@ def fb2tex(infile, outfile):
     # Temporary disabled, since it is causing 'pdfopt' crashes
     #f.write("\\usepackage{hyperref}\n")
     f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
-    f.write("\\setcounter{secnumdepth}{-2}\n"); # supress section numbering
+    f.write("\\setcounter{secnumdepth}{-2}\n"); # suppress section numbering
 
     f.write("\n\\begin{document}\n\n")
 
@@ -174,8 +176,7 @@ def processPoem(p,f):
     d = p.find("date", recursive=False)
     if d:
         pdate = _text(d)
-        if verbose:
-            print "* Unsupported element: date"
+        logging.warning("Unsupported element: date")
         #TODO find a nice way to print date
         
     f.write('\\end{verse}\n')
@@ -187,8 +188,7 @@ def processStanza(s, f):
         title = getSectionTitle(t)
         if title and len(title):
             # TODO: implement
-            if verbose:
-                print "* Unsupported element: stanza 'title'"
+            logging.warning("Unsupported element: stanza 'title'")
     
     # subtitle (optional)
     st = s.find("subtitle", recursive=False)
@@ -196,8 +196,7 @@ def processStanza(s, f):
         subtitle = getSectionTitle(st)
         if subtitle and len(subtitle):
             # TODO: implement
-            if verbose:
-                print "* Unsupported element: stanza 'subtitle'"
+            logging.warning("Unsupported element: stanza 'subtitle'")
 
     # 'v' - multiple    
     vv = s.findAll("v", recursive=False)
@@ -229,8 +228,7 @@ def processSection(s, f):
             elif x.name == "empty-line":
                 f.write("\n\n") # TODO: not sure
             elif x.name == "image":
-                if verbose:
-                    print "* Unsupported element: %s" % x.name
+                logging.warning("Unsupported element: %s" % x.name)
                 pass # TODO
             elif x.name == "poem":
                 processPoem(x,f)
@@ -239,16 +237,13 @@ def processSection(s, f):
                 _uwrite(f,par(x))
                 f.write("}\n")
             elif x.name == "cite":
-                if verbose:
-                    print "* Unsupported element: %s" % x.name
+                logging.warning("Unsupported element: %s" % x.name)
                 pass # TODO
             elif x.name == "table":
-                if verbose:
-                    print "* Unsupported element: %s" % x.name
+                logging.warning("Unsupported element: %s" % x.name)
                 pass # TODO
             elif x.name!="title" and x.name!="epigraph":
-                print "*** Unknown section element: %s" % x.name
-
+                logging.error("Unknown section element: %s" % x.name)
 
 def processAnnotation(f, an):
     if len(an):
@@ -268,18 +263,15 @@ def processAnnotation(f, an):
                     _uwrite(f,par(x))
                     f.write("}\n")
                 elif x.name == "cite":
-                    if verbose:
-                        print "* Unsupported element: %s" % x.name
+                    logging.warning("Unsupported element: %s" % x.name)
                     pass # TODO
                 elif x.name == "table":
-                    if verbose:
-                        print "* Unsupported element: %s" % x.name
+                    logging.warning("Unsupported element: %s" % x.name)
                     pass # TODO
                 else:
-                    print "*** Unknown annotation element: %s" % x.name
+                    logging.error("Unknown annotation element: %s" % x.name)
         f.write('\\end{small}\n')
         f.write('\\pagebreak\n')
-            
 
 def getSectionTitle(t):
     ''' Section title consists of "p" and "empty-line" elements sequence'''
@@ -297,7 +289,7 @@ def getSectionTitle(t):
                 if not first:
                     res = res + u"\\\\"
             else:
-                print "*** Unknown section title element: %s" % x.name
+                logging.error("Unknown section title element: %s" % x.name)
     return res
 
 def processEpigraphText(f,e):
@@ -321,11 +313,10 @@ def processEpigraphText(f,e):
                 # TODO: test how verse plays with epigraph evn.
                 processPoem(x,f)
             elif x.name == "cite":
-                if verbose:
-                    print "* Unsupported element: %s" % x.name
+                logging.warning("Unsupported element: %s" % x.name)
                 pass #TODO
             elif x.name != "text-author":
-                print "*** Unknown epigraph element: %s" % x.name
+                logging.error("Unknown epigraph element: %s" % x.name)
         
 def processEpigraphs(s,f):
     ep = s.findAll("epigraph", recursive=False)
@@ -346,18 +337,16 @@ def processEpigraphs(s,f):
         f.write("}\n")
         
     f.write("\\end{epigraphs}\n")
-        
-
 
 def processDescription(desc,f):
     if not desc:
-        print "Warning, missing required 'description' element\n"
+        logging.warning("Missing required 'description' element\n")
         return
     
     # title info, mandatory element
     ti = desc.find("title-info")
     if not ti:
-        print "Warning, missing required 'title-info' element\n"
+        logging.warning("Missing required 'title-info' element\n")
         return 
     t = ti.find("book-title")
     if t:
@@ -401,7 +390,7 @@ def processDescription(desc,f):
     if author_name or title:
         f.write("\\maketitle\n");
 
-    # TODO: PDF info generation temporaty disabled. It seems that
+    # TODO: PDF info generation temporary disabled. It seems that
     # non ASCII characters are not allowed there!
     if False and (author_name or title):
         f.write("\n\\pdfinfo {\n")
@@ -428,7 +417,7 @@ def processDescription(desc,f):
                 processInlineImage(f,image)
             #f.write("\\end{titlepage}\n")
 
-    # annontation, optional
+    # annotation, optional
     an = desc.find("annotation")
     if an:
         processAnnotation(f,an)
@@ -440,7 +429,7 @@ def findEnclosures(fb):
         ct=e['content-type']
         global image_exts
         if not image_exts.has_key(ct):
-            print "Warning, unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id)
+            logging.warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
             continue
         fname = os.tempnam('.', "enc") + "." + image_exts[ct]
         f=open(fname,"w")
@@ -453,11 +442,11 @@ def processInlineImage(f,image):
         global enclosures
         href = image['l:href']
         if not href or href[0]!='#':
-            print "Invalid inline image ref '%s'\n" % href
+            logging.error("Invalid inline image ref '%s'\n" % href)
             return
         href=str(href[1:])
         if not enclosures.has_key(href):
-            print "Non-existing image ref '%s'\n" % href
+            logging.error("Non-existing image ref '%s'\n" % href)
             return 
         (ct,fname)=enclosures[href]
         f.write("\\includegraphics{%s}\n" % fname)
@@ -465,30 +454,60 @@ def processInlineImage(f,image):
 def usage():
     sys.stderr.write("Usage: fb2tex.py [-v] -f fb2file -o texfile\n")
 
-def main():
-
+def parseCommandLine():
+    global logfile
+    global verbosity
+    global log_verbosity
     infile = None
     outfile = None
-    global verbose
     
+    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file=", "output="])
+    for option, argument in optlist:
+        if option in ("-v", "--verbose"):
+            verbosity = logging.DEBUG
+        elif option in ("-f", "--file"):
+            if os.path.isfile(argument):
+                infile = argument
+            else:
+                raise getopt.GetoptError("input file '%s' doesn't exist" % argument)
+        elif option in ("-o", "--output"):
+            outfile = argument
+            
+    if infile == None:
+        raise getopt.GetoptError("input file not specified")
+    if outfile == None:
+        raise getopt.GetoptError("output file not specified")
+        
+    logging.basicConfig(
+        level = log_verbosity,
+        format = '%(asctime)s %(levelname)-8s %(message)s',
+        datefmt = '%a, %d %b %Y %H:%M:%S',
+        filename = logfile,
+        filemode = 'w'
+    )
+    
+    console = logging.StreamHandler()
+    console.setLevel(verbosity)
+    formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+    
+    return (infile, outfile)
+
+def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file", "output"])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-    for o, a in opts:
-        if o in ("-f", "--file"):
-            infile = a
-        if o in ("-o", "--output"):
-            outfile = a
-        if o in ("-v", "--verbose"):
-            verbose = True
-
-    if len(args) != 0 or infile is None or outfile is None:
-        usage()
-        sys.exit(2)
-
-    fb2tex(infile, outfile)
+        (infile, outfile) = parseCommandLine()
+        fb2tex(infile, outfile)
+    except getopt.GetoptError, msg:
+        if len(sys.argv[1:]) > 0:
+            print >>sys.stderr, "Error: %s\n" % msg
+        else:
+            usage()
+        return 2
+    except:
+        info = sys.exc_info()
+        traceback.print_exc()
+        return 3
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
