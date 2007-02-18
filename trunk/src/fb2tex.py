@@ -67,16 +67,16 @@ def _textQuote(str, code=False):
     if len(str)==0:
         return str
     if not code:
-        # 'EN DASH' at the beginning of paragraph - russian direct speech
-        if ord(str[0])==0x2013:
-            str="\\cdash--*" + str[1:]
         # escape meta symbols
         meta = re.compile('([{}%&$#_])')
         str = meta.sub(r'\\\1', str)
+        # backslash
+        str = string.replace(str,'\\','\\textbackslash ')
+        # 'EN DASH' at the beginning of paragraph - russian direct speech
+        if ord(str[0])==0x2013:
+            str="\\cdash--*" + str[1:]
         # ellipses
         str = string.replace(str,'...','\\ldots')
-        # backslash
-        #str = string.replace(str,'\\','\\textbackslash')
         # caret
         str = string.replace(str,'\^','\\textasciicircum')
         # tilde
@@ -117,21 +117,34 @@ def fb2tex(infile, outfile):
     f.close()
 
     f = open(outfile, 'w')
-    f.write("\\documentclass[11pt]{book}\n")
-    f.write("\\usepackage{graphicx}\n")
-    f.write("\\usepackage{url}\n")
-    f.write("\\usepackage{epigraph}\n")
-    f.write("\\usepackage{verbatim}\n")
-    f.write("\\usepackage{ulem}\n")
-    f.write("\\usepackage[utf-8]{inputenc}\n")
-    f.write("\\usepackage[russian]{babel}\n")
-    # Temporary disabled, since it is causing 'pdfopt' crashes
-    f.write("\\usepackage{hyperref}\n")
-    f.write("\\usepackage[papersize={9cm,12cm}, margin=4mm, ignoreall, pdftex]{geometry}\n")
-    f.write("\\setcounter{secnumdepth}{-2}\n"); # suppress section numbering
+    # laTeX-document header
+    f.write("""\\documentclass[12pt,openany]{book}
+    \\usepackage[
+        colorlinks=true,
+        linkcolor=black,
+        bookmarks=true,
+        bookmarksnumbered=true,
+        hypertexnames=false,
+        plainpages=false,
+        pdfpagelabels
+    ]{hyperref}
+    \\usepackage[
+        papersize={90.6mm,122.4mm},
+        margin=2mm,
+        ignoreall,
+        pdftex
+    ]{geometry}
+    \\usepackage{graphicx}
+    \\usepackage{url}
+    \\usepackage{epigraph}
+    \\usepackage{verbatim}
+    \\usepackage{ulem}
+    \\usepackage[utf-8]{inputenc}
+    \\usepackage[russian]{babel}
+    \\setcounter{secnumdepth}{-2}
+    """)
 
     f.write("\n\\begin{document}\n\n")
-
     fb = soup.find("fictionbook")
     findEnclosures(fb)
     processDescription(fb.find("description"), f)
