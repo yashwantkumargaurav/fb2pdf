@@ -70,10 +70,13 @@ def _textQuote(str, code=False):
         # 'EN DASH' at the beginning of paragraph - russian direct speech
         if ord(str[0])==0x2013:
             str="\\cdash--*" + str[1:]
+        # escape meta symbols
+        meta = re.compile('([{}%&$#_])')
+        str = meta.sub(r'\\\1', str)
         # ellipses
         str = string.replace(str,'...','\\ldots')
         # backslash
-        str = string.replace(str,'\\','\\textbackslash')
+        #str = string.replace(str,'\\','\\textbackslash')
         # caret
         str = string.replace(str,'\^','\\textasciicircum')
         # tilde
@@ -86,9 +89,6 @@ def _textQuote(str, code=False):
         str = re.sub(r'(\s)--(\s)','---',str)
         # preserve double quotes
         str = string.replace(str,'"','\\symbol{34}')
-        # escape meta symbols
-        meta = re.compile('([{}%&$#_])')
-        str = meta.sub(r'\\\1', str)
 
     return str
 
