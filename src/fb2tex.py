@@ -144,7 +144,13 @@ def fb2tex(infile, outfile):
     \\usepackage[russian]{babel}
     \\setcounter{secnumdepth}{-2}
     """)
-
+    
+    #TODO: Instead of selecting font family inside of the document 
+    # section, set the defaults for the entire document
+    #\renewcommand{\rmdefault}{xxx}
+    #\renewcommand{\sfdefault}{xxx}
+    #\renewcommand{\ttdefault}{xxx}
+    
     f.write("\n\\begin{document}\n\n")
     f.write("{\\fontfamily{cmss}\\selectfont\n")
     fb = soup.find("fictionbook")
@@ -476,9 +482,9 @@ def processInlineImage(f,image):
             logging.error("Non-existing image ref '%s'\n" % href)
             return 
         (ct,fname)=enclosures[href]
-        #TODO: convert to 2-bit greyscale
+        # convert to grayscale, 166dpi (native resolution for Sony Reader)
+        Image.open(fname).convert("L").save(fname, dpi=(166,166))
         #TODO: scale down large images
-        #Image.open(fname).resize((600,800)).convert("L").save(fname)
         f.write("\\includegraphics{%s}\n" % fname)
 
 def usage():

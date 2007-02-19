@@ -1,0 +1,36 @@
+\documentclass[12pt,openany]{book}
+\usepackage[
+    papersize={90.6mm,122.4mm},
+    margin=2mm,
+    ignoreall,
+    pdftex
+]{geometry}
+\usepackage[OT1]{fontenc}
+\usepackage[utf-8]{inputenc}
+\usepackage[english,russian]{babel}
+\setcounter{secnumdepth}{-2}
+
+\begin{document}
+\def\TextSnippet#1{
+{\fontfamily{#1}\selectfont
+\section{Font family: #1}
+\subsection{Кириллица}
+
+Наказание в виде тюремного заключения может быть наложено любым английским судом, начиная с низшего суда магистратов, за совершение почти всех преступлений. Исключением являются незначительные автотранспортные преступления и мелкие правонарушения.
+
+\subsection{Latin}
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+\newpage
+}
+}
+
+\TextSnippet{cmr}
+\TextSnippet{cmss}
+\TextSnippet{cmtt}
+\TextSnippet{ptm}
+\TextSnippet{phv}
+\TextSnippet{pcr}
+
+\end{document}
