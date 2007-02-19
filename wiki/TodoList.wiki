@@ -7,15 +7,15 @@
   * multiple 'author' elements in 'title-info'
   * multiple 'body' elements
   * Spaces in TOC
-  * center picture on 'coverpage'
+  * 'image' elemnt support for external images referenced by URL
 
 == Buggy ==
 
   * Epigraphs does not always look good, especially if they do not fit page. Try alternative  epigraph packeages mentioned [http://www.tex.ac.uk/cgi-bin/texfaq2html?label=epigraph here]
   * Using 'hyperref' to enable links from TOC to sections causing pdfopt crash.
+  * 'empty-line' in section between paragraphs does not work. e.g. in bunin_okayanniye_dni.fb2)
 
 == Ideas ==
 
-  * Convert images to greyscale 
   * Convert images in unsupported formats using imagemagic
   * Distributed conversion service using Amazon Simple Queue
