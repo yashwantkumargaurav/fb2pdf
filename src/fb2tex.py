@@ -16,6 +16,7 @@ import re
 import binascii
 
 from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString
+import Image
 
 # -- constants --
 image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
@@ -145,6 +146,7 @@ def fb2tex(infile, outfile):
     """)
 
     f.write("\n\\begin{document}\n\n")
+    f.write("{\\fontfamily{cmss}\\selectfont\n")
     fb = soup.find("fictionbook")
     findEnclosures(fb)
     processDescription(fb.find("description"), f)
@@ -155,6 +157,7 @@ def fb2tex(infile, outfile):
     processEpigraphs(body, f)
     processSections(body, f)
     
+    f.write("}")
     f.write("\n\\end{document}\n")
     f.close()
 
@@ -473,6 +476,9 @@ def processInlineImage(f,image):
             logging.error("Non-existing image ref '%s'\n" % href)
             return 
         (ct,fname)=enclosures[href]
+        #TODO: convert to 2-bit greyscale
+        #TODO: scale down large images
+        #Image.open(fname).resize((600,800)).convert("L").save(fname)
         f.write("\\includegraphics{%s}\n" % fname)
 
 def usage():
