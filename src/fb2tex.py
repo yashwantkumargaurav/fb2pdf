@@ -112,12 +112,22 @@ def _text(t):
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
 
+def _getdir(f):
+    l = string.rsplit(f,"/",1)
+    if len(l)==2:
+        return l[0]
+    else:
+        return "."
+    
 def fb2tex(infile, outfile):
     f = open(infile, 'r')
     soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
     f.close()
 
     f = open(outfile, 'w')
+
+    outdir=_getdir(outfile)
+    
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
     \\usepackage[
@@ -154,7 +164,8 @@ def fb2tex(infile, outfile):
     f.write("\n\\begin{document}\n\n")
     f.write("{\\fontfamily{cmss}\\selectfont\n")
     fb = soup.find("fictionbook")
-    findEnclosures(fb)
+    
+    findEnclosures(fb,outdir)
     processDescription(fb.find("description"), f)
 
     f.write("\\tableofcontents\n\\newpage\n");
@@ -455,7 +466,7 @@ def processDescription(desc,f):
     if an:
         processAnnotation(f,an)
 
-def findEnclosures(fb):
+def findEnclosures(fb,outdir):
     encs = fb.findAll("binary", recursive=False)
     for e in encs:
         id=e['id']
@@ -464,10 +475,14 @@ def findEnclosures(fb):
         if not image_exts.has_key(ct):
             logging.warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
             continue
-        fname = os.tempnam('.', "enc") + "." + image_exts[ct]
-        f=open(fname,"w")
+        fname = os.tempnam(".", "enc") + "." + image_exts[ct]
+        fullfname = outdir + "/" + fname
+        f = open(fullfname,"w")
         f.write(binascii.a2b_base64(e.contents[0]))
         f.close()
+        # convert to grayscale, 166dpi (native resolution for Sony Reader)
+        Image.open(fullfname).convert("L").save(fullfname, dpi=(166,166))
+        #TODO: scale down large images        
         global enclosures
         enclosures[id]=(ct, fname)
     
@@ -482,9 +497,6 @@ def processInlineImage(f,image):
             logging.error("Non-existing image ref '%s'\n" % href)
             return 
         (ct,fname)=enclosures[href]
-        # convert to grayscale, 166dpi (native resolution for Sony Reader)
-        Image.open(fname).convert("L").save(fname, dpi=(166,166))
-        #TODO: scale down large images
         f.write("\\includegraphics{%s}\n" % fname)
 
 def usage():
