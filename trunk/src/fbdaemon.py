@@ -7,15 +7,19 @@ Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
 import getopt
-import sys
-import string
-import time
+import sys, os
+import string, time
+import urllib
+import traceback
+
 from xml.dom.minidom import parse, parseString
 from ConfigParser import ConfigParser
 
 from boto.connection import SQSConnection
 from boto.sqs.message import Message
 from boto.exception import SQSError
+
+import fb2tex
 
 MSG_FORMAT_VER=1
 
@@ -64,7 +68,8 @@ def main():
                     q.delete_message(m)
                 except:
                     print "Error processing message"
-
+                    traceback.print_exc(file=sys.stdout)
+                    
 def processMessage(m):
     msg = None
     try:
@@ -97,11 +102,23 @@ def processMessage(m):
     res = results[0]
     res_key = res.getAttribute('key')
 
-    print src_url
-    print src_type
-    print res_key
+    processDocument(src_url, src_type, res_key)
+
+def processDocument(src_url, src_type, res_key):
+    tmpdirname = str(int(time.time()))    
+    print "Creating dir '%s'" % tmpdirname
+    os.mkdir(tmpdirname)
+    try:
+        fbfilenamebase = os.tempnam(tmpdirname)
+        fbfilename = fbfilenamebase + '.fb2'
+        print "Downloading '%s' to file '%s'" % (src_url, fbfilename)
+        urllib.urlretrieve(src_url, fbfilename)
+        texfilename = fbfilenamebase + '.tex'
+        fb2tex.fb2tex(fbfilename, texfilename)                
+    finally:
+        pass
+        #TODO: os.remove(tmpdirname)
     
 
 if __name__ == "__main__":
     main()
-
