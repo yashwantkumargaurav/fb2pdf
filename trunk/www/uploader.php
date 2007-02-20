@@ -3,6 +3,8 @@
 
 <?php
 require_once 'fbparser.php';
+require_once 'awscfg.php';
+require_once 's3.class.php';
 
 $filePath = NULL;
 $fileName = NULL;
@@ -18,7 +20,6 @@ if ($_POST['uploadtype'] == 'file')
         
     if (!is_uploaded_file($filePath)) 
         error("Internal error. Unable to upload the file. Please, try again.");
-
 }
 else if ($_POST['uploadtype'] == 'url')
 {
@@ -29,7 +30,7 @@ else if ($_POST['uploadtype'] == 'url')
 // Check format
 print "<br>Checking the file format...";
 if (!check_fb_format($filePath))
-    error($fileName . " is not a fb2 file. Please select a fb2 file and try again.");
+    error($fileName . " does not exists or it is not a fb2 file. Please select a fb2 file and try again.");
 print " Done";
 
 print "<br>Uploading file...";
@@ -40,6 +41,7 @@ print " Done";
 // Put file to amazon s3
 function s3_put($filePath)
 {
+    // create a bucket
     return TRUE;
 }
     

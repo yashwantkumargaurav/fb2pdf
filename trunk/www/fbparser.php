@@ -9,10 +9,13 @@ function check_fb_format($file)
     global $rootElementFound;
     
     // Read the data from file
+    $data = NULL;
     $fp=fopen($file,"r");
-    $data=fread($fp,1024);
-    fclose($fp);
-    
+    if ($fp)
+    {
+        $data=fread($fp,1024);
+        fclose($fp);
+    }
     if (!$data)
         return FALSE;
     
