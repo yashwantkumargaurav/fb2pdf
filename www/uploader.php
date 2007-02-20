@@ -3,8 +3,7 @@
 
 <?php
 require_once 'fbparser.php';
-require_once 'awscfg.php';
-require_once 's3.class.php';
+require_once 'aws.php';
 
 $filePath = NULL;
 $fileName = NULL;
@@ -34,17 +33,10 @@ if (!check_fb_format($filePath))
 print " Done";
 
 print "<br>Uploading file...";
-if (!s3_put($filePath))    
+if (!store_file($filePath))    
     error("Unable to store file " . $fileName . " for further processing. Please try again.");
 print " Done";
 
-// Put file to amazon s3
-function s3_put($filePath)
-{
-    // create a bucket
-    return TRUE;
-}
-    
 // Print error message and stop the script
 function error($str) 
 {
