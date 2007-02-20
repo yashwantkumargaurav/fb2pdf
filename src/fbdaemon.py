@@ -7,6 +7,7 @@ Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
 import getopt
+import logging, logging.handlers
 import sys, os
 import string, time
 import urllib
@@ -23,82 +24,118 @@ import fb2tex
 
 MSG_FORMAT_VER=1
 
-# --- Code ---
+# --- Defaults ---
+logfile = 'fbdaemon.log'
+verbosity = logging.NOTSET
+log_verbosity = logging.DEBUG
 
+# --- Code ---
+class ProcessError:
+    def __init__(self, msg):
+        self.message = msg
+        
+    def __str__(self):
+        return self.message
+        
 def usage():
     sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-v]\n")
 
+def parseCommandLineAndReadConfiguration():
+    global logfile
+    global verbosity
+    global log_verbosity
+    
+    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile="])
+    
+    for option, argument in optlist:
+        if option in ("-v", "--verbose"):
+            verbosity = logging.DEBUG
+        elif option in ("-c", "--cfgfile"):
+            if os.path.isfile(argument):
+                cfgfile = argument
+            else:
+                raise getopt.GetoptError("config file '%s' doesn't exist" % argument)
+                
+    if cfgfile is None:
+        raise getopt.GetoptError("configuration file not specified")
+    
+    cfg = ConfigParser()
+    cfg.read(cfgfile)
+    
+    # rotate logs on daily basis
+    rotatingLog = logging.handlers.TimedRotatingFileHandler(logfile, "D", 1, backupCount=5)
+    rotatingLog.setLevel(log_verbosity)
+    log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+    rotatingLog.setFormatter(log_formatter)
+    logging.getLogger('').addHandler(rotatingLog)
+    
+    console = logging.StreamHandler()
+    console.setLevel(verbosity)
+    formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+    
+    return cfg
+
 def main():
-      cfgfile = None
-      verbose = False
-      
-      try:
-            opts, args = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile"])
-      except getopt.GetoptError:
-            usage()
-            sys.exit(2)
-      for o, a in opts:
-            if o in ("-c", "--cfgfile"):
-                  cfgfile = a
-            if o in ("-v", "--verbose"):
-                  verbose = True
-
-      if len(args) != 0 or cfgfile is None:
-            usage()
-            sys.exit(2)
-
-      cfg = ConfigParser()
-      cfg.read(cfgfile)
-
-      c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
-      
-      qname = cfg.get('queue','name')
-      qtimeout = int(cfg.get('queue','timeout'))
-      pdelay = int(cfg.get('queue','polling_delay'))
-      
-      q = c.create_queue(qname)
-
-      while True:
+    try:
+        cfg = parseCommandLineAndReadConfiguration()
+        c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
+        
+        qname = cfg.get('queue','name')
+        qtimeout = int(cfg.get('queue','timeout'))
+        pdelay = int(cfg.get('queue','polling_delay'))
+        
+        q = c.create_queue(qname)
+        
+        while True:
             m = q.read(qtimeout)
             if m==None:
-                  time.sleep(pdelay)
+                time.sleep(pdelay)
             else:
                 try:
                     processMessage(m)
                     q.delete_message(m)
-                except:
-                    print "Error processing message"
-                    traceback.print_exc(file=sys.stdout)
+                except ProcessError, msg:
+                    logging.exception(msg)
                     
+    except getopt.GetoptError, msg:
+        if len(sys.argv[1:]) > 0:
+            print >>sys.stderr, "Error: %s\n" % msg
+        else:
+            usage()
+        return 2
+        
+    except:
+        info = sys.exc_info()
+        traceback.print_exc()
+        return 3
+
 def processMessage(m):
     msg = None
     try:
         msg = parseString(m.get_body())
     except:
-        print "Invalid message, could not be parsed. Dropping"
-        return
+        logging.debug(m.get_body())
+        raise ProcessError("Could not parse the message.")
         
     root = msg.childNodes[0]
     if root.nodeName != 'fb2pdfjob':
-        print "Unknwon XML root element '%s'" % root.nodeName
-        return
+        raise ProcessError("Unknwon XML root element '%s'." % root.nodeName)
     v=root.getAttribute('version')
     if not v or int(v)!=MSG_FORMAT_VER: 
-        print "Unsupported message format version '%s'" % v
-        return
+        raise ProcessError("Unsupported message format version '%s'." % v)
 
     srcs=root.getElementsByTagName('source')
     if len(srcs)!=1:
-        print "Too many sources in the message!"
-        return
+        raise ProcessError("Too many sources in the message.")
     src = srcs[0]
     src_url = src.getAttribute('url')
     src_type = src.getAttribute('type')
 
     results=root.getElementsByTagName('result')
     if len(srcs)!=1:
-        print "Too many results in the message!"
-        return
+        raise ProcessError("Too many results in the message.")
     res = results[0]
     res_key = res.getAttribute('key')
 
@@ -106,19 +143,18 @@ def processMessage(m):
 
 def processDocument(src_url, src_type, res_key):
     tmpdirname = str(int(time.time()))    
-    print "Creating dir '%s'" % tmpdirname
+    logging.info("Creating temporary directory '%s'." % tmpdirname)
     os.mkdir(tmpdirname)
     try:
         fbfilenamebase = os.tempnam(tmpdirname)
         fbfilename = fbfilenamebase + '.fb2'
-        print "Downloading '%s' to file '%s'" % (src_url, fbfilename)
+        logging.info("Downloading '%s' to file '%s'." % (src_url, fbfilename))
         urllib.urlretrieve(src_url, fbfilename)
         texfilename = fbfilenamebase + '.tex'
-        fb2tex.fb2tex(fbfilename, texfilename)                
+        fb2tex.fb2tex(fbfilename, texfilename)
     finally:
         pass
         #TODO: os.remove(tmpdirname)
     
-
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
