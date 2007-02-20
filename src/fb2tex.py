@@ -141,7 +141,7 @@ def fb2tex(infile, outfile):
     ]{hyperref}
     \\usepackage[
         papersize={90.6mm,122.4mm},
-        margin=2mm,
+        margin=1mm,
         ignoreall,
         pdftex
     ]{geometry}
