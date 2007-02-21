@@ -268,7 +268,7 @@ def processSection(s, f):
                 _uwrite(f,par(x))
                 f.write("\n\n")
             elif x.name == "empty-line":
-                f.write("\n\n") # TODO: not sure
+                f.write("\\vspace{10mm}\n\n")
             elif x.name == "image":
                 logging.warning("Unsupported element: %s" % x.name)
                 pass # TODO
