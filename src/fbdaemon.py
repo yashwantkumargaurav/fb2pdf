@@ -147,6 +147,7 @@ def processDocument(src_url, src_type, res_key):
     tmpdirname = str(int(time.time()))    
     logging.info("Creating temporary directory '%s'." % tmpdirname)
     os.mkdir(tmpdirname)
+    basedir = os.getcwd()
     try:
         os.chdir(tmpdirname)
         fbfilenamebase = os.tempnam('./','book')[2:]
@@ -158,6 +159,7 @@ def processDocument(src_url, src_type, res_key):
         pdffilename = fbfilenamebase + '.pdf'
         tex2pdf(texfilename, pdffilename)
     finally:
+        os.chdir(basedir)
         pass
         #TODO: os.remove(tmpdirname)
 
