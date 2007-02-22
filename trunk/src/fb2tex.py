@@ -391,6 +391,27 @@ def processEpigraphs(s,f):
         
     f.write("\\end{epigraphs}\n")
 
+
+def authorName(a):
+    fn = a.find("first-name")
+    if fn:
+        author_name = _text(fn)
+    else:
+        author_name = ""
+    mn = a.find("middle-name")
+    if mn:
+        if author_name:
+            author_name = author_name + " " + _text(mn)
+        else:
+            author_name = _text(mn)
+    ln = a.find("last-name")
+    if ln:
+        if author_name:
+            author_name = author_name + " " + _text(ln)
+        else:
+            author_name = _text(ln)
+    return author_name
+
 def processDescription(desc,f):
     if not desc:
         logging.warning("Missing required 'description' element\n")
@@ -406,28 +427,16 @@ def processDescription(desc,f):
         title = _text(t)
     else:
         title = ""
-    a = ti.find("author")
-    if not a:
-        author_name = ""
-    else:
-        fn = a.find("first-name")
-        if fn:
-            author_name = _text(fn)
+
+    # authors
+    aa = ti.findAll("author")
+    author_name = ""
+    for a in aa:
+        if len(author_name):
+            author_name += "\\and " + authorName(a)
         else:
-            author_name = ""
-        mn = a.find("middle-name")
-        if mn:
-            if author_name:
-                author_name = author_name + " " + _text(mn)
-            else:
-                author_name = _text(mn)
-        ln = a.find("last-name")
-        if ln:
-            if author_name:
-                author_name = author_name + " " + _text(ln)
-            else:
-                author_name = _text(ln)
-                
+            author_name = authorName(a)
+            
     if author_name:
         f.write("\\author{")
         _uwrite(f,author_name)
