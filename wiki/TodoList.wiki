@@ -4,7 +4,6 @@
 
   * 'cite', 'table'
   * PHP frontend
-  * multiple 'author' elements in 'title-info'
   * multiple 'body' elements
   * 'image' elemnt support for external images referenced by URL
 
