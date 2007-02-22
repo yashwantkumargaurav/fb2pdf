@@ -39,7 +39,6 @@ def par(p):
                 logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "a":
-                #e.g. <a l:href="#fn1">Стирки</a>
                 href=s.get('l:href')
                 if href:
                     if href[0]=='#':
