@@ -25,7 +25,7 @@ class S3
 	var $responseHeader;
     
     // debug (set to false to remove echo)
-    var $debug = true;
+    var $debug = false;
 
 	function S3($accessKeyId, $secretKey) 
     {
@@ -37,19 +37,19 @@ class S3
     function listBuckets() 
     {
         $this->request =& new HTTP_Request($this->serviceUrl);
-		$this->initRequest("GET", "", "private", "", "");
+		$this->initRequest("GET", "", "private", "", "", "");
         $this->request->sendRequest();
         $this->gotResponse();
         return ($this->responseCode == 200) ? true : false;
 	}
 
-  	// Creates a new object
-    function createObject($bucket, $object, $data, $contentType, $acl, $metadata)
+  	// Writes an object
+    function writeObject($bucket, $object, $data, $contentType, $acl, $metadata = NULL, $extraHttpHeaders = NULL)
     {
         $resource = $bucket . "/" . $object;
         
         $this->request =& new HTTP_Request($this->serviceUrl . $resource);
-		$this->initRequest("PUT", $resource, $contentType, $acl, $metadata);
+		$this->initRequest("PUT", $resource, $contentType, $acl, $metadata, $extraHttpHeaders);
         
         // add data
         $this->request->setBody($data);
@@ -65,7 +65,7 @@ class S3
         $resource = $bucket . "/" . $object;
         
         $this->request =& new HTTP_Request($this->serviceUrl . $resource);
-		$this->initRequest("HEAD", $resource, "", "private", "");
+		$this->initRequest("HEAD", $resource, "", "private", "", "");
         
         $this->request->sendRequest();
         $this->gotResponse();
@@ -89,7 +89,7 @@ class S3
     }
     
     //initializes common elements of all REST requests
-	function initRequest($verb, $resource, $contentType, $acl, $metadata)
+	function initRequest($verb, $resource, $contentType, $acl, $metadata, $extraHttpHeaders)
     {
         define('DATE_RFC822', 'D, d M Y H:i:s T');
         $httpDate = gmdate(DATE_RFC822);
@@ -108,6 +108,15 @@ class S3
             {
 				$this->request->addHeader("x-amz-meta-".$key, trim($value));
 				$metadatastring .= "x-amz-meta-".$key.":".trim($value)."\n";
+            }
+        }
+        
+        // add extra http headers
+        if (is_array($extraHttpHeaders)) 
+        {
+			foreach ($extraHttpHeaders as $key => $value) 
+            {
+				$this->request->addHeader($key, trim($value));
             }
         }
         

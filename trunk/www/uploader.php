@@ -1,9 +1,7 @@
-<html>
-<body>
-
 <?php
 require_once 'fbparser.php';
-require_once 'aws.php';
+require_once 'awscfg.php';
+require_once 's3.php';
 
 $filePath = NULL;
 $fileName = NULL;
@@ -15,10 +13,10 @@ if ($_POST['uploadtype'] == 'file')
     $fileName = $_FILES['fileupload']['name'];
     
     if (trim($fileName) == "")
-        error("Please, specify a file you would like to convert.");
+        die("Please, specify a file you would like to convert.");
         
     if (!is_uploaded_file($filePath)) 
-        error("Internal error. Unable to upload the file. Please, try again.");
+        die("Internal error. Unable to upload the file. Please, try again.");
 }
 else if ($_POST['uploadtype'] == 'url')
 {
@@ -27,22 +25,54 @@ else if ($_POST['uploadtype'] == 'url')
 }
 
 // Check format
-print "<br>Checking the file format...";
 if (!check_fb_format($filePath))
-    error($fileName . " does not exists or it is not a fb2 file. Please select a fb2 file and try again.");
-print " Done";
+    die($fileName . " does not exists or it is not a fb2 file. Please select a fb2 file and try again.");
 
-print "<br>Uploading file...";
-if (!store_file($filePath))    
-    error("Unable to store file " . $fileName . " for further processing. Please try again.");
-print " Done";
+// Process file
+$key = process_file($filePath, $fileName);
+if ($key === false)
+    die("Unable to store file " . $fileName . " for further processing. Please try again.");
 
-// Print error message and stop the script
-function error($str) 
+// redirect to the status page
+$host = $_SERVER["HTTP_HOST"];
+$uri  = rtrim(dirname($_SERVER["PHP_SELF"]), "/\\");
+$page = "status.php?id=$key";
+
+$url = "http://$host$uri/$page";
+header("Location: $url");
+
+// Process file.
+// Returns key or false
+function process_file($filePath, $fileName)
 {
-    print "<div style='color: red;'><pre>$str</pre></div>";
-    die;
+    global $awsApiKey, $awsApiSecretKey, $awsS3Bucket;
+
+    // get file content
+    $data = file_get_contents($filePath);
+    $md5 = md5(data);
+    
+    // get the filename without extension
+    $pathParts = pathinfo($fileName);
+    $name = $pathParts["basename"];
+    $pos = strrpos($name, ".");
+    if ($pos !== false) 
+        $name = substr($name, 0, $pos);
+
+    // set content-disposition
+    $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.fb2\"");
+    
+    // create an object to store source file
+    $s3 = new S3($awsApiKey, $awsApiSecretKey);
+
+    if (!$s3->writeObject($awsS3Bucket, $md5 . ".fb2", $data, "application/fb2+xml", "public-read", "", $httpHeaders))
+        return false;
+    
+    // create a placeholder for conversion result
+    $metadata = array("status"=>"");
+    $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.pdf\"");
+    if (!$s3->writeObject($awsS3Bucket, $md5 . ".pdf", "result", "application/pdf", "public-read", $metadata, $httpHeaders))
+        return false;
+    
+    return $md5;
 }
 ?>
-</body>
-</html>
