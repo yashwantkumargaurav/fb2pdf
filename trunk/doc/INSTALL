@@ -1,8 +1,13 @@
 Required packages: 
 
+System packages:
 . Python 2.3 or newer
 . teTeX
+
+TeX packages
 . http://www.tex.ac.uk/tex-archive/macros/latex/contrib/epigraph/
 . http://www.ctan.org/tex-archive/macros/latex/contrib/verse/
+
+Python packages:
 . http://code.google.com/p/boto/
 . http://www.pythonware.com/products/pil/

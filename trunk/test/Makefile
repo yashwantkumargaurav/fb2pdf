@@ -1,6 +1,7 @@
 # Makefile 
 
 all: $(alltex)
+	echo $(alltex)
 
 allfb := $(wildcard *.fb2)
 allpdf := $(patsubst %.fb2,%.pdf,$(wildcard *.fb2))
