@@ -8,7 +8,7 @@ Author: Vadim Zaliva <lord@crocodile.org>
 
 import getopt
 import logging, logging.handlers
-import sys, os
+import sys, os, shutil
 import string, time
 import urllib
 import traceback
@@ -46,6 +46,8 @@ def parseCommandLineAndReadConfiguration():
     global log_verbosity
     
     (optlist, arglist) = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile="])
+
+    cfgfile = None
     
     for option, argument in optlist:
         if option in ("-v", "--verbose"):
@@ -146,15 +148,33 @@ def processDocument(src_url, src_type, res_key):
     logging.info("Creating temporary directory '%s'." % tmpdirname)
     os.mkdir(tmpdirname)
     try:
-        fbfilenamebase = os.tempnam(tmpdirname)
+        os.chdir(tmpdirname)
+        fbfilenamebase = os.tempnam('./','book')[2:]
         fbfilename = fbfilenamebase + '.fb2'
         logging.info("Downloading '%s' to file '%s'." % (src_url, fbfilename))
         urllib.urlretrieve(src_url, fbfilename)
         texfilename = fbfilenamebase + '.tex'
         fb2tex.fb2tex(fbfilename, texfilename)
+        pdffilename = fbfilenamebase + '.pdf'
+        tex2pdf(texfilename, pdffilename)
     finally:
         pass
         #TODO: os.remove(tmpdirname)
+
+def tex2pdf(texfilename, pdffilename):
+    # TODO: specify location to style files
+    shutil.copyfile('../../test/verse.sty','./verse.sty')
+    shutil.copyfile('../../test/epigraph.sty','./epigraph.sty')
+    
+    #TODO specify PDF output filename
+    rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
+    if rc:
+        raise "Execution of pdflatex filed with error code %d" % rc
+    # Run again, to incorporate TOC
+    rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
+    if rc:
+        raise "Execution of pdflatex filed with error code %d" % rc
+
     
 if __name__ == "__main__":
     sys.exit(main())
