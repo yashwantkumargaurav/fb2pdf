@@ -210,17 +210,9 @@ def processPoem(p,f):
     ss = p.findAll("stanza", recursive=False)
     for s in ss:
         processStanza(s, f)
-    
-    # text-author (optional)
-    # TODO: check, see if there is a better way to list multiple authors
-    #    perhaps comma, separated.
-    aa = p.findAll("text-author", recursive=False)
-    for a in aa:
-        author = par(a)
-        f.write('\\attrib{')
-        _uwrite(f,author)
-        f.write("}\n")
 
+    processAuthors(p,f)
+    
     # date
     d = p.find("date", recursive=False)
     if d:
@@ -253,6 +245,48 @@ def processStanza(s, f):
         vt = par(v)
         _uwrite(f,vt)
         f.write(" \\\\\n")
+
+
+def processAuthors(q,f):
+    aa = q.findAll("text-author")
+    author_name = ""
+    for a in aa:
+        if len(author_name):
+            author_name += " \\and " + _textQuote(_text(a))
+        else:
+            author_name = _textQuote(_text(a))
+            
+    if author_name:
+        f.write("\\author{")
+        _uwrite(f,author_name)
+        f.write("}\n");
+
+
+def processCite(q,f):
+    f.write('\\begin{quotation}\n')
+
+    for x in q:
+        if isinstance(x, Tag):
+            if x.name=="p":
+                _uwrite(f,par(x))
+                f.write("\n\n")
+            elif x.name=="poem":
+                processPoem(x,f)
+            elif x.name=="empty-line":
+                f.write("\\vspace{10mm}\n\n")
+            elif x.name == "subtitle":
+                f.write("\\subsection*{")
+                _uwrite(f,par(x))
+                f.write("}\n")
+            elif x.name=="table":
+                logging.warning("Unsupported element: %s" % x.name)
+                pass # TODO
+        elif isinstance(x, basestring) or isinstance(x, unicode):
+            _uwrite(f,_textQuote(_text(x)))
+
+    processAuthors(q,f)
+
+    f.write('\\end{quotation}\n')
     
 def processSection(s, f):
     t = s.find("title", recursive=False)
@@ -290,8 +324,7 @@ def processSection(s, f):
                 _uwrite(f,par(x))
                 f.write("}\n")
             elif x.name == "cite":
-                logging.warning("Unsupported element: %s" % x.name)
-                pass # TODO
+                processCite(x,f)
             elif x.name == "table":
                 logging.warning("Unsupported element: %s" % x.name)
                 pass # TODO
@@ -316,8 +349,7 @@ def processAnnotation(f, an):
                     _uwrite(f,par(x))
                     f.write("}\n")
                 elif x.name == "cite":
-                    logging.warning("Unsupported element: %s" % x.name)
-                    pass # TODO
+                    processCite(x,f)
                 elif x.name == "table":
                     logging.warning("Unsupported element: %s" % x.name)
                     pass # TODO
@@ -366,8 +398,7 @@ def processEpigraphText(f,e):
                 # TODO: test how verse plays with epigraph evn.
                 processPoem(x,f)
             elif x.name == "cite":
-                logging.warning("Unsupported element: %s" % x.name)
-                pass #TODO
+                processCite(x,f)
             elif x.name != "text-author":
                 logging.error("Unknown epigraph element: %s" % x.name)
         
@@ -433,7 +464,7 @@ def processDescription(desc,f):
     author_name = ""
     for a in aa:
         if len(author_name):
-            author_name += "\\and " + authorName(a)
+            author_name += " \\and " + authorName(a)
         else:
             author_name = authorName(a)
             
