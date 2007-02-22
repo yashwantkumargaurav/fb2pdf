@@ -60,8 +60,7 @@ def par(p):
             elif s.name == "code":
                 res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
             elif s.name == "image":
-                logging.warning("Unsupported element: %s" % s.name)
-                res += "" #TODO
+                res += processInlineImage(s)
             elif s.name == "l":
                 logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
@@ -283,8 +282,7 @@ def processSection(s, f):
             elif x.name == "empty-line":
                 f.write("\\vspace{10mm}\n\n")
             elif x.name == "image":
-                logging.warning("Unsupported element: %s" % x.name)
-                pass # TODO
+                f.write(processInlineImage(x))
             elif x.name == "poem":
                 processPoem(x,f)
             elif x.name == "subtitle":
@@ -469,9 +467,7 @@ def processDescription(desc,f):
         if len(images):
             #f.write("\\begin{titlepage}\n")
             for image in images:
-                f.write("\\begin{center}\n")
-                processInlineImage(f,image)
-                f.write("\\end{center}\n")
+                f.write(processInlineImage(image))
             #f.write("\\end{titlepage}\n")
 
     # annotation, optional
@@ -499,18 +495,18 @@ def findEnclosures(fb,outdir):
         global enclosures
         enclosures[id]=(ct, fname)
     
-def processInlineImage(f,image):
+def processInlineImage(image):
         global enclosures
-        href = image['l:href']
+        href = image.get('l:href')
         if not href or href[0]!='#':
             logging.error("Invalid inline image ref '%s'\n" % href)
-            return
+            return ""
         href=str(href[1:])
         if not enclosures.has_key(href):
             logging.error("Non-existing image ref '%s'\n" % href)
-            return 
+            return ""
         (ct,fname)=enclosures[href]
-        f.write("\\includegraphics{%s}\n" % fname)
+        return "\\begin{center}\n\\includegraphics{%s}\n\\end{center}\n" % fname
 
 def usage():
     sys.stderr.write("Usage: fb2tex.py [-v] -f fb2file -o texfile\n")
