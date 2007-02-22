@@ -39,7 +39,16 @@ def par(p):
                 logging.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "a":
-                logging.warning("Unsupported element: %s" % s.name)
+                #e.g. <a l:href="#fn1">Стирки</a>
+                href=s.get('l:href')
+                if href:
+                    if href[0]=='#':
+                        res += '\\hyperlink{' + href[1:] + '}{\\underline{' + _textQuote(_text(s)) + '}}'
+                    else:
+                        res += '\\href{' + href + '}{\\underline{' + _textQuote(_text(s)) + '}}'
+                else:
+                    print s
+                    logging.warning("'a' without 'href'")
                 res += "" #TODO
             elif s.name == "strikethrough":
                 res += u'\\sout{' + par(s) + u'}'
@@ -265,6 +274,11 @@ def processSection(s, f):
             if x.name == "section":
                 processSection(x,f)
             if x.name == "p":
+                pid=x.get('id')
+                if pid:
+                    f.write('\\hypertarget{')
+                    _uwrite(f,pid)
+                    f.write('}{}\n')
                 _uwrite(f,par(x))
                 f.write("\n\n")
             elif x.name == "empty-line":
