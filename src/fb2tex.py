@@ -24,8 +24,6 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 # --- globals --
 enclosures = {}
 logfile = 'fb2tex.log'
-verbosity = logging.ERROR
-log_verbosity = logging.DEBUG
 
 def par(p):
     res = u''
@@ -126,7 +124,12 @@ def _getdir(f):
     else:
         return "."
     
-def fb2tex(infile, outfile):
+def fb2tex(infile, outfile, logfilename=None):
+
+    if logfilename:
+        initLog(logfilename, logging.DEBUG)
+    logging.warning("Converting %s" % infile)
+        
     f = open(infile, 'r')
     soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
     f.close()
@@ -551,12 +554,21 @@ def processInlineImage(image):
 def usage():
     sys.stderr.write("Usage: fb2tex.py [-v] -f fb2file -o texfile\n")
 
+def initLog(logfilename, log_verbosity):
+    logging.basicConfig(
+        level = log_verbosity,
+        format = '%(asctime)s %(levelname)-8s %(message)s',
+        datefmt = '%a, %d %b %Y %H:%M:%S',
+        filename = logfilename,
+        filemode = 'w'
+    )
+
 def parseCommandLine():
-    global logfile
-    global verbosity
-    global log_verbosity
     infile = None
     outfile = None
+
+    verbosity = logging.ERROR
+    log_verbosity = logging.DEBUG
     
     (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file=", "output="])
     for option, argument in optlist:
@@ -574,15 +586,11 @@ def parseCommandLine():
         raise getopt.GetoptError("input file not specified")
     if outfile == None:
         raise getopt.GetoptError("output file not specified")
-        
-    logging.basicConfig(
-        level = log_verbosity,
-        format = '%(asctime)s %(levelname)-8s %(message)s',
-        datefmt = '%a, %d %b %Y %H:%M:%S',
-        filename = logfile,
-        filemode = 'w'
-    )
-    
+
+    # file log
+    initLog(logfile, log_verbosity)
+
+    # console log
     console = logging.StreamHandler()
     console.setLevel(verbosity)
     formatter = logging.Formatter('[%(levelname)s] %(message)s')

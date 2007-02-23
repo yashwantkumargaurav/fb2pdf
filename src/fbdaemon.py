@@ -17,12 +17,14 @@ from xml.dom.minidom import parse, parseString
 from ConfigParser import ConfigParser
 
 from boto.connection import SQSConnection
+from boto.connection import S3Connection
 from boto.sqs.message import Message
 from boto.exception import SQSError
+from boto.s3.key import Key
 
 import fb2tex
 
-MSG_FORMAT_VER=1
+MSG_FORMAT_VER=2
 
 # --- Defaults ---
 logfile = 'fbdaemon.log'
@@ -60,7 +62,8 @@ def parseCommandLineAndReadConfiguration():
                 
     if cfgfile is None:
         raise getopt.GetoptError("configuration file not specified")
-    
+
+    global cfg
     cfg = ConfigParser()
     cfg.read(cfgfile)
     
@@ -76,12 +79,11 @@ def parseCommandLineAndReadConfiguration():
     formatter = logging.Formatter('[%(levelname)s] %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
-    
-    return cfg
 
 def main():
     try:
-        cfg = parseCommandLineAndReadConfiguration()
+        global cfg
+        parseCommandLineAndReadConfiguration()
         c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
         
         qname = cfg.get('queue','name')
@@ -113,6 +115,15 @@ def main():
         traceback.print_exc()
         return 3
 
+def upload_file(bucket, key, filename):
+    global cfg
+    c = S3Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
+    b = c.create_bucket(bucket) 
+    k = Key(b)
+    k.key = key
+    k.set_contents_from_filename(filename,{'Content-Disposition':'attachement; filename=\"%s\"' % filename})
+    #TODO close connection?
+
 def processMessage(m):
     msg = None
     try:
@@ -132,32 +143,48 @@ def processMessage(m):
     if len(srcs)!=1:
         raise ProcessError("Too many sources in the message.")
     src = srcs[0]
-    src_url = src.getAttribute('url')
+    src_url  = src.getAttribute('url')
     src_type = src.getAttribute('type')
+    src_name = src.getAttribute('name')
 
     results=root.getElementsByTagName('result')
-    if len(srcs)!=1:
-        raise ProcessError("Too many results in the message.")
-    res = results[0]
-    res_key = res.getAttribute('key')
+    if len(results)!=1:
+        raise ProcessError("Message must contain excactly one 'result' element")
+    res_key = results[0].getAttribute('key')
 
-    processDocument(src_url, src_type, res_key)
+    logs=root.getElementsByTagName('log')
+    if len(logs)!=1:
+        raise ProcessError("Message must contain excactly one 'result' element")
+    log_key = logs[0].getAttribute('key')
 
-def processDocument(src_url, src_type, res_key):
+    processDocument(str(src_url), str(src_type), str(src_name), str(res_key), str(log_key))
+
+def processDocument(src_url, src_type, src_name, res_key, log_key):
     tmpdirname = str(int(time.time()))    
     logging.info("Creating temporary directory '%s'." % tmpdirname)
     os.mkdir(tmpdirname)
     basedir = os.getcwd()
+    bucket='fb2pdf' # TODO: move to cfg
     try:
         os.chdir(tmpdirname)
-        fbfilenamebase = os.tempnam('./','book')[2:]
-        fbfilename = fbfilenamebase + '.fb2'
+        fbfilename = src_name + '.fb2'
         logging.info("Downloading '%s' to file '%s'." % (src_url, fbfilename))
         urllib.urlretrieve(src_url, fbfilename)
-        texfilename = fbfilenamebase + '.tex'
-        fb2tex.fb2tex(fbfilename, texfilename)
-        pdffilename = fbfilenamebase + '.pdf'
+        texfilename = src_name + '.tex'
+        logfilename = src_name + '.txt'
+        try:
+            fb2tex.fb2tex(fbfilename, texfilename, logfilename)
+        except:
+            # Conversion error, upload log
+            upload_file(bucket, log_key, logfilename)
+            raise
+        pdffilename = src_name + '.pdf'
         tex2pdf(texfilename, pdffilename)
+        # all OK
+        # upload PDF 
+        upload_file(bucket, res_key, pdffilename)
+        # upoad log (log should be uploaded AFTER PDF)
+        upload_file(bucket, log_key, logfilename)
     finally:
         os.chdir(basedir)
         pass
