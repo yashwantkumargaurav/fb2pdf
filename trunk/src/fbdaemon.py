@@ -68,17 +68,19 @@ def parseCommandLineAndReadConfiguration():
     cfg.read(cfgfile)
     
     # rotate logs on daily basis
+    global logger
     rotatingLog = logging.handlers.TimedRotatingFileHandler(logfile, "D", 1, backupCount=5)
     rotatingLog.setLevel(log_verbosity)
     log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
     rotatingLog.setFormatter(log_formatter)
-    logging.getLogger('').addHandler(rotatingLog)
+    logger=logging.getLogger('fbdaemon')
+    logger.addHandler(rotatingLog)
     
     console = logging.StreamHandler()
     console.setLevel(verbosity)
     formatter = logging.Formatter('[%(levelname)s] %(message)s')
     console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
+    logger.addHandler(console)
 
 def main():
     try:
@@ -101,7 +103,7 @@ def main():
                     processMessage(m)
                     q.delete_message(m)
                 except ProcessError, msg:
-                    logging.exception(msg)
+                    logger.exception(msg)
                     
     except getopt.GetoptError, msg:
         if len(sys.argv[1:]) > 0:
@@ -129,7 +131,7 @@ def processMessage(m):
     try:
         msg = parseString(m.get_body())
     except:
-        logging.debug(m.get_body())
+        logger.debug(m.get_body())
         raise ProcessError("Could not parse the message.")
         
     root = msg.childNodes[0]
@@ -160,15 +162,16 @@ def processMessage(m):
     processDocument(str(src_url), str(src_type), str(src_name), str(res_key), str(log_key))
 
 def processDocument(src_url, src_type, src_name, res_key, log_key):
+    logger.info("Processing '%s'." % src_name)
     tmpdirname = str(int(time.time()))    
-    logging.info("Creating temporary directory '%s'." % tmpdirname)
+    logger.debug("Creating temporary directory '%s'." % tmpdirname)
     os.mkdir(tmpdirname)
     basedir = os.getcwd()
     bucket='fb2pdf' # TODO: move to cfg
     try:
         os.chdir(tmpdirname)
         fbfilename = src_name + '.fb2'
-        logging.info("Downloading '%s' to file '%s'." % (src_url, fbfilename))
+        logger.info("Downloading '%s' to file '%s'." % (src_url, fbfilename))
         urllib.urlretrieve(src_url, fbfilename)
         texfilename = src_name + '.tex'
         logfilename = src_name + '.txt'
