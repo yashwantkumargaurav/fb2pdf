@@ -73,6 +73,8 @@ def _textQuote(str, code=False):
     if len(str)==0:
         return str
     if not code:
+        # special chars needs to be quoted with backslash
+        str = re.sub(r'([\&\$\%\#\_\{\}])',r'\\\1',str)
         # 'EN DASH' at the beginning of paragraph - russian direct speech
         if ord(str[0])==0x2013:
             str="\\cdash--*" + str[1:]
