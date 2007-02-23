@@ -58,19 +58,13 @@ function process_file($filePath, $fileName)
     if ($pos !== false) 
         $name = substr($name, 0, $pos);
 
-    // set content-disposition
+    // content-disposition
     $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.fb2\"");
     
     // create an object to store source file
     $s3 = new S3($awsApiKey, $awsApiSecretKey);
 
     if (!$s3->writeObject($awsS3Bucket, $md5 . ".fb2", $data, "application/fb2+xml", "public-read", "", $httpHeaders))
-        return false;
-    
-    // create a placeholder for conversion result
-    $metadata = array("status"=>"");
-    $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.pdf\"");
-    if (!$s3->writeObject($awsS3Bucket, $md5 . ".pdf", "result", "application/pdf", "public-read", $metadata, $httpHeaders))
         return false;
     
     return $md5;
