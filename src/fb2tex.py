@@ -34,7 +34,7 @@ def par(p):
             elif s.name == "emphasis":
                 res += u'{\\it '+ par(s) + u'}'
             elif s.name == "style":
-                logging.warning("Unsupported element: %s" % s.name)
+                flogger.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "a":
                 href=s.get('l:href')
@@ -45,25 +45,25 @@ def par(p):
                         res += '\\href{' + href + '}{\\underline{' + _textQuote(_text(s)) + '}}'
                 else:
                     print s
-                    logging.warning("'a' without 'href'")
+                    flogger.warning("'a' without 'href'")
                 res += "" #TODO
             elif s.name == "strikethrough":
                 res += u'\\sout{' + par(s) + u'}'
             elif s.name == "sub":
-                logging.warning("Unsupported element: %s" % s.name)
+                flogger.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "sup":
-                logging.warning("Unsupported element: %s" % s.name)
+                flogger.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "code":
                 res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
             elif s.name == "image":
                 res += processInlineImage(s)
             elif s.name == "l":
-                logging.warning("Unsupported element: %s" % s.name)
+                flogger.warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             else:
-                logging.error("Unknown paragrpah element: %s" % s.name)
+                flogger.error("Unknown paragrpah element: %s" % s.name)
         elif isinstance(s, basestring) or isinstance(s, unicode):
             res += _textQuote(_text(s))
     return res            
@@ -111,7 +111,7 @@ def _text(t):
     # Temporary check. TODO: remove
     for x in t.contents:
         if not isinstance(x, basestring) and not isinstance(x, unicode):
-            logging.error("Unexpected element in _text: '%s'" % x)
+            flogger.error("Unexpected element in _text: '%s'" % x)
     return string.join([convXMLentities(e) for e in  t.contents])
 
 def _uwrite(f, ustr):
@@ -127,8 +127,8 @@ def _getdir(f):
 def fb2tex(infile, outfile, logfilename=None):
 
     if logfilename:
-        initLog(logfilename, logging.DEBUG)
-    logging.warning("Converting %s" % infile)
+        initLog(logfilename, logging.ERROR)
+    flogger.info("Converting %s" % infile)
         
     f = open(infile, 'r')
     soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
@@ -220,7 +220,7 @@ def processPoem(p,f):
     d = p.find("date", recursive=False)
     if d:
         pdate = _text(d)
-        logging.warning("Unsupported element: date")
+        flogger.warning("Unsupported element: date")
         #TODO find a nice way to print date
         
     f.write('\\end{verse}\n')
@@ -232,7 +232,7 @@ def processStanza(s, f):
         title = getSectionTitle(t)
         if title and len(title):
             # TODO: implement
-            logging.warning("Unsupported element: stanza 'title'")
+            flogger.warning("Unsupported element: stanza 'title'")
     
     # subtitle (optional)
     st = s.find("subtitle", recursive=False)
@@ -240,7 +240,7 @@ def processStanza(s, f):
         subtitle = getSectionTitle(st)
         if subtitle and len(subtitle):
             # TODO: implement
-            logging.warning("Unsupported element: stanza 'subtitle'")
+            flogger.warning("Unsupported element: stanza 'subtitle'")
 
     # 'v' - multiple    
     vv = s.findAll("v", recursive=False)
@@ -282,7 +282,7 @@ def processCite(q,f):
                 _uwrite(f,par(x))
                 f.write("}\n")
             elif x.name=="table":
-                logging.warning("Unsupported element: %s" % x.name)
+                flogger.warning("Unsupported element: %s" % x.name)
                 pass # TODO
         elif isinstance(x, basestring) or isinstance(x, unicode):
             _uwrite(f,_textQuote(_text(x)))
@@ -329,10 +329,10 @@ def processSection(s, f):
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name == "table":
-                logging.warning("Unsupported element: %s" % x.name)
+                flogger.warning("Unsupported element: %s" % x.name)
                 pass # TODO
             elif x.name!="title" and x.name!="epigraph":
-                logging.error("Unknown section element: %s" % x.name)
+                flogger.error("Unknown section element: %s" % x.name)
 
 def processAnnotation(f, an):
     if len(an):
@@ -354,10 +354,10 @@ def processAnnotation(f, an):
                 elif x.name == "cite":
                     processCite(x,f)
                 elif x.name == "table":
-                    logging.warning("Unsupported element: %s" % x.name)
+                    flogger.warning("Unsupported element: %s" % x.name)
                     pass # TODO
                 else:
-                    logging.error("Unknown annotation element: %s" % x.name)
+                    flogger.error("Unknown annotation element: %s" % x.name)
         f.write('\\end{small}\n')
         f.write('\\pagebreak\n')
 
@@ -377,7 +377,7 @@ def getSectionTitle(t):
                 if not first:
                     res = res + u"\\\\"
             else:
-                logging.error("Unknown section title element: %s" % x.name)
+                flogger.error("Unknown section title element: %s" % x.name)
     return res
 
 def processEpigraphText(f,e):
@@ -403,7 +403,7 @@ def processEpigraphText(f,e):
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name != "text-author":
-                logging.error("Unknown epigraph element: %s" % x.name)
+                flogger.error("Unknown epigraph element: %s" % x.name)
         
 def processEpigraphs(s,f):
     ep = s.findAll("epigraph", recursive=False)
@@ -448,13 +448,13 @@ def authorName(a):
 
 def processDescription(desc,f):
     if not desc:
-        logging.warning("Missing required 'description' element\n")
+        flogger.warning("Missing required 'description' element\n")
         return
     
     # title info, mandatory element
     ti = desc.find("title-info")
     if not ti:
-        logging.warning("Missing required 'title-info' element\n")
+        flogger.warning("Missing required 'title-info' element\n")
         return 
     t = ti.find("book-title")
     if t:
@@ -525,7 +525,7 @@ def findEnclosures(fb,outdir):
         ct=e['content-type']
         global image_exts
         if not image_exts.has_key(ct):
-            logging.warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
+            flogger.warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
             continue
         fname = os.tempnam(".", "enc") + "." + image_exts[ct]
         fullfname = outdir + "/" + fname
@@ -542,11 +542,11 @@ def processInlineImage(image):
         global enclosures
         href = image.get('l:href')
         if not href or href[0]!='#':
-            logging.error("Invalid inline image ref '%s'\n" % href)
+            flogger.error("Invalid inline image ref '%s'\n" % href)
             return ""
         href=str(href[1:])
         if not enclosures.has_key(href):
-            logging.error("Non-existing image ref '%s'\n" % href)
+            flogger.error("Non-existing image ref '%s'\n" % href)
             return ""
         (ct,fname)=enclosures[href]
         return "\\begin{center}\n\\includegraphics{%s}\n\\end{center}\n" % fname
@@ -555,13 +555,14 @@ def usage():
     sys.stderr.write("Usage: fb2tex.py [-v] -f fb2file -o texfile\n")
 
 def initLog(logfilename, log_verbosity):
-    logging.basicConfig(
-        level = log_verbosity,
-        format = '%(asctime)s %(levelname)-8s %(message)s',
-        datefmt = '%a, %d %b %Y %H:%M:%S',
-        filename = logfilename,
-        filemode = 'w'
-    )
+    hdlr = logging.FileHandler(logfilename)
+    formatter = logging.Formatter('%(asctime)s [%(process)d.%(thread)d] %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    hdlr.setLevel(log_verbosity)
+    
+    global flogger
+    flogger = logging.getLogger('fb2tex')
+    flogger.addHandler(hdlr) 
 
 def parseCommandLine():
     infile = None
@@ -595,7 +596,7 @@ def parseCommandLine():
     console.setLevel(verbosity)
     formatter = logging.Formatter('[%(levelname)s] %(message)s')
     console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
+    flogger.addHandler(console)
     
     return (infile, outfile)
 
