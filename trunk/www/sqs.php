@@ -16,8 +16,8 @@
 /**
  * A PHP5 class for interfacing with the Amazon SQS REST API
 */
-require_once 'HMAC.php';    // grab this with "pear install Crypt_HMAC"
-require_once 'Request.php';  // grab this with "pear install --onlyreqdeps HTTP_Request"
+require_once 'Crypt/HMAC.php';    // grab this with "pear install Crypt_HMAC"
+require_once 'HTTP/Request.php';  // grab this with "pear install --onlyreqdeps HTTP_Request"
 // Note that version HTTP_Request 1.3.0 has a BUG in it!  Change line
 // 765 from:
 //            (HTTP_REQUEST_METHOD_POST != $this->_method && empty($this->_postData) && empty($this->_postFiles))) {
@@ -25,7 +25,8 @@ require_once 'Request.php';  // grab this with "pear install --onlyreqdeps HTTP_
 //            (HTTP_REQUEST_METHOD_POST == $this->_method && empty($this->_postData) && empty($this->_postFiles))) {
 // Without this change PUTs with non-empty content-type will fail!
 
-class sqs{
+class SQS
+{
 	var $serviceUrl;
    	var $accessKeyId;
    	var $secretKey;
@@ -44,7 +45,7 @@ class sqs{
 	 * - [str] $serviceUrl: OPTIONAL: defaults: http://queue.amazonaws.com/
 	 *
 	*/
-	function __construct($accessKeyId, $secretKey, $serviceUrl="http://queue.amazonaws.com/") {
+	function SQS($accessKeyId, $secretKey, $serviceUrl="http://queue.amazonaws.com/") {
 		$this->serviceUrl=$serviceUrl;
 		$this->accessKeyId=$accessKeyId;
 		$this->secretKey=$secretKey;
@@ -67,7 +68,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -91,7 +92,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -114,7 +115,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -143,7 +144,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -174,7 +175,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -197,7 +198,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -221,7 +222,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -245,7 +246,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -269,7 +270,7 @@ class sqs{
 		$this->request->sendRequest();
 		$this->responseCode=$this->request->getResponseCode();
 		$this->responseString = $this->request->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -302,7 +303,7 @@ class sqs{
 	    $req->sendRequest();
 		$this->responseCode=$req->getResponseCode();
 		$this->responseString = $req->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -327,7 +328,7 @@ class sqs{
 	    $req->sendRequest();
 		$this->responseCode=$req->getResponseCode();
 		$this->responseString = $req->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {
@@ -358,7 +359,7 @@ class sqs{
 	    $req->sendRequest();
 		$this->responseCode=$req->getResponseCode();
 		$this->responseString = $req->getResponseBody();
-		$this->parsed_xml = simplexml_load_string($this->responseString);
+		//$this->parsed_xml = simplexml_load_string($this->responseString);
 		if ($this->responseCode == 200) {
 			return true;
 		} else {

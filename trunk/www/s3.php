@@ -59,6 +59,20 @@ class S3
         return ($this->responseCode == 200) ? true : false;
     }
     
+  	// Object exists
+    function objectExists($bucket, $object)
+    {
+        $resource = $bucket . "/" . $object;
+        
+        $this->request =& new HTTP_Request($this->serviceUrl . $resource);
+		$this->initRequest("HEAD", $resource, "", "private", "", "");
+        
+        $this->request->sendRequest();
+        $this->gotResponse();
+        
+        return ($this->responseCode == 200) ? true : false;
+    }
+    
   	// Gets array of object's metadata
     function getObjectMetadata($bucket, $object)
     {
