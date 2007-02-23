@@ -73,11 +73,6 @@ def _textQuote(str, code=False):
     if len(str)==0:
         return str
     if not code:
-        # escape meta symbols
-        meta = re.compile('([{}%&$#_])')
-        str = meta.sub(r'\\\1', str)
-        # backslash
-        str = string.replace(str,'\\','\\textbackslash ')
         # 'EN DASH' at the beginning of paragraph - russian direct speech
         if ord(str[0])==0x2013:
             str="\\cdash--*" + str[1:]
@@ -147,7 +142,8 @@ def fb2tex(infile, outfile, logfilename=None):
         bookmarksnumbered=true,
         hypertexnames=false,
         plainpages=false,
-        pdfpagelabels
+        pdfpagelabels,
+        unicode
     ]{hyperref}
     \\usepackage[
         papersize={90.6mm,122.4mm},
@@ -178,7 +174,7 @@ def fb2tex(infile, outfile, logfilename=None):
     findEnclosures(fb,outdir)
     processDescription(fb.find("description"), f)
 
-    f.write("\\tableofcontents\n\\newpage\n");
+    f.write("\\tableofcontents\n\\newpage\n\n");
     
     body=fb.find("body")
     processEpigraphs(body, f)
@@ -194,16 +190,17 @@ def processSections(b,f):
         processSection(s, f)
 
 def processPoem(p,f):
-    f.write('\\begin{verse}\n')
+    f.write('\\begin{verse}\n\n')
     
     # title (optinal)
     t = p.find("title", recursive=False)
     if t:
         title = getSectionTitle(t)
         if title and len(title):
-            f.write("\\poemtitle{")
+            f.write("\\poemtitle{\\texorpdfstring{")
             _uwrite(f,title)
-            f.write("}\n")
+            #TODO latin transliteration?
+            f.write("}{}}\n")
 
     
     # epigraphs (multiple, optional)
@@ -223,7 +220,7 @@ def processPoem(p,f):
         flogger.warning("Unsupported element: date")
         #TODO find a nice way to print date
         
-    f.write('\\end{verse}\n')
+    f.write('\\end{verse}\n\n')
 
 def processStanza(s, f):
     # title (optional)
@@ -278,9 +275,10 @@ def processCite(q,f):
             elif x.name=="empty-line":
                 f.write("\\vspace{10mm}\n\n")
             elif x.name == "subtitle":
-                f.write("\\subsection*{")
+                f.write("\\subsection*{\\texorpdfstring{")
                 _uwrite(f,par(x))
-                f.write("}\n")
+                #TODO latin transliteration?
+                f.write("}{}}\n\n")
             elif x.name=="table":
                 flogger.warning("Unsupported element: %s" % x.name)
                 pass # TODO
@@ -298,9 +296,10 @@ def processSection(s, f):
     else:
         title = ""
 
-    f.write("\\section{")
+    f.write("\n\\section{\\texorpdfstring{")
     _uwrite(f,title) # TODO quote
-    f.write("}\n");
+    #TODO latin transliteration for cyrillic section names?
+    f.write("}{}}\n\n");
 
     processEpigraphs(s, f)
     
@@ -323,9 +322,10 @@ def processSection(s, f):
             elif x.name == "poem":
                 processPoem(x,f)
             elif x.name == "subtitle":
-                f.write("\\subsection{")
+                f.write("\\subsection{\\texorpdfstring{")
                 _uwrite(f,par(x))
-                f.write("}\n")
+                #TODO latin transliteration?
+                f.write("}{}}\n")
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name == "table":
@@ -348,9 +348,10 @@ def processAnnotation(f, an):
                 elif x.name == "poem":
                     processPoem(x,f)
                 elif x.name == "subtitle":
-                    f.write("\\subsection*{")
+                    f.write("\\subsection*{\\texorpdfstring{")
                     _uwrite(f,par(x))
-                    f.write("}\n")
+                    #TODO latin transliteration?
+                    f.write("}{}}\n")
                 elif x.name == "cite":
                     processCite(x,f)
                 elif x.name == "table":
@@ -359,7 +360,7 @@ def processAnnotation(f, an):
                 else:
                     flogger.error("Unknown annotation element: %s" % x.name)
         f.write('\\end{small}\n')
-        f.write('\\pagebreak\n')
+        f.write('\\pagebreak\n\n')
 
 def getSectionTitle(t):
     ''' Section title consists of "p" and "empty-line" elements sequence'''
@@ -477,9 +478,10 @@ def processDescription(desc,f):
         f.write("}\n");
 
     if title:
-        f.write("\\title{")
+        f.write("\\title{\\texorpdfstring{")
         _uwrite(f, title)
-        f.write("}\n")
+        #TODO latin transliteration?
+        f.write("}{}}\n")
 
     f.write("\\date{}")
 
