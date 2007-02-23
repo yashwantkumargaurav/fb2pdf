@@ -73,6 +73,8 @@ def _textQuote(str, code=False):
     if len(str)==0:
         return str
     if not code:
+        # backslash itslef must be represented as \backslash
+        str = string.replace(str,'\\','\\backslash')
         # special chars needs to be quoted with backslash
         str = re.sub(r'([\&\$\%\#\_\{\}])',r'\\\1',str)
         # 'EN DASH' at the beginning of paragraph - russian direct speech
