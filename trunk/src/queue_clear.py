@@ -45,9 +45,11 @@ def main():
       
       qname = cfg.get('queue','name')
       q = c.create_queue(qname)
-      print "Queue size: %d. Clearning..." % q.count()
-      q.clear()
-      print "Queue cleared."
+      print "Queue created. Clearning..."
+      n=q.clear()
+      print "Queue cleared. %d messages dropped." % n
+      c.delete_queue(q)
+      print "Queue deleted."
 
 if __name__ == "__main__":
     main()
