@@ -2,6 +2,7 @@
 require_once 'fbparser.php';
 require_once 'awscfg.php';
 require_once 's3.php';
+require_once 'sqshelper.php';
 
 $filePath = NULL;
 $fileName = NULL;
@@ -65,6 +66,10 @@ function process_file($filePath, $fileName)
     $s3 = new S3($awsApiKey, $awsApiSecretKey);
 
     if (!$s3->writeObject($awsS3Bucket, $md5 . ".fb2", $data, "application/fb2+xml", "public-read", "", $httpHeaders))
+        return false;
+    
+    // send SQS message
+    if(!sqsPutMessage($md5, "http://s3.amazonaws.com/$awsS3Bucket/$md5.fb2", $name))
         return false;
     
     return $md5;

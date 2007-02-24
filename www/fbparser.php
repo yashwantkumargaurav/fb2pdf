@@ -21,7 +21,7 @@ function check_fb_format($file)
     
     // Initialize the XML parser
     $parser=xml_parser_create();
-    xml_set_element_handler($parser,"element_start","element_end");
+    xml_set_element_handler($parser,"fb_element_start","fb_element_end");
     
     $error = FALSE;
     if (!xml_parse($parser,$data,FALSE))
@@ -33,7 +33,7 @@ function check_fb_format($file)
 }
 
 // Function to use at the start of an element
-function element_start($parser,$element_name,$element_attrs)
+function fb_element_start($parser,$element_name,$element_attrs)
 {
     global $rootElementFound;
     
@@ -42,7 +42,7 @@ function element_start($parser,$element_name,$element_attrs)
 }
 
 // Function to use at the end of an element
-function element_end($parser,$element_name)
+function fb_element_end($parser,$element_name)
 {
 }
 
