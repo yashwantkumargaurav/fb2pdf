@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.4
 
 '''
-Simple Tool to send messages to the queue
+Simple Tool to clear queue
 
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
@@ -17,33 +17,26 @@ from boto.exception import SQSError
 # --- Code ---
 
 def usage():
-    sys.stderr.write("Usage: queue_send.py [-v] -c cfgfile -f file\n")
+    sys.stderr.write("Usage: queue_clear.py [-v] -c cfgfile\n")
 
 def main():
       cfgfile = None
-      ifile = None
       verbose = False
       
       try:
-            opts, args = getopt.getopt(sys.argv[1:], "vc:f:", ["verbose", "cfgfile", "file"])
+            opts, args = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile"])
       except getopt.GetoptError:
             usage()
             sys.exit(2)
       for o, a in opts:
             if o in ("-c", "--cfgfile"):
                   cfgfile = a
-            if o in ("-f", "--file"):
-                  ifile = a
             if o in ("-v", "--verbose"):
                   verbose = True
 
-      if len(args) != 0 or cfgfile is None or ifile is None:
+      if len(args) != 0 or cfgfile is None:
             usage()
             sys.exit(2)
-
-      f=open(ifile)
-      msgtext=f.read()
-      f.close()
 
       cfg = ConfigParser()
       cfg.read(cfgfile)
@@ -52,10 +45,9 @@ def main():
       
       qname = cfg.get('queue','name')
       q = c.create_queue(qname)
-      m = Message()
-      m.set_body(msgtext)
-      rs = q.write(m)
-      print "Message sent"
+      print "Queue size: %d. Clearning..." % q.count()
+      q.clear()
+      print "Queue cleared."
 
 if __name__ == "__main__":
     main()
