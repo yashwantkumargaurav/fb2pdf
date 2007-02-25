@@ -73,10 +73,15 @@ def _textQuote(str, code=False):
     if len(str)==0:
         return str
     if not code:
-        # backslash itslef must be represented as \backslash
-        str = string.replace(str,'\\','\\backslash')
-        # special chars needs to be quoted with backslash
+        # backslash itself must be represented as \backslash
+        # (should go first to avoid escaping backslash in TeX commands
+        # produced further down this function)
+        str = string.replace(str,'\\','\\backslash\\,')
+        # special chars need to be quoted with backslash
+        # (should go after escaping backslash but before any of the
+        # other conversions that produce TeX commands that include {})
         str = re.sub(r'([\&\$\%\#\_\{\}])',r'\\\1',str)
+        
         # 'EN DASH' at the beginning of paragraph - russian direct speech
         if ord(str[0])==0x2013:
             str="\\cdash--*" + str[1:]
@@ -94,7 +99,11 @@ def _textQuote(str, code=False):
         str = re.sub(r'(\s)--(\s)','---',str)
         # preserve double quotes
         str = string.replace(str,'"','\\symbol{34}')
-
+        # Fancy quotation marks (sometimes used to denote a quote
+        # inside of another quote)
+        str = string.replace(str,u'\u201e','``')
+        str = string.replace(str,u'\u201c',"''")
+        
     return str
 
 def convXMLentities(s):
