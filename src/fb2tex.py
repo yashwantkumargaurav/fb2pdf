@@ -14,6 +14,7 @@ import sys
 import string
 import re
 import binascii
+import codecs
 
 from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString
 import Image
@@ -122,6 +123,14 @@ def _text(t):
             flogger.error("Unexpected element in _text: '%s'" % x)
     return string.join([convXMLentities(e) for e in  t.contents])
 
+def _escapeSpace(t):
+    return re.sub(r'([ ])+',r'\\ ', t)
+
+def _pdfString(t):
+    #TODO Make sure the string is a valid PDF string
+    # which means transliterating cyrillic characters?
+    return ""
+
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
 
@@ -211,9 +220,8 @@ def processPoem(p,f):
         title = getSectionTitle(t)
         if title and len(title):
             f.write("\\poemtitle{\\texorpdfstring{")
-            _uwrite(f,title)
-            #TODO latin transliteration?
-            f.write("}{}}\n")
+            _uwrite(f,_escapeSpace(title))
+            f.write("}{%s}}\n" % _pdfString(title))
 
     
     # epigraphs (multiple, optional)
@@ -289,9 +297,8 @@ def processCite(q,f):
                 f.write("\\vspace{10mm}\n\n")
             elif x.name == "subtitle":
                 f.write("\\subsection*{\\texorpdfstring{")
-                _uwrite(f,par(x))
-                #TODO latin transliteration?
-                f.write("}{}}\n\n")
+                _uwrite(f,_escapeSpace(par(x)))
+                f.write("}{%s}}\n\n" % _pdfString(x))
             elif x.name=="table":
                 flogger.warning("Unsupported element: %s" % x.name)
                 pass # TODO
@@ -310,9 +317,8 @@ def processSection(s, f):
         title = ""
 
     f.write("\n\\section{\\texorpdfstring{")
-    _uwrite(f,title) # TODO quote
-    #TODO latin transliteration for cyrillic section names?
-    f.write("}{}}\n\n");
+    _uwrite(f,_escapeSpace(title)) # TODO quote
+    f.write("}{%s}}\n\n" % _pdfString(title));
 
     processEpigraphs(s, f)
     
@@ -336,9 +342,8 @@ def processSection(s, f):
                 processPoem(x,f)
             elif x.name == "subtitle":
                 f.write("\\subsection{\\texorpdfstring{")
-                _uwrite(f,par(x))
-                #TODO latin transliteration?
-                f.write("}{}}\n")
+                _uwrite(f,_escapeSpace(par(x)))
+                f.write("}{%s}}\n" % _pdfString(x))
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name == "table":
@@ -362,9 +367,8 @@ def processAnnotation(f, an):
                     processPoem(x,f)
                 elif x.name == "subtitle":
                     f.write("\\subsection*{\\texorpdfstring{")
-                    _uwrite(f,par(x))
-                    #TODO latin transliteration?
-                    f.write("}{}}\n")
+                    _uwrite(f,_escapeSpace(par(x)))
+                    f.write("}{%s}}\n" % _pdfString(x))
                 elif x.name == "cite":
                     processCite(x,f)
                 elif x.name == "table":
@@ -492,9 +496,8 @@ def processDescription(desc,f):
 
     if title:
         f.write("\\title{\\texorpdfstring{")
-        _uwrite(f, title)
-        #TODO latin transliteration?
-        f.write("}{}}\n")
+        _uwrite(f, _escapeSpace(title))
+        f.write("}{%s}}\n" % _pdfString(title))
 
     f.write("\\date{}")
 
