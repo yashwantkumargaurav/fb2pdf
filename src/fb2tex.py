@@ -126,10 +126,11 @@ def _text(t):
 def _escapeSpace(t):
     return re.sub(r'([ ])+',r'\\ ', t)
 
-def _pdfString(t):
-    #TODO Make sure the string is a valid PDF string
-    # which means transliterating cyrillic characters?
-    return ""
+def _pdfString(p):
+    res = ''
+    for s in p:
+        res = res + _text(s)
+    return res.encode('utf-8', 'replace')
 
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
