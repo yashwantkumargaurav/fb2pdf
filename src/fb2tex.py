@@ -14,7 +14,6 @@ import sys
 import string
 import re
 import binascii
-import codecs
 
 from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString
 import Image
@@ -51,11 +50,9 @@ def par(p):
             elif s.name == "strikethrough":
                 res += u'\\sout{' + par(s) + u'}'
             elif s.name == "sub":
-                flogger.warning("Unsupported element: %s" % s.name)
-                res += "" #TODO
+                res += u'$_{\\textrm{' + par(s) + '}}$'
             elif s.name == "sup":
-                flogger.warning("Unsupported element: %s" % s.name)
-                res += "" #TODO
+                res += u'$^{\\textrm{' + par(s) + '}}$'
             elif s.name == "code":
                 res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
             elif s.name == "image":
