@@ -120,8 +120,9 @@ def main():
 def upload_file(bucket, key, filename):
     global cfg
     c = S3Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
-    b = c.create_bucket(bucket) 
+    b = c.create_bucket(bucket)
     k = Key(b)
+    k.set_acl('public-read')
     k.key = key
     k.set_contents_from_filename(filename,{'Content-Disposition':'attachement; filename=\"%s\"' % filename})
     #TODO close connection?

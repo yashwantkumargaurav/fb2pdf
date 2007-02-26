@@ -141,8 +141,10 @@ def _getdir(f):
     
 def fb2tex(infile, outfile, logfilename=None):
 
+    flogger.info("Converting %s to %s" % (infile,outfile))
+
     if logfilename:
-        initLog(logfilename, logging.ERROR)
+        initLog(logfilename, logging.DEBUG)
     flogger.info("Converting %s" % infile)
         
     f = open(infile, 'r')
@@ -203,6 +205,8 @@ def fb2tex(infile, outfile, logfilename=None):
     f.write("}")
     f.write("\n\\end{document}\n")
     f.close()
+
+    flogger.info("Conversion successfully finished")
 
 def processSections(b,f):
     ss = b.findAll("section", recursive=False)
