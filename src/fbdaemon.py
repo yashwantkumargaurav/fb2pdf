@@ -191,8 +191,10 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         upload_file(bucket, log_key, logfilename)
     finally:
         os.chdir(basedir)
-        pass
-        #TODO: os.remove(tmpdirname)
+        # remove temp files
+        for f in os.listdir(tmpdirname):
+            os.remove("tmpdirname/%s" % f)
+        os.rmdir(tmpdirname)
 
 def tex2pdf(texfilename, pdffilename):
     # TODO: specify location to style files
