@@ -133,7 +133,6 @@ class SQS
 	 * - [int] $visibilityTimeout (OPTIONAL): if not deleted after this time, the message will return to the queue
 	*/		
 	function putMessage($message, $queueId, $visibilityTimeout){
-		$message = "<?xml version='1.0' encoding='UTF-8'?>".$message;
 		$httpDate = date("D, j M Y G:i:s T");
 		$stringToSign = "PUT\n\ntext/plain\n$httpDate\n/$queueId/back";
 		$this->request =& new HTTP_Request($this->serviceUrl . "$queueId/back?VisibilityTimeout=$visibilityTimeout");

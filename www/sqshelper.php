@@ -13,7 +13,7 @@ if (!$sqs->createQueue($awsSQSQueue))
 $queueUrl = parseCreateQueueResponse($sqs->responseString);
 $queueUrl = str_replace("http://queue.amazonaws.com/","",$queueUrl);
 
-$message = "<fb2pdfjob version=\"2\">" . 
+$message = "<?xml version='1.0' encoding='UTF-8'?><fb2pdfjob version=\"2\">" . 
     "<source url=\"$url\" type=\"application/fb2+xml\" name=\"$name\"/>" .
     "<result key=\"$id.pdf\"/>" .
     "<log key=\"$id.txt\"/>" .
