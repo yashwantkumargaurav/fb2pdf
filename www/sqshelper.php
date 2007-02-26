@@ -19,7 +19,7 @@ $message = "<fb2pdfjob version=\"2\">" .
     "<log key=\"$id.txt\"/>" .
     "</fb2pdfjob>";
 
-if (!$sqs->putMessage($message, $queueUrl, $awsSQSTimeout))
+if (!$sqs->putMessage(base64_encode($message), $queueUrl, $awsSQSTimeout))
     return false;
 
 return true;
