@@ -91,7 +91,10 @@ def main():
         qname = cfg.get('queue','name')
         qtimeout = int(cfg.get('queue','timeout'))
         pdelay = int(cfg.get('queue','polling_delay'))
-        
+
+
+        logger.info("Starting")
+
         q = c.create_queue(qname)
         
         while True:
@@ -128,6 +131,7 @@ def upload_file(bucket, key, filename):
     #TODO close connection?
 
 def processMessage(m):
+    logger.debug("Received new task")
     msg = None
     try:
         msg = parseString(m.get_body())
@@ -172,24 +176,29 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
     try:
         os.chdir(tmpdirname)
         fbfilename = src_name + '.fb2'
-        logger.info("Downloading '%s' to file '%s'." % (src_url, fbfilename))
+        logger.debug("Downloading '%s' to file '%s'." % (src_url, fbfilename))
         urllib.urlretrieve(src_url, fbfilename)
         texfilename = src_name + '.tex'
         logfilename = src_name + '.txt'
         try:
+            logger.debug("Converting to TeX")
             fb2tex.fb2tex(fbfilename, texfilename, logfilename)
         except:
             # Conversion error, upload log
             upload_file(bucket, log_key, logfilename)
             raise
         pdffilename = src_name + '.pdf'
+        logger.debug("Converting to PDF")
         tex2pdf(texfilename, pdffilename)
         # all OK
         # upload PDF 
+        logger.debug("Uploading PDF to S3")
         upload_file(bucket, res_key, pdffilename)
         # upoad log (log should be uploaded AFTER PDF)
+        logger.debug("Uploading log to S3")
         upload_file(bucket, log_key, logfilename)
     finally:
+        logger.debug("Removing temp files")
         os.chdir(basedir)
         # remove temp files
         for f in os.listdir(tmpdirname):
