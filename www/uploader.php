@@ -14,10 +14,10 @@ if ($_POST['uploadtype'] == 'file')
     $fileName = $_FILES['fileupload']['name'];
     
     if (trim($fileName) == "")
-        die("Please, specify a file you would like to convert.");
+        die("Пожалуйста, укажите FB2 файл, который Вы бы хотели сконвертировать.");
         
     if (!is_uploaded_file($filePath)) 
-        die("Internal error. Unable to upload the file. Please, try again.");
+        die("Внутренняя ошибка системы. Невозможно загрузить файл. Пожалуйста, попробуйте ешё раз.");
 }
 else if ($_POST['uploadtype'] == 'url')
 {
@@ -27,12 +27,12 @@ else if ($_POST['uploadtype'] == 'url')
 
 // Check format
 if (!check_fb_format($filePath))
-    die($fileName . " does not exists or it is not a fb2 file. Please select a fb2 file and try again.");
+    die($fileName . " не существует или не является файлом в формате FB2. Пожалуйста, выберите FB2 файл и попробуйте ещё раз.");
 
 // Process file
 $key = process_file($filePath, $fileName);
 if ($key === false)
-    die("Unable to store file " . $fileName . " for further processing. Please try again.");
+    die("Невозможно сохранить файл " . $fileName . " для дальнейшей конвертации. Пожалуйста, попробуйте ешё раз.");
 
 // redirect to the status page
 $host = $_SERVER["HTTP_HOST"];

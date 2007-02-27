@@ -1,7 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-<title>FictionBook2 to PDF file converter</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Конвертор FictionBook2 в PDF для SonyReader</title>
 <script type="text/javascript">
 function toggleuploadmode(file) {
     if (file) {
@@ -15,7 +16,7 @@ function toggleuploadmode(file) {
 </script>
 </head>
 <body>
-<p>Please upload your FB2 file or specify URL:
+<p>Пожалуйста загрузите FB2 файл или укажите URL этого файла:
 <p>
 
 <form enctype="multipart/form-data" action="uploader.php" method="POST">
