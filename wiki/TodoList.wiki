@@ -3,15 +3,11 @@
 == Not yet implemented ==
 
   * 'table'
-  * PHP frontend
+  * ZIP file support in PHP frontend
+  * Web Design
   * multiple 'body' elements
   * 'image' elemnt support for external images referenced by URL
-
-== Buggy ==
-
-  * Using 'hyperref' to enable links from TOC to sections causing pdfopt crash.
 
 == Ideas ==
 
   * Convert images in unsupported formats using imagemagic
-  * Distributed conversion service using Amazon Simple Queue
