@@ -128,7 +128,7 @@ def upload_file(bucket, key, filename):
     k = Key(b)
     k.set_acl('public-read')
     k.key = key
-    k.set_contents_from_filename(filename,{'Content-Disposition':'attachement; filename=\"%s\"' % filename})
+    k.set_contents_from_filename(filename,{'Content-Disposition':'attachment; filename=\"%s\"' % filename})
     #TODO close connection?
 
 def processMessage(m):
@@ -142,7 +142,7 @@ def processMessage(m):
         
     root = msg.childNodes[0]
     if root.nodeName != 'fb2pdfjob':
-        raise ProcessError("Unknwon XML root element '%s'." % root.nodeName)
+        raise ProcessError("Unknown XML root element '%s'." % root.nodeName)
     v=root.getAttribute('version')
     if not v or int(v)!=MSG_FORMAT_VER: 
         raise ProcessError("Unsupported message format version '%s'." % v)
@@ -157,12 +157,12 @@ def processMessage(m):
 
     results=root.getElementsByTagName('result')
     if len(results)!=1:
-        raise ProcessError("Message must contain excactly one 'result' element")
+        raise ProcessError("Message must contain exactly one 'result' element")
     res_key = results[0].getAttribute('key')
 
     logs=root.getElementsByTagName('log')
     if len(logs)!=1:
-        raise ProcessError("Message must contain excactly one 'result' element")
+        raise ProcessError("Message must contain exactly one 'result' element")
     log_key = logs[0].getAttribute('key')
 
     processDocument(str(src_url), str(src_type), str(src_name), str(res_key), str(log_key))
@@ -214,11 +214,11 @@ def tex2pdf(texfilename, pdffilename):
     #TODO specify PDF output filename
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
     if rc:
-        raise "Execution of pdflatex filed with error code %d" % rc
+        raise "Execution of pdflatex failed with error code %d" % rc
     # Run again, to incorporate TOC
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
     if rc:
-        raise "Execution of pdflatex filed with error code %d" % rc
+        raise "Execution of pdflatex failed with error code %d" % rc
 
     
 if __name__ == "__main__":
