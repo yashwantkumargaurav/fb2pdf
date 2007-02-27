@@ -97,7 +97,7 @@ def main():
         pdelay = int(cfg.get('queue','polling_delay'))
 
         q = c.create_queue(qname)
-        
+
         while True:
             m = q.read(qtimeout)
             if m==None:
@@ -126,9 +126,9 @@ def upload_file(bucket, key, filename):
     c = S3Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
     b = c.create_bucket(bucket)
     k = Key(b)
-    k.set_acl('public-read')
     k.key = key
     k.set_contents_from_filename(filename,{'Content-Disposition':'attachment; filename=\"%s\"' % filename})
+    k.set_acl('public-read')
     #TODO close connection?
 
 def processMessage(m):
