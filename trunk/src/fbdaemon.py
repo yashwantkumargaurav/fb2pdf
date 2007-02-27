@@ -137,6 +137,7 @@ def processMessage(m):
     try:
         msg = parseString(m.get_body())
     except:
+        logger.exception("Error parsing message body")
         logger.debug(m.get_body())
         raise ProcessError("Could not parse the message.")
         
@@ -186,6 +187,7 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
             fb2tex.fb2tex(fbfilename, texfilename, logfilename)
         except:
             # Conversion error, upload log
+            logger.exception("Error converting to TeX")
             upload_file(bucket, log_key, logfilename)
             raise
         pdffilename = src_name + '.pdf'
