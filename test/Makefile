@@ -1,15 +1,16 @@
 # Makefile 
 
-all: $(alltex)
-	echo $(alltex)
-
 allfb := $(wildcard *.fb2)
 allpdf := $(patsubst %.fb2,%.pdf,$(wildcard *.fb2))
 alltex := $(patsubst %.fb2,%.tex,$(wildcard *.fb2))
 
+PDFLATEXFLAGS = -halt-on-error -interaction batchmode -no-shell-escape 
+
+all: $(allpdf)
+
 %.pdf: %.tex
-	pdflatex $<
-	pdflatex $<
+	pdflatex $(PDFLATEXFLAGS) $<
+	pdflatex $(PDFLATEXFLAGS) $<
 
 %.tex: %.fb2
 	../src/fb2tex.py -v -f $< -o $@
