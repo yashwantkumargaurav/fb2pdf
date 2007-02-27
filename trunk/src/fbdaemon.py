@@ -240,6 +240,8 @@ def tex2pdf(texfilename, pdffilename):
     # TODO: specify location to style files
     shutil.copyfile('../../test/verse.sty','./verse.sty')
     shutil.copyfile('../../test/epigraph.sty','./epigraph.sty')
+
+    logger.debug("Converting TeX to PDF")
     
     #TODO specify PDF output filename
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
@@ -249,6 +251,14 @@ def tex2pdf(texfilename, pdffilename):
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
     if rc:
         raise "Execution of pdflatex failed with error code %d" % rc
+
+    # Optimize pdf
+    logger.debug("Optimzing PDF")
+    tmptex=texfilename+".noopt"
+    os.rename(texfilename, tmptex)
+    rc = os.system("pdfopt %s %s > /dev/null" % (texfilename,tmptex))
+    if rc:
+        raise "Execution of pdfopt failed with error code %d" % rc
 
     
 if __name__ == "__main__":
