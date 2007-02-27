@@ -50,7 +50,8 @@ function process_file($filePath, $fileName)
 
     // get file content
     $data = file_get_contents($filePath);
-    $md5 = md5(data);
+    //$md5 = md5(data);
+    $md5 = md5(uniqid(""));
     
     // get the filename without extension
     $pathParts = pathinfo($fileName);
