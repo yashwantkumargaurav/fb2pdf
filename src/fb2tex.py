@@ -123,11 +123,14 @@ def _text(t):
 def _escapeSpace(t):
     return re.sub(r'([ ])+',r'\\ ', t)
 
-def _pdfString(p):
-    res = ''
-    for s in p:
-        res = res + _text(s)
-    return res.encode('utf-8', 'replace')
+def _pdfString(t):
+    if isinstance(t, basestring) or isinstance(t, unicode):
+        return convXMLentities(unicode(t.strip()))
+    else:
+        res = u''
+        for e in t:
+            res += _pdfString(e)
+        return res
 
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
@@ -164,7 +167,7 @@ def fb2tex(infile, outfile, logfilename=None):
         hypertexnames=false,
         plainpages=false,
         pdfpagelabels,
-        unicode
+        unicode=true
     ]{hyperref}
     \\usepackage[
         papersize={90.6mm,122.4mm},
@@ -222,7 +225,7 @@ def processPoem(p,f):
         if title and len(title):
             f.write("\\poemtitle{\\texorpdfstring{")
             _uwrite(f,_escapeSpace(title))
-            f.write("}{%s}}\n" % _pdfString(title))
+            _uwrite(f, "}{%s}}\n" % _pdfString(t))
 
     
     # epigraphs (multiple, optional)
@@ -299,7 +302,7 @@ def processCite(q,f):
             elif x.name == "subtitle":
                 f.write("\\subsection*{\\texorpdfstring{")
                 _uwrite(f,_escapeSpace(par(x)))
-                f.write("}{%s}}\n\n" % _pdfString(x))
+                _uwrite(f, "}{%s}}\n" % _pdfString(x))
             elif x.name=="table":
                 flogger.warning("Unsupported element: %s" % x.name)
                 pass # TODO
@@ -319,7 +322,7 @@ def processSection(s, f):
 
     f.write("\n\\section{\\texorpdfstring{")
     _uwrite(f,_escapeSpace(title)) # TODO quote
-    f.write("}{%s}}\n\n" % _pdfString(title));
+    _uwrite(f, "}{%s}}\n" % _pdfString(t))
 
     processEpigraphs(s, f)
     
@@ -344,7 +347,7 @@ def processSection(s, f):
             elif x.name == "subtitle":
                 f.write("\\subsection{\\texorpdfstring{")
                 _uwrite(f,_escapeSpace(par(x)))
-                f.write("}{%s}}\n" % _pdfString(x))
+                _uwrite(f, "}{%s}}\n" % _pdfString(x))
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name == "table":
@@ -369,7 +372,7 @@ def processAnnotation(f, an):
                 elif x.name == "subtitle":
                     f.write("\\subsection*{\\texorpdfstring{")
                     _uwrite(f,_escapeSpace(par(x)))
-                    f.write("}{%s}}\n" % _pdfString(x))
+                    _uwrite(f, "}{%s}}\n" % _pdfString(x))
                 elif x.name == "cite":
                     processCite(x,f)
                 elif x.name == "table":
@@ -498,7 +501,7 @@ def processDescription(desc,f):
     if title:
         f.write("\\title{\\texorpdfstring{")
         _uwrite(f, _escapeSpace(title))
-        f.write("}{%s}}\n" % _pdfString(title))
+        _uwrite(f, "}{%s}}\n" % _pdfString(title))
 
     f.write("\\date{}")
 
