@@ -22,12 +22,16 @@ from boto.sqs.message import Message
 from boto.exception import SQSError
 from boto.s3.key import Key
 
+from daemon import createDaemon
+
 import fb2tex
 
-MSG_FORMAT_VER=2
+_MSG_FORMAT_VER=2
 
 # --- Defaults ---
-logfile = 'fbdaemon.log'
+
+pidfile='/var/run/updater.pid'
+logfile = '/var/log/fbdaemon.log'
 log_verbosity = logging.INFO
 logger = None
 
@@ -40,17 +44,20 @@ class ProcessError:
         return self.message
         
 def usage():
-    sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-v]\n")
+    sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-p pidfile] [-v] [-d]\n")
 
 def parseCommandLineAndReadConfiguration():
     global logfile
     global log_verbosity
     
-    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile="])
+    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vdc:p:l:", ["verbose", "daemon", "cfgfile=", "pidfile=","logfile="])
 
     cfgfile = None
+    do_daemon = False
     
     for option, argument in optlist:
+        if option in ("-d", "--daemon"):
+            do_daemon = True
         if option in ("-v", "--verbose"):
             log_verbosity = logging.DEBUG
         elif option in ("-c", "--cfgfile"):
@@ -58,9 +65,24 @@ def parseCommandLineAndReadConfiguration():
                 cfgfile = argument
             else:
                 raise getopt.GetoptError("config file '%s' doesn't exist" % argument)
+        elif option in ("-p", "--pidfile"):
+            global pidfile
+            pidfile = argument
+        elif option in ("-l", "--logfile"):
+            global logfile
+            logfile = argument
                 
     if cfgfile is None:
         raise getopt.GetoptError("configuration file not specified")
+
+    if do_daemon:
+        # Detach
+        createDaemon()
+        
+        # write PID file
+        p = open(pidfile, "w")
+        p.write("%s\n" % os.getpid())
+        p.close()
 
     global cfg
     cfg = ConfigParser()
@@ -73,11 +95,12 @@ def parseCommandLineAndReadConfiguration():
     rotatingLog.setFormatter(log_formatter)
     logger=logging.getLogger('fbdaemon')
     logger.addHandler(rotatingLog)
-    
-    console = logging.StreamHandler()
-    formatter = logging.Formatter('[%(levelname)s] %(message)s')
-    console.setFormatter(formatter)
-    logger.addHandler(console)
+
+    if not do_daemon:
+        console = logging.StreamHandler()
+        formatter = logging.Formatter('[%(levelname)s] %(message)s')
+        console.setFormatter(formatter)
+        logger.addHandler(console)
 
     logger.setLevel(log_verbosity)
 
@@ -145,7 +168,7 @@ def processMessage(m):
     if root.nodeName != 'fb2pdfjob':
         raise ProcessError("Unknown XML root element '%s'." % root.nodeName)
     v=root.getAttribute('version')
-    if not v or int(v)!=MSG_FORMAT_VER: 
+    if not v or int(v)!=_MSG_FORMAT_VER: 
         raise ProcessError("Unsupported message format version '%s'." % v)
 
     srcs=root.getElementsByTagName('source')
