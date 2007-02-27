@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Конвертор FictionBook2 в PDF для SonyReader</title>
+<title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <script type="text/javascript">
 function toggleuploadmode(file) {
     if (file) {
@@ -16,6 +16,7 @@ function toggleuploadmode(file) {
 </script>
 </head>
 <body>
+<h4 align="center">Этот сервис предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://en.wikipedia.org/wiki/Sony_Reader">Sony Reader</a>.</h4>
 <p>Пожалуйста загрузите FB2 файл или укажите URL этого файла:
 <p>
 
@@ -34,5 +35,9 @@ function toggleuploadmode(file) {
  
 <input type="submit" value="Upload File" />
 </form>
+
+<p>Обнаружили ошибку? У Вас есть предложения по улучшению сервиса? Хотите оставить комментарий?
+<br>Это можно сделать <a href="http://groups.google.com/group/fb2pdf-users/about?hl=ru">здесь</a>
+
 </body>
  
