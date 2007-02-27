@@ -28,8 +28,8 @@ MSG_FORMAT_VER=2
 
 # --- Defaults ---
 logfile = 'fbdaemon.log'
-verbosity = logging.NOTSET
-log_verbosity = logging.DEBUG
+log_verbosity = logging.INFO
+logger = None
 
 # --- Code ---
 class ProcessError:
@@ -44,7 +44,6 @@ def usage():
 
 def parseCommandLineAndReadConfiguration():
     global logfile
-    global verbosity
     global log_verbosity
     
     (optlist, arglist) = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile="])
@@ -53,7 +52,7 @@ def parseCommandLineAndReadConfiguration():
     
     for option, argument in optlist:
         if option in ("-v", "--verbose"):
-            verbosity = logging.DEBUG
+            log_verbosity = logging.DEBUG
         elif option in ("-c", "--cfgfile"):
             if os.path.isfile(argument):
                 cfgfile = argument
@@ -70,30 +69,32 @@ def parseCommandLineAndReadConfiguration():
     # rotate logs on daily basis
     global logger
     rotatingLog = logging.handlers.TimedRotatingFileHandler(logfile, "D", 1, backupCount=5)
-    rotatingLog.setLevel(log_verbosity)
     log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
     rotatingLog.setFormatter(log_formatter)
     logger=logging.getLogger('fbdaemon')
     logger.addHandler(rotatingLog)
     
     console = logging.StreamHandler()
-    console.setLevel(verbosity)
     formatter = logging.Formatter('[%(levelname)s] %(message)s')
     console.setFormatter(formatter)
     logger.addHandler(console)
 
+    logger.setLevel(log_verbosity)
+
+
 def main():
     try:
         global cfg
+        global logger
         parseCommandLineAndReadConfiguration()
+
+        logger.info("Starting")
+            
         c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
         
         qname = cfg.get('queue','name')
         qtimeout = int(cfg.get('queue','timeout'))
         pdelay = int(cfg.get('queue','polling_delay'))
-
-
-        logger.info("Starting")
 
         q = c.create_queue(qname)
         
@@ -202,7 +203,7 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         os.chdir(basedir)
         # remove temp files
         for f in os.listdir(tmpdirname):
-            os.remove("tmpdirname/%s" % f)
+            os.remove("%s/%s" % (tmpdirname,f))
         os.rmdir(tmpdirname)
 
 def tex2pdf(texfilename, pdffilename):
