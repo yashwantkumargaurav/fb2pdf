@@ -8,7 +8,7 @@ Author: Vadim Zaliva <lord@crocodile.org>
 
 import getopt
 import logging, logging.handlers
-import sys, os, shutil
+import sys, os, os.path, shutil
 import string, time
 import urllib
 import traceback
@@ -78,6 +78,11 @@ def parseCommandLineAndReadConfiguration():
     if do_daemon:
         # Detach
         createDaemon()
+
+        # change process name, important for init.d script on Linux
+        if os.path.exists('/lib/libc.so.6'):
+            libc = dl.open('/lib/libc.so.6')
+            libc.call('prctl', 15, 'updater', 0, 0, 0)
         
         # write PID file
         p = open(pidfile, "w")
