@@ -141,10 +141,9 @@ def _getdir(f):
     
 def fb2tex(infile, outfile, logfilename=None):
 
-    flogger.info("Converting %s to %s" % (infile,outfile))
-
     if logfilename:
         initLog(logfilename, logging.DEBUG)
+
     flogger.info("Converting %s" % infile)
         
     f = open(infile, 'r')
