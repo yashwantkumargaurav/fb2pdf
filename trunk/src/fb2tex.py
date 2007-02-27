@@ -93,6 +93,8 @@ def _textQuote(str, code=False):
         str = string.replace(str,u'\u00ab','<<')
         # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
         str = string.replace(str,u'\u00bb','>>') # replacing with french/russian equivalent
+        # EN-DASH
+        str = string.replace(str,u'\u2013','--')
         # EM-DASH
         str = re.sub(r'(\s)--(\s)','---',str)
         # preserve double quotes
@@ -101,6 +103,8 @@ def _textQuote(str, code=False):
         # inside of another quote)
         str = string.replace(str,u'\u201e','``')
         str = string.replace(str,u'\u201c',"''")
+        # [number]
+        str = re.sub(r'\[([0-9]+)\]', r'\\string[\1\\string]', str)
         
     return str
 
@@ -124,13 +128,15 @@ def _escapeSpace(t):
     return re.sub(r'([ ])+',r'\\ ', t)
 
 def _pdfString(t):
-    if isinstance(t, basestring) or isinstance(t, unicode):
-        return convXMLentities(unicode(t.strip()))
-    else:
-        res = u''
+    if isinstance(t, Tag):
+        res = []
         for e in t:
-            res += _pdfString(e)
-        return res
+            res.append(_pdfString(e))
+        return " ".join(res)
+    elif isinstance(t, basestring) or isinstance(t, unicode):
+        return convXMLentities(t.strip())
+        
+    return u''
 
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
@@ -269,7 +275,7 @@ def processStanza(s, f):
     for v in vv:
         vt = par(v)
         _uwrite(f,vt)
-        f.write(" \\\\\n")
+        f.write("\\\\\n")
 
 
 def processAuthors(q,f):
@@ -298,7 +304,7 @@ def processCite(q,f):
             elif x.name=="poem":
                 processPoem(x,f)
             elif x.name=="empty-line":
-                f.write("\\vspace{10mm}\n\n")
+                f.write("\\vspace{12pt}\n\n")
             elif x.name == "subtitle":
                 f.write("\\subsection*{\\texorpdfstring{")
                 _uwrite(f,_escapeSpace(par(x)))
@@ -339,7 +345,7 @@ def processSection(s, f):
                 _uwrite(f,par(x))
                 f.write("\n\n")
             elif x.name == "empty-line":
-                f.write("\\vspace{10mm}\n\n")
+                f.write("\\vspace{12pt}\n\n")
             elif x.name == "image":
                 f.write(processInlineImage(x))
             elif x.name == "poem":
@@ -396,8 +402,7 @@ def getSectionTitle(t):
                     first = False
                 res = res + par(x)
             elif x.name == "empty-line":
-                if not first:
-                    res = res + u"\\\\"
+                res = res + u"\\vspace{10pt}"
             else:
                 flogger.error("Unknown section title element: %s" % x.name)
     return res
@@ -416,9 +421,7 @@ def processEpigraphText(f,e):
                     first = False
                 _uwrite(f,par(x))
             elif x.name == "empty-line":
-                if not first and i!=len(e.contents):
-                    # not first, not last
-                    f.write("\\\\")
+                f.write("\\vspace{10pt}")
             elif x.name == "poem":
                 # TODO: test how verse plays with epigraph evn.
                 processPoem(x,f)
