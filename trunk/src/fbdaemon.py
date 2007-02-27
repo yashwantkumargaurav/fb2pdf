@@ -95,7 +95,7 @@ def parseCommandLineAndReadConfiguration():
     
     # rotate logs on daily basis
     global logger
-    rotatingLog = logging.handlers.TimedRotatingFileHandler(logfile, "D", 1, backupCount=5)
+    rotatingLog = logging.handlers.FileHandler(logfile)
     log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
     rotatingLog.setFormatter(log_formatter)
     logger=logging.getLogger('fbdaemon')
