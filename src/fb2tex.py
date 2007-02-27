@@ -578,23 +578,23 @@ def initLog(logfilename, log_verbosity):
     hdlr = logging.FileHandler(logfilename)
     formatter = logging.Formatter('%(asctime)s [%(process)d.%(thread)d] %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
-    hdlr.setLevel(log_verbosity)
     
     global flogger
     flogger = logging.getLogger('fb2tex')
-    flogger.addHandler(hdlr) 
+    flogger.addHandler(hdlr)
+    flogger.setLevel(log_verbosity)
+
 
 def parseCommandLine():
     infile = None
     outfile = None
 
-    verbosity = logging.ERROR
-    log_verbosity = logging.DEBUG
+    log_verbosity = logging.INFO
     
     (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file=", "output="])
     for option, argument in optlist:
         if option in ("-v", "--verbose"):
-            verbosity = logging.DEBUG
+            log_verbosity = logging.DEBUG
         elif option in ("-f", "--file"):
             if os.path.isfile(argument):
                 infile = argument
@@ -613,7 +613,6 @@ def parseCommandLine():
 
     # console log
     console = logging.StreamHandler()
-    console.setLevel(verbosity)
     formatter = logging.Formatter('[%(levelname)s] %(message)s')
     console.setFormatter(formatter)
     flogger.addHandler(console)
