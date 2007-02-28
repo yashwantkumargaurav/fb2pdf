@@ -256,7 +256,7 @@ def tex2pdf(texfilename, pdffilename):
     logger.debug("Optimzing PDF")
     tmptex=texfilename+".noopt"
     os.rename(texfilename, tmptex)
-    rc = os.system("pdfopt %s %s > /dev/null" % (texfilename,tmptex))
+    rc = os.system("pdfopt %s %s > /dev/null" % (tmptex,texfilename))
     if rc:
         raise "Execution of pdfopt failed with error code %d" % rc
 
