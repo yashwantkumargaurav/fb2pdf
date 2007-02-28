@@ -10,5 +10,5 @@ setup(name='fb2pdf',
       url='http://code.google.com/p/fb2pdf/',
       packages=['fb2pdf'],
       package_dir={'fb2pdf': 'src/fb2pdf'},
-      package_data={'fb2pdf': ['src/TeX/*.sty']},
+      data_files=[('share/texmf-local/', ['src/TeX/verse.sty', 'src/TeX/epigraph.sty'])]
      )
