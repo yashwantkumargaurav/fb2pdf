@@ -9,6 +9,6 @@ setup(name='fb2pdf',
       author_email='lord@crocodile.org',
       url='http://code.google.com/p/fb2pdf/',
       packages=['fb2pdf'],
-      package_dir={'fb2pd': 'src/fb2pdf'},
+      package_dir={'fb2pdf': 'src/fb2pdf'},
       package_data={'fb2pdf': ['src/TeX/*.sty']},
      )
