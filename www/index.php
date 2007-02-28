@@ -67,10 +67,10 @@ function showForm()
  </div>
  
  <div id="upurl" style="display: none">
- <input type="text" id="fileupload" value="type url here" name="url" size="30"/>
+ <input type="text" id="fileupload" value="наберите URL здесь" name="url" size="30"/>
  </div>
  
-<input type="button" onclick="doUpload()" value="Upload File" />
+<input type="button" onclick="doUpload()" value="Конвертировать" />
 </form>
 
 <p>Обнаружили ошибку? У Вас есть предложения по улучшению сервиса? Хотите оставить комментарий?
@@ -81,6 +81,9 @@ function showForm()
 <div id="progress" style="display:none;text-align:center">
     <img id="pimage" src="images/progress.gif"/>
 </div>
+
+<hr WIDTH="100%">
+<a href="http://www.crocodile.org/"><img src="http://www.crocodile.org/noir.png"></a> 
 
 </body>
  
