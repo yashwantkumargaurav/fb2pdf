@@ -237,9 +237,7 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         os.rmdir(tmpdirname)
 
 def tex2pdf(texfilename, pdffilename):
-    # TODO: specify location to style files
-    shutil.copyfile('../../test/verse.sty','./verse.sty')
-    shutil.copyfile('../../test/epigraph.sty','./epigraph.sty')
+    # Style files located ${sys_prefix}/share/texmf-local/
 
     logger.debug("Converting TeX to PDF")
     
