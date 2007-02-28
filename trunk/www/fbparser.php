@@ -4,13 +4,13 @@ $rootElementFound = FALSE;
 
 // Check fb format
 // Returns TRUE or FALSE
-function check_fb_format($file)
+function check_fb_format($fbfile)
 {
     global $rootElementFound;
     
     // Read the data from file
     $data = NULL;
-    $fp=fopen($file,"r");
+    $fp=fopen($fbfile,"r");
     if ($fp)
     {
         $data=fread($fp,1024);
