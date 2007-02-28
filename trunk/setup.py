@@ -10,6 +10,6 @@ setup(name='fb2pdf',
       url='http://code.google.com/p/fb2pdf/',
       packages=['fb2pdf'],
       package_dir={'fb2pdf': 'src/fb2pdf'},
-      scripts=['scripts/fb2pdf_queue_send','scripts/fb2pdf_queue_clear','scripts/fb2pdf_queue_receive','scripts/fbdaemon'],
+      scripts=['scripts/fb2pdf_queue_send','scripts/fb2pdf_queue_clear','scripts/fb2pdf_queue_receive','scripts/fbdaemon','scripts/fb2tex'],
       data_files=[('share/texmf-local/', ['src/TeX/verse.sty', 'src/TeX/epigraph.sty'])]
      )
