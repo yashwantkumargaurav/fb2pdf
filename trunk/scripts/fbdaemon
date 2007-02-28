@@ -21,8 +21,8 @@ from boto.exception import SQSError
 
 from fb2pdf.daemon import createDaemon
 
-from fb2tex import fb2tex
-from fb2tex import tex2pdf
+from fb2pdf import fb2tex
+from fb2pdf import tex2pdf
 
 # --- Defaults ---
 
@@ -33,7 +33,7 @@ logger = None
 
 # --- Code ---
 def usage():
-    sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-p pidfile] [-v] [-d]\n")
+    sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-p pidfile] [-l logfile] [-v] [-d]\n")
 
 def parseCommandLineAndReadConfiguration():
     global logfile
