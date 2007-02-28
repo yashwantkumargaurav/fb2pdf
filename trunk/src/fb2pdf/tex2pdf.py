@@ -6,23 +6,14 @@ FictionBook2 -> TeX converter daemon
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
-import getopt
-import logging, logging.handlers
 import sys, os, os.path, shutil
 import string, time
 import urllib
-import traceback
 
 from xml.dom.minidom import parse, parseString
-from ConfigParser import ConfigParser
 
-from boto.connection import SQSConnection
 from boto.connection import S3Connection
-from boto.sqs.message import Message
-from boto.exception import SQSError
 from boto.s3.key import Key
-
-from daemon import createDaemon
 
 import fb2tex
 
@@ -30,10 +21,7 @@ _MSG_FORMAT_VER=2
 
 # --- Defaults ---
 
-pidfile='/var/run/updater.pid'
-logfile = '/var/log/fbdaemon.log'
-log_verbosity = logging.INFO
-logger = None
+global logger
 
 # --- Code ---
 class ProcessError:
@@ -43,112 +31,6 @@ class ProcessError:
     def __str__(self):
         return self.message
         
-def usage():
-    sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-p pidfile] [-v] [-d]\n")
-
-def parseCommandLineAndReadConfiguration():
-    global logfile
-    global log_verbosity
-    
-    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vdc:p:l:", ["verbose", "daemon", "cfgfile=", "pidfile=","logfile="])
-
-    cfgfile = None
-    do_daemon = False
-    
-    for option, argument in optlist:
-        if option in ("-d", "--daemon"):
-            do_daemon = True
-        if option in ("-v", "--verbose"):
-            log_verbosity = logging.DEBUG
-        elif option in ("-c", "--cfgfile"):
-            if os.path.isfile(argument):
-                cfgfile = argument
-            else:
-                raise getopt.GetoptError("config file '%s' doesn't exist" % argument)
-        elif option in ("-p", "--pidfile"):
-            global pidfile
-            pidfile = argument
-        elif option in ("-l", "--logfile"):
-            global logfile
-            logfile = argument
-                
-    if cfgfile is None:
-        raise getopt.GetoptError("configuration file not specified")
-
-    if do_daemon:
-        # Detach
-        createDaemon()
-
-        # change process name, important for init.d script on Linux
-        if os.path.exists('/lib/libc.so.6'):
-            libc = dl.open('/lib/libc.so.6')
-            libc.call('prctl', 15, 'updater', 0, 0, 0)
-        
-        # write PID file
-        p = open(pidfile, "w")
-        p.write("%s\n" % os.getpid())
-        p.close()
-
-    global cfg
-    cfg = ConfigParser()
-    cfg.read(cfgfile)
-    
-    # rotate logs on daily basis
-    global logger
-    rotatingLog = logging.FileHandler(logfile)
-    log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
-    rotatingLog.setFormatter(log_formatter)
-    logger=logging.getLogger('fbdaemon')
-    logger.addHandler(rotatingLog)
-
-    if not do_daemon:
-        console = logging.StreamHandler()
-        formatter = logging.Formatter('[%(levelname)s] %(message)s')
-        console.setFormatter(formatter)
-        logger.addHandler(console)
-
-    logger.setLevel(log_verbosity)
-
-
-def main():
-    try:
-        global cfg
-        global logger
-        parseCommandLineAndReadConfiguration()
-
-        logger.info("Starting")
-            
-        c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
-        
-        qname = cfg.get('queue','name')
-        qtimeout = int(cfg.get('queue','timeout'))
-        pdelay = int(cfg.get('queue','polling_delay'))
-
-        q = c.create_queue(qname)
-
-        while True:
-            m = q.read(qtimeout)
-            if m==None:
-                time.sleep(pdelay)
-            else:
-                try:
-                    processMessage(m)
-                    q.delete_message(m)
-                except ProcessError, msg:
-                    logger.exception(msg)
-                    
-    except getopt.GetoptError, msg:
-        if len(sys.argv[1:]) > 0:
-            print >>sys.stderr, "Error: %s\n" % msg
-        else:
-            usage()
-        return 2
-        
-    except:
-        info = sys.exc_info()
-        traceback.print_exc()
-        return 3
-
 def upload_file(bucket, key, filename):
     global cfg
     c = S3Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
@@ -258,6 +140,3 @@ def tex2pdf(texfilename, pdffilename):
     if rc:
         raise "Execution of pdfopt failed with error code %d" % rc
 
-    
-if __name__ == "__main__":
-    sys.exit(main())
