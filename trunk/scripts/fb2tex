@@ -15,7 +15,9 @@ import string
 
 from fb2pdf import fb2tex
 
+# --- globals --
 logfile = 'fb2tex.log'
+flogger = None
 
 def usage():
     sys.stderr.write("Usage: fb2tex.py [-v] -f fb2file -o texfile\n")
@@ -33,7 +35,7 @@ def initLog(logfilename, log_verbosity):
 def parseCommandLine():
     infile = None
     outfile = None
-
+    
     log_verbosity = logging.INFO
     
     (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file=", "output="])
@@ -52,10 +54,10 @@ def parseCommandLine():
         raise getopt.GetoptError("input file not specified")
     if outfile == None:
         raise getopt.GetoptError("output file not specified")
-
+        
     # file log
     initLog(logfile, log_verbosity)
-
+    
     # console log
     console = logging.StreamHandler()
     formatter = logging.Formatter('[%(levelname)s] %(message)s')

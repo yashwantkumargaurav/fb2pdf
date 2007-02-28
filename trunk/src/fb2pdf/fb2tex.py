@@ -22,7 +22,6 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 # --- globals --
 global flogger
 enclosures = {}
-logfile = 'fb2tex.log'
 
 def par(p):
     res = u''
@@ -150,12 +149,11 @@ def _getdir(f):
         return "."
     
 def fb2tex(infile, outfile, logfilename=None):
-
     if logfilename:
         initLog(logfilename, logging.DEBUG)
-
+    flogger = logging.getLogger('fb2tex')
     flogger.info("Converting %s" % infile)
-        
+    
     f = open(infile, 'r')
     soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
     f.close()
