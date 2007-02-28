@@ -13,7 +13,7 @@ all: $(allpdf)
 	pdflatex $(PDFLATEXFLAGS) $<
 
 %.tex: %.fb2
-	../src/fb2tex.py -v -f $< -o $@
+	fb2tex -v -f $< -o $@
 
 clean:
 	rm -f *.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex
