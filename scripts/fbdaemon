@@ -238,6 +238,8 @@ def main():
                     q.delete_message(m)
                 except ProcessError, msg:
                     logging.getLogger('fbdaemon').exception(msg)
+                except:
+                    logging.getLogger('fbdaemon').exception('Unknown Processing Error')
                     
     except getopt.GetoptError, msg:
         if len(sys.argv[1:]) > 0:
