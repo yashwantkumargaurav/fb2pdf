@@ -29,7 +29,6 @@ from fb2pdf import tex2pdf
 pidfile='/var/run/updater.pid'
 logfile = '/var/log/fbdaemon.log'
 log_verbosity = logging.INFO
-logger = None
 
 # --- Code ---
 def usage():
@@ -83,7 +82,6 @@ def parseCommandLineAndReadConfiguration():
     cfg.read(cfgfile)
     
     # rotate logs on daily basis
-    global logger
     rotatingLog = logging.FileHandler(logfile)
     log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
     rotatingLog.setFormatter(log_formatter)
@@ -102,10 +100,9 @@ def parseCommandLineAndReadConfiguration():
 def main():
     try:
         global cfg
-        global logger
         parseCommandLineAndReadConfiguration()
 
-        logger.info("Starting")
+        logging.getLogger('fbdaemon').info("Starting")
             
         c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
         
@@ -124,7 +121,7 @@ def main():
                     processMessage(m)
                     q.delete_message(m)
                 except ProcessError, msg:
-                    logger.exception(msg)
+                    logging.getLogger('fbdaemon').exception(msg)
                     
     except getopt.GetoptError, msg:
         if len(sys.argv[1:]) > 0:
