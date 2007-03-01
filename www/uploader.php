@@ -5,7 +5,7 @@ require_once 'awscfg.php';
 require_once 's3.php';
 require_once 'sqshelper.php';
 
-$testMode = true; // set to false for production
+$testMode = false; // set to false for production
 
 $filePath = NULL;
 $fileName = NULL;
