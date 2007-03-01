@@ -195,6 +195,9 @@ def fb2tex(infile, outfile):
     f.write("\n\\begin{document}\n\n")
     f.write("{\\fontfamily{cmss}\\selectfont\n")
     fb = soup.find("fictionbook")
+    if not fb:
+        logging.getLogger('fb2tex').exception("The file does not seems to contain 'fictionbook' root element")
+        raise Exception("The file does not seems to contain 'fictionbook' root element")
     
     findEnclosures(fb,outdir)
     processDescription(fb.find("description"), f)
