@@ -5,7 +5,7 @@ require_once 'awscfg.php';
 require_once 's3.php';
 require_once 'sqshelper.php';
 
-$testMode = false; // set to false for production
+$testMode = true; // set to false for production
 
 $filePath = NULL;
 $fileName = NULL;
@@ -73,9 +73,7 @@ function process_file($filePath, $fileName)
 {
     global $awsApiKey, $awsApiSecretKey, $awsS3Bucket, $testMode;
 
-    // get file content
-    $data = file_get_contents($filePath);
-    //$md5 = md5(data);
+    // genarate key
     $md5 = md5(uniqid(""));
     
     // get the filename without extension
@@ -93,7 +91,7 @@ function process_file($filePath, $fileName)
         // create an object to store source file
         $s3 = new S3($awsApiKey, $awsApiSecretKey);
 
-        if (!$s3->writeObject($awsS3Bucket, $md5 . ".fb2", $data, "application/fb2+xml", "public-read", "", $httpHeaders))
+        if (!$s3->writeObject($awsS3Bucket, $md5 . ".fb2", $filePath, "application/fb2+xml", "public-read", "", $httpHeaders))
         {
             error_log("FB2PDF ERROR. Unable to store file with key <$md5> in the Amazon S3 storage."); 
             return false;

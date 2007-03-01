@@ -59,6 +59,35 @@ class S3
         return ($this->responseCode == 200) ? true : false;
     }
     
+  	// Writes a file
+    function writeFile($bucket, $object, $filename, $contentType, $acl, $metadata = NULL, $extraHttpHeaders = NULL)
+    {
+        // check file
+        $fp = fopen ($filename, "r");
+        if (!$fp)
+            return false;
+        
+        $resource = $bucket . "/" . $object;
+        
+        $this->request =& new HTTP_Request($this->serviceUrl . $resource);
+		$this->initRequest("PUT", $resource, $contentType, $acl, $metadata, $extraHttpHeaders);
+        
+        // read data from file
+        while (!feof($fp))
+        {
+            $data = fread($fp, 8192);
+            if (!$this->request->_body)
+                $this->request->_body = $data;
+            else
+                $this->request->_body .= $data;
+        }
+        fclose ($fp);
+        
+        $this->request->sendRequest();
+        $this->gotResponse();
+        return ($this->responseCode == 200) ? true : false;
+    }
+    
   	// Object exists
     function objectExists($bucket, $object)
     {
