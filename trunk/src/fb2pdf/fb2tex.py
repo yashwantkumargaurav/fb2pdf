@@ -20,7 +20,6 @@ import Image
 image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
 # --- globals --
-global flogger
 enclosures = {}
 
 def par(p):
@@ -32,7 +31,7 @@ def par(p):
             elif s.name == "emphasis":
                 res += u'{\\it '+ par(s) + u'}'
             elif s.name == "style":
-                flogger.warning("Unsupported element: %s" % s.name)
+                logging.getLogger('fb2tex').warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "a":
                 href=s.get('l:href')
@@ -43,7 +42,7 @@ def par(p):
                         res += '\\href{' + href + '}{\\underline{' + _textQuote(_text(s)) + '}}'
                 else:
                     print s
-                    flogger.warning("'a' without 'href'")
+                    logging.getLogger('fb2tex').warning("'a' without 'href'")
                 res += "" #TODO
             elif s.name == "strikethrough":
                 res += u'\\sout{' + par(s) + u'}'
@@ -56,10 +55,10 @@ def par(p):
             elif s.name == "image":
                 res += processInlineImage(s)
             elif s.name == "l":
-                flogger.warning("Unsupported element: %s" % s.name)
+                logging.getLogger('fb2tex').warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             else:
-                flogger.error("Unknown paragrpah element: %s" % s.name)
+                logging.getLogger('fb2tex').error("Unknown paragrpah element: %s" % s.name)
         elif isinstance(s, basestring) or isinstance(s, unicode):
             res += _textQuote(_text(s))
     return res            
@@ -121,7 +120,7 @@ def _text(t):
     # Temporary check. TODO: remove
     for x in t.contents:
         if not isinstance(x, basestring) and not isinstance(x, unicode):
-            flogger.error("Unexpected element in _text: '%s'" % x)
+            logging.getLogger('fb2tex').error("Unexpected element in _text: '%s'" % x)
     return string.join([convXMLentities(e) for e in  t.contents])
 
 def _escapeSpace(t):
@@ -148,11 +147,8 @@ def _getdir(f):
     else:
         return "."
     
-def fb2tex(infile, outfile, logfilename=None):
-    if logfilename:
-        initLog(logfilename, logging.DEBUG)
-    flogger = logging.getLogger('fb2tex')
-    flogger.info("Converting %s" % infile)
+def fb2tex(infile, outfile):
+    logging.getLogger('fb2tex').info("Converting %s" % infile)
     
     f = open(infile, 'r')
     soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
@@ -213,7 +209,7 @@ def fb2tex(infile, outfile, logfilename=None):
     f.write("\n\\end{document}\n")
     f.close()
 
-    flogger.info("Conversion successfully finished")
+    logging.getLogger('fb2tex').info("Conversion successfully finished")
 
 def processSections(b,f):
     ss = b.findAll("section", recursive=False)
@@ -247,7 +243,7 @@ def processPoem(p,f):
     d = p.find("date", recursive=False)
     if d:
         pdate = _text(d)
-        flogger.warning("Unsupported element: date")
+        logging.getLogger('fb2tex').warning("Unsupported element: date")
         #TODO find a nice way to print date
         
     f.write('\\end{verse}\n\n')
@@ -259,7 +255,7 @@ def processStanza(s, f):
         title = getSectionTitle(t)
         if title and len(title):
             # TODO: implement
-            flogger.warning("Unsupported element: stanza 'title'")
+            logging.getLogger('fb2tex').warning("Unsupported element: stanza 'title'")
     
     # subtitle (optional)
     st = s.find("subtitle", recursive=False)
@@ -267,7 +263,7 @@ def processStanza(s, f):
         subtitle = getSectionTitle(st)
         if subtitle and len(subtitle):
             # TODO: implement
-            flogger.warning("Unsupported element: stanza 'subtitle'")
+            logging.getLogger('fb2tex').warning("Unsupported element: stanza 'subtitle'")
 
     # 'v' - multiple    
     vv = s.findAll("v", recursive=False)
@@ -309,7 +305,7 @@ def processCite(q,f):
                 _uwrite(f,_escapeSpace(par(x)))
                 _uwrite(f, "}{%s}}\n" % _pdfString(x))
             elif x.name=="table":
-                flogger.warning("Unsupported element: %s" % x.name)
+                logging.getLogger('fb2tex').warning("Unsupported element: %s" % x.name)
                 pass # TODO
         elif isinstance(x, basestring) or isinstance(x, unicode):
             _uwrite(f,_textQuote(_text(x)))
@@ -356,10 +352,10 @@ def processSection(s, f):
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name == "table":
-                flogger.warning("Unsupported element: %s" % x.name)
+                logging.getLogger('fb2tex').warning("Unsupported element: %s" % x.name)
                 pass # TODO
             elif x.name!="title" and x.name!="epigraph":
-                flogger.error("Unknown section element: %s" % x.name)
+                logging.getLogger('fb2tex').error("Unknown section element: %s" % x.name)
 
 def processAnnotation(f, an):
     if len(an):
@@ -381,10 +377,10 @@ def processAnnotation(f, an):
                 elif x.name == "cite":
                     processCite(x,f)
                 elif x.name == "table":
-                    flogger.warning("Unsupported element: %s" % x.name)
+                    logging.getLogger('fb2tex').warning("Unsupported element: %s" % x.name)
                     pass # TODO
                 else:
-                    flogger.error("Unknown annotation element: %s" % x.name)
+                    logging.getLogger('fb2tex').error("Unknown annotation element: %s" % x.name)
         f.write('\\end{small}\n')
         f.write('\\pagebreak\n\n')
 
@@ -403,7 +399,7 @@ def getSectionTitle(t):
             elif x.name == "empty-line":
                 res = res + u"\\vspace{10pt}"
             else:
-                flogger.error("Unknown section title element: %s" % x.name)
+                logging.getLogger('fb2tex').error("Unknown section title element: %s" % x.name)
     return res
 
 def processEpigraphText(f,e):
@@ -427,7 +423,7 @@ def processEpigraphText(f,e):
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name != "text-author":
-                flogger.error("Unknown epigraph element: %s" % x.name)
+                logging.getLogger('fb2tex').error("Unknown epigraph element: %s" % x.name)
         
 def processEpigraphs(s,f):
     ep = s.findAll("epigraph", recursive=False)
@@ -472,13 +468,13 @@ def authorName(a):
 
 def processDescription(desc,f):
     if not desc:
-        flogger.warning("Missing required 'description' element\n")
+        logging.getLogger('fb2tex').warning("Missing required 'description' element\n")
         return
     
     # title info, mandatory element
     ti = desc.find("title-info")
     if not ti:
-        flogger.warning("Missing required 'title-info' element\n")
+        logging.getLogger('fb2tex').warning("Missing required 'title-info' element\n")
         return 
     t = ti.find("book-title")
     if t:
@@ -549,7 +545,7 @@ def findEnclosures(fb,outdir):
         ct=e['content-type']
         global image_exts
         if not image_exts.has_key(ct):
-            flogger.warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
+            logging.getLogger('fb2tex').warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
             continue
         fname = os.tempnam(".", "enc") + "." + image_exts[ct]
         fullfname = outdir + "/" + fname
@@ -566,11 +562,11 @@ def processInlineImage(image):
         global enclosures
         href = image.get('l:href')
         if not href or href[0]!='#':
-            flogger.error("Invalid inline image ref '%s'\n" % href)
+            logging.getLogger('fb2tex').error("Invalid inline image ref '%s'\n" % href)
             return ""
         href=str(href[1:])
         if not enclosures.has_key(href):
-            flogger.error("Non-existing image ref '%s'\n" % href)
+            logging.getLogger('fb2tex').error("Non-existing image ref '%s'\n" % href)
             return ""
         (ct,fname)=enclosures[href]
         return "\\begin{center}\n\\includegraphics{%s}\n\\end{center}\n" % fname

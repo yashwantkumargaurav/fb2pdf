@@ -17,7 +17,6 @@ from fb2pdf import fb2tex
 
 # --- globals --
 logfile = 'fb2tex.log'
-flogger = None
 
 def usage():
     sys.stderr.write("Usage: fb2tex.py [-v] -f fb2file -o texfile\n")
@@ -27,7 +26,6 @@ def initLog(logfilename, log_verbosity):
     formatter = logging.Formatter('%(asctime)s [%(process)d.%(thread)d] %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     
-    global flogger
     flogger = logging.getLogger('fb2tex')
     flogger.addHandler(hdlr)
     flogger.setLevel(log_verbosity)
@@ -58,11 +56,11 @@ def parseCommandLine():
     # file log
     initLog(logfile, log_verbosity)
     
-    # console log
+    # Add console log
     console = logging.StreamHandler()
     formatter = logging.Formatter('[%(levelname)s] %(message)s')
     console.setFormatter(formatter)
-    flogger.addHandler(console)
+    logging.getLogger('fb2tex').addHandler(console)
     
     return (infile, outfile)
 

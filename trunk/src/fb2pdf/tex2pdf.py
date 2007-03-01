@@ -19,10 +19,6 @@ import fb2tex
 
 _MSG_FORMAT_VER=2
 
-# --- Defaults ---
-
-global logger
-
 # --- Code ---
 class ProcessError:
     def __init__(self, msg):
@@ -42,13 +38,13 @@ def upload_file(bucket, key, filename):
     #TODO close connection?
 
 def processMessage(m):
-    logger.debug("Received new task")
+    logging.getLogger('tex2pdf').debug("Received new task")
     msg = None
     try:
         msg = parseString(m.get_body())
     except:
-        logger.exception("Error parsing message body")
-        logger.debug(m.get_body())
+        logging.getLogger('tex2pdf').exception("Error parsing message body")
+        logging.getLogger('tex2pdf').debug(m.get_body())
         raise ProcessError("Could not parse the message.")
         
     root = msg.childNodes[0]
@@ -79,39 +75,39 @@ def processMessage(m):
     processDocument(str(src_url), str(src_type), str(src_name), str(res_key), str(log_key))
 
 def processDocument(src_url, src_type, src_name, res_key, log_key):
-    logger.info("Processing '%s'." % src_name)
+    logging.getLogger('tex2pdf').info("Processing '%s'." % src_name)
     tmpdirname = str(int(time.time()))    
-    logger.debug("Creating temporary directory '%s'." % tmpdirname)
+    logging.getLogger('tex2pdf').debug("Creating temporary directory '%s'." % tmpdirname)
     os.mkdir(tmpdirname)
     basedir = os.getcwd()
     bucket='fb2pdf' # TODO: move to cfg
     try:
         os.chdir(tmpdirname)
         fbfilename = src_name + '.fb2'
-        logger.debug("Downloading '%s' to file '%s'." % (src_url, fbfilename))
+        logging.getLogger('tex2pdf').debug("Downloading '%s' to file '%s'." % (src_url, fbfilename))
         urllib.urlretrieve(src_url, fbfilename)
         texfilename = src_name + '.tex'
         logfilename = src_name + '.txt'
         try:
-            logger.debug("Converting to TeX")
+            logging.getLogger('tex2pdf').debug("Converting to TeX")
             fb2tex.fb2tex(fbfilename, texfilename, logfilename)
         except:
             # Conversion error, upload log
-            logger.exception("Error converting to TeX")
+            logging.getLogger('tex2pdf').exception("Error converting to TeX")
             upload_file(bucket, log_key, logfilename)
             raise
         pdffilename = src_name + '.pdf'
-        logger.debug("Converting to PDF")
+        logging.getLogger('tex2pdf').debug("Converting to PDF")
         tex2pdf(texfilename, pdffilename)
         # all OK
         # upload PDF 
-        logger.debug("Uploading PDF to S3")
+        logging.getLogger('tex2pdf').debug("Uploading PDF to S3")
         upload_file(bucket, res_key, pdffilename)
         # upoad log (log should be uploaded AFTER PDF)
-        logger.debug("Uploading log to S3")
+        logging.getLogger('tex2pdf').debug("Uploading log to S3")
         upload_file(bucket, log_key, logfilename)
     finally:
-        logger.debug("Removing temp files")
+        logging.getLogger('tex2pdf').debug("Removing temp files")
         os.chdir(basedir)
         # remove temp files
         for f in os.listdir(tmpdirname):
@@ -121,7 +117,7 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
 def tex2pdf(texfilename, pdffilename):
     # Style files located ${sys_prefix}/share/texmf-local/
 
-    logger.debug("Converting TeX to PDF")
+    logging.getLogger('tex2pdf').debug("Converting TeX to PDF")
     
     #TODO specify PDF output filename
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
@@ -133,7 +129,7 @@ def tex2pdf(texfilename, pdffilename):
         raise "Execution of pdflatex failed with error code %d" % rc
 
     # Optimize pdf
-    logger.debug("Optimzing PDF")
+    logging.getLogger('tex2pdf').debug("Optimzing PDF")
     tmptex=texfilename+".noopt"
     os.rename(texfilename, tmptex)
     rc = os.system("pdfopt %s %s > /dev/null" % (tmptex,texfilename))
