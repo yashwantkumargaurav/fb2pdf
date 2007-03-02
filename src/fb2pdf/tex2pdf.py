@@ -6,11 +6,13 @@ FictionBook2 -> TeX converter daemon
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
-import sys, os
+import sys, os, shutil
 
 # --- Code ---
 def tex2pdf(texfilename, pdffilename):
     # Style files located ${sys_prefix}/share/texmf-local/
+    shutil.copy(sys.prefix + '/share/texmf-local/verse.sty', "./")
+    shutil.copy(sys.prefix + '/share/texmf-local/epigraph.sty', "./")
 
     logging.getLogger('tex2pdf').debug("Converting TeX to PDF")
     
