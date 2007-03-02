@@ -6,7 +6,7 @@ FictionBook2 -> TeX converter daemon
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
-import sys, os, shutil
+import sys, os, shutil, logging
 
 # --- Code ---
 def tex2pdf(texfilename, pdffilename):
