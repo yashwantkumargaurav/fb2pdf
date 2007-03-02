@@ -52,9 +52,6 @@ else // zip file
     $fileName = $zipArr["fileName"];
 }
 
-print ("Path = $fbFile, Name = $fileName");
-die;
-
 // Process file
 $key = process_file($fbFile, $fileName);
 
