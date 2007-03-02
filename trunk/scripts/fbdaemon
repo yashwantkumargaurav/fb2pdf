@@ -10,7 +10,7 @@ import getopt
 import logging, logging.handlers
 import sys, os, os.path, shutil
 import string, time
-import urllib
+import urllib, tempfile
 import traceback
 
 from xml.dom.minidom import parse, parseString
@@ -160,7 +160,7 @@ def upload_file(bucket, key, filename):
 
 def processDocument(src_url, src_type, src_name, res_key, log_key):
     logging.getLogger('fbdaemon').info("Processing '%s'." % src_name)
-    tmpdirname = str(int(time.time()))    
+    tmpdirname = tempfile.gettempdir() + '/' + str(int(time.time()))
     logging.getLogger('fbdaemon').debug("Creating temporary directory '%s'." % tmpdirname)
     os.mkdir(tmpdirname)
     basedir = os.getcwd()
