@@ -24,7 +24,7 @@ function check_zip_format($zipfile)
                 // check fb format
                 if (check_fb_format($tempFile))
                 {
-                    $ret = $tempFile;
+                    $ret = array("fileName"=>$fileName, "filePath"=>$tempFile);
                     break;
                 }
                 else
