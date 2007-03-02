@@ -37,15 +37,23 @@ else if ($_POST['uploadtype'] == 'url')
 }
 
 // Check zip format
-$zipFile = $filePath;
-$fbFile = check_zip_format($zipFile);
-if ($fbFile === false) // this is not a zip
+$zipArr = check_zip_format($filePath);
+if ($zipArr === false) //  not a zip file
 {
-    $fbFile = $zipFile;
     $zipFile = NULL;
+    $fbFile  = $filePath;
     if (!check_fb_format($fbFile))
         die("$fileName не существует или не является файлом в формате ZIP или FB2. Пожалуйста, выберите ZIP или FB2 файл и попробуйте ещё раз.");
 }
+else // zip file
+{
+    $zipFile  = $filePath;
+    $fbFile   = $zipArr["filePath"];
+    $fileName = $zipArr["fileName"];
+}
+
+print ("Path = $fbFile, Name = $fileName");
+die;
 
 // Process file
 $key = process_file($fbFile, $fileName);
@@ -91,7 +99,7 @@ function process_file($filePath, $fileName)
         // create an object to store source file
         $s3 = new S3($awsApiKey, $awsApiSecretKey);
 
-        if (!$s3->writeObject($awsS3Bucket, $md5 . ".fb2", $filePath, "application/fb2+xml", "public-read", "", $httpHeaders))
+        if (!$s3->writeFile($awsS3Bucket, $md5 . ".fb2", $filePath, "application/fb2+xml", "public-read", "", $httpHeaders))
         {
             error_log("FB2PDF ERROR. Unable to store file with key <$md5> in the Amazon S3 storage."); 
             return false;
