@@ -19,11 +19,11 @@ def tex2pdf(texfilename, pdffilename):
     #TODO specify PDF output filename
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
     if rc:
-        raise "Execution of pdflatex failed with error code %d" % rc
+        raise Exception("Execution of pdflatex failed with error code %d" % rc)
     # Run again, to incorporate TOC
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
     if rc:
-        raise "Execution of pdflatex failed with error code %d" % rc
+        raise Exception("Execution of pdflatex failed with error code %d" % rc)
 
     # Optimize pdf
     logging.getLogger('tex2pdf').debug("Optimzing PDF")
@@ -31,5 +31,5 @@ def tex2pdf(texfilename, pdffilename):
     os.rename(texfilename, tmptex)
     rc = os.system("pdfopt %s %s > /dev/null" % (tmptex,texfilename))
     if rc:
-        raise "Execution of pdfopt failed with error code %d" % rc
+        raise Exception("Execution of pdfopt failed with error code %d" % rc)
 
