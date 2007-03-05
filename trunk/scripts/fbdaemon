@@ -18,7 +18,7 @@ from ConfigParser import ConfigParser
 
 from boto.connection import SQSConnection
 from boto.sqs.message import Message
-from boto.exception import SQSError
+from boto.exception import SQSError, S3Error
 
 from boto.connection import S3Connection
 from boto.s3.key import Key
