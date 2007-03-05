@@ -16,6 +16,9 @@ import binascii
 from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString
 import Image
 
+from exceptions import TemporaryError, PersistentError
+
+
 # -- constants --
 image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
@@ -197,7 +200,7 @@ def fb2tex(infile, outfile):
     fb = soup.find("fictionbook")
     if not fb:
         logging.getLogger('fb2tex').exception("The file does not seems to contain 'fictionbook' root element")
-        raise Exception("The file does not seems to contain 'fictionbook' root element")
+        raise PersistentError("The file does not seems to contain 'fictionbook' root element")
     
     findEnclosures(fb,outdir)
     processDescription(fb.find("description"), f)

@@ -25,8 +25,7 @@ from boto.s3.key import Key
 
 from fb2pdf.daemon import createDaemon
 
-from fb2pdf import fb2tex
-from fb2pdf import tex2pdf
+from fb2pdf import TemporaryError, PersistentError, tex2pdf, fb2tex
 
 # --- Constants --- 
 
@@ -40,13 +39,6 @@ log_verbosity = logging.INFO
 
 # --- Code ---
 
-class ProcessError:
-    def __init__(self, msg):
-        self.message = msg
-        
-    def __str__(self):
-        return self.message
-        
 def usage():
     sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-p pidfile] [-l logfile] [-v] [-d]\n")
 
@@ -119,18 +111,18 @@ def processMessage(m):
     except:
         logging.getLogger('fbdaemon').exception("Error parsing message body")
         logging.getLogger('fbdaemon').debug(m.get_body())
-        raise ProcessError("Could not parse the message.")
+        raise PersistentError("Could not parse the message.")
         
     root = msg.childNodes[0]
     if root.nodeName != 'fb2pdfjob':
-        raise ProcessError("Unknown XML root element '%s'." % root.nodeName)
+        raise PersistentError("Unknown XML root element '%s'." % root.nodeName)
     v=root.getAttribute('version')
     if not v or int(v)!=_MSG_FORMAT_VER: 
-        raise ProcessError("Unsupported message format version '%s'." % v)
+        raise TemporaryError("Unsupported message format version '%s'." % v)
 
     srcs=root.getElementsByTagName('source')
     if len(srcs)!=1:
-        raise ProcessError("Too many sources in the message.")
+        raise PersistentError("Too many sources in the message.")
     src = srcs[0]
     src_url  = src.getAttribute('url')
     src_type = src.getAttribute('type')
@@ -138,12 +130,12 @@ def processMessage(m):
 
     results=root.getElementsByTagName('result')
     if len(results)!=1:
-        raise ProcessError("Message must contain exactly one 'result' element")
+        raise PersistentError("Message must contain exactly one 'result' element")
     res_key = results[0].getAttribute('key')
 
     logs=root.getElementsByTagName('log')
     if len(logs)!=1:
-        raise ProcessError("Message must contain exactly one 'result' element")
+        raise PersistentError("Message must contain exactly one 'result' element")
     log_key = logs[0].getAttribute('key')
 
     processDocument(str(src_url), str(src_type), str(src_name), str(res_key), str(log_key))
@@ -236,8 +228,12 @@ def main():
                 try:
                     processMessage(m)
                     q.delete_message(m)
-                except ProcessError, msg:
+                except TemporaryError, msg:
                     logging.getLogger('fbdaemon').exception(msg)
+                except PersistentError, msg:
+                    logging.getLogger('fbdaemon').exception(msg)
+                    logging.getLogger('fbdaemon').debug("removing message due to persistent error")
+                    q.delete_message(m)
                 except:
                     logging.getLogger('fbdaemon').exception('Unknown Processing Error')
                     
