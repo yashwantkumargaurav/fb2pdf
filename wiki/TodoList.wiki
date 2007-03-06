@@ -3,7 +3,6 @@
 == Not yet implemented ==
 
   * 'table'
-  * ZIP file support in PHP frontend
   * Web Design
   * multiple 'body' elements
   * 'image' elemnt support for external images referenced by URL
