@@ -112,9 +112,12 @@ def _textQuote(str, code=False):
 
 def convXMLentities(s):
     #TODO: proper conversion
-    return s.replace('&lt;','<') \
-           .replace('&gt;','>') \
-           .replace('&amp;','&')
+    if s:
+        return s.replace('&lt;','<') \
+               .replace('&gt;','>') \
+               .replace('&amp;','&')
+    else:
+        return ""
            
 def _text(t):
     if isinstance(t, basestring) or isinstance(t, unicode):
@@ -124,7 +127,7 @@ def _text(t):
     for x in t.contents:
         if not isinstance(x, basestring) and not isinstance(x, unicode):
             logging.getLogger('fb2pdf').error("Unexpected element in _text: '%s'" % x)
-    return string.join([convXMLentities(e) for e in  t.contents])
+    return string.join([convXMLentities(e) for e in t.contents])
 
 def _escapeSpace(t):
     return re.sub(r'([ ])+',r'\\ ', t)
@@ -154,6 +157,7 @@ def fb2tex(infile, outfile):
     logging.getLogger('fb2pdf').info("Converting %s" % infile)
     
     f = open(infile, 'r')
+
     soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
     f.close()
 
