@@ -54,7 +54,7 @@ function showForm()
 <!-- div to display upload form -->
 <div id="form">
 <h4 align="center">Этот сервис предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://en.wikipedia.org/wiki/Sony_Reader">Sony Reader</a>.</h4>
-<p>Пожалуйста загрузите FB2 файл или укажите URL этого файла:
+<p>Пожалуйста загрузите книгу в FB2 или ZIP формате (ZIP может содержать только одну книгу в FB2 формате) или укажите URL:
 <p>
 
 <form id="uploadform" enctype="multipart/form-data" action="uploader.php" method="POST">
@@ -79,6 +79,7 @@ function showForm()
 
 <!-- div to display progress indicator -->
 <div id="progress" style="display:none;text-align:center">
+    <h4 align="center">Загрузка файла. Пожалуйста, подождите...</h4> 
     <img id="pimage" src="images/progress.gif"/>
 </div>
 

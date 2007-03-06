@@ -49,10 +49,12 @@ if ($status == STATUS_DONE)
 {
     echo "<h4 align=\"center\">Ваш файл был успешно сконвертирован. Теперь Вы можете <a href=\"$convertedFile\">загрузить</a> сконветрированный файл и записать его в Ваш Sony Reader.";
     echo "<br>(Возможные ошибки и предупреждения, возникшие в результате конвертации Вы можете посмотреть <a href=\"$logFile\">здесь</a>.)</h4>";
+    echo "<br><br><a href=\"$originalFile\">Посмотреть исходный файл.</a>";
 }
 else if ($status == STATUS_ERROR)
 {
     echo "<h4 align=\"center\">При конвертации произошла ошибка. Вы можете посмотреть её <a href=\"$logFile\">здесь</a>.</h4>";
+    echo "<br><br><a href=\"$originalFile\">Посмотреть исходный файл.</a>";
 }
 else
 {
@@ -64,7 +66,6 @@ else
 
 ?>
 
-<br><br><a href="<?php echo $originalFile; ?>">Посмотреть исходный файл.</a>
 <br><br><a href="index.php">Сконвертировать ещё один файл.</a>
 <br><br>Обнаружили ошибку? У Вас есть предложения по улучшению сервиса? Хотите оставить комментарий?
 <br>Это можно сделать <a href="http://groups.google.com/group/fb2pdf-users/about?hl=ru">здесь</a>.
