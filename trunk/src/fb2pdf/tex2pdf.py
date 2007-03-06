@@ -29,10 +29,10 @@ def tex2pdf(texfilename, pdffilename):
         raise TemporaryError("Execution of pdflatex failed with error code %d" % rc)
 
     # Optimize pdf
-    logging.getLogger('fb2pdf').debug("Optimzing PDF")
-    tmppdf=pdffilename+".noopt"
-    os.rename(pdffilename, tmppdf)
-    rc = os.system("pdfopt %s %s > /dev/null" % (tmppdf,pdffilename))
-    if rc:
-        raise PersistentError("Execution of pdfopt failed with error code %d" % rc)
+    #logging.getLogger('fb2pdf').debug("Optimzing PDF")
+    #tmppdf=pdffilename+".noopt"
+    #os.rename(pdffilename, tmppdf)
+    #rc = os.system("pdfopt %s %s > /dev/null" % (tmppdf,pdffilename))
+    #if rc:
+    #    raise PersistentError("Execution of pdfopt failed with error code %d" % rc)
 
