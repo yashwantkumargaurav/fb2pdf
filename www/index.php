@@ -53,7 +53,7 @@ function showForm()
 
 <!-- div to display upload form -->
 <div id="form">
-<h4 align="center">Этот сервис предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://en.wikipedia.org/wiki/Sony_Reader">Sony Reader</a>.</h4>
+<h4 align="center">Этот сервис (альфа версия) предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://en.wikipedia.org/wiki/Sony_Reader">Sony Reader</a>.</h4>
 <p>Пожалуйста загрузите книгу в FB2 или ZIP формате (ZIP может содержать только одну книгу в FB2 формате) или укажите URL:
 <p>
 

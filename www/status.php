@@ -54,6 +54,9 @@ if ($status == STATUS_DONE)
 else if ($status == STATUS_ERROR)
 {
     echo "<h4 align=\"center\">При конвертации произошла ошибка. Вы можете посмотреть её <a href=\"$logFile\">здесь</a>.</h4>";
+    echo "Хотите нам сообщить об ошибке? Это можно сделать <a href=\"http://groups.google.com/group/fb2pdf-users/about?hl=ru\">здесь</a>";
+    echo "<br>Не забудьте скопировать <a href=\"$logFile\">информацию об ошибке</a> в текст Вашего сообщения.";
+    
     echo "<br><br><a href=\"$originalFile\">Посмотреть исходный файл.</a>";
 }
 else
