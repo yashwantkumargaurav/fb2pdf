@@ -30,9 +30,9 @@ def tex2pdf(texfilename, pdffilename):
 
     # Optimize pdf
     logging.getLogger('tex2pdf').debug("Optimzing PDF")
-    tmptex=texfilename+".noopt"
-    os.rename(texfilename, tmptex)
-    rc = os.system("pdfopt %s %s > /dev/null" % (tmptex,texfilename))
+    tmppdf=pdffilename+".noopt"
+    os.rename(pdffilename, tmppdf)
+    rc = os.system("pdfopt %s %s > /dev/null" % (tmppdf,pdffilename))
     if rc:
         raise PersistentError("Execution of pdfopt failed with error code %d" % rc)
 
