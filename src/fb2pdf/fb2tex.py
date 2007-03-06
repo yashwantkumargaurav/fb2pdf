@@ -34,7 +34,7 @@ def par(p):
             elif s.name == "emphasis":
                 res += u'{\\it '+ par(s) + u'}'
             elif s.name == "style":
-                logging.getLogger('fb2tex').warning("Unsupported element: %s" % s.name)
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             elif s.name == "a":
                 href=s.get('l:href')
@@ -45,7 +45,7 @@ def par(p):
                         res += '\\href{' + href + '}{\\underline{' + _textQuote(_text(s)) + '}}'
                 else:
                     print s
-                    logging.getLogger('fb2tex').warning("'a' without 'href'")
+                    logging.getLogger('fb2pdf').warning("'a' without 'href'")
                 res += "" #TODO
             elif s.name == "strikethrough":
                 res += u'\\sout{' + par(s) + u'}'
@@ -58,10 +58,10 @@ def par(p):
             elif s.name == "image":
                 res += processInlineImage(s)
             elif s.name == "l":
-                logging.getLogger('fb2tex').warning("Unsupported element: %s" % s.name)
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.name)
                 res += "" #TODO
             else:
-                logging.getLogger('fb2tex').error("Unknown paragrpah element: %s" % s.name)
+                logging.getLogger('fb2pdf').error("Unknown paragrpah element: %s" % s.name)
         elif isinstance(s, basestring) or isinstance(s, unicode):
             res += _textQuote(_text(s))
     return res            
@@ -123,7 +123,7 @@ def _text(t):
     # Temporary check. TODO: remove
     for x in t.contents:
         if not isinstance(x, basestring) and not isinstance(x, unicode):
-            logging.getLogger('fb2tex').error("Unexpected element in _text: '%s'" % x)
+            logging.getLogger('fb2pdf').error("Unexpected element in _text: '%s'" % x)
     return string.join([convXMLentities(e) for e in  t.contents])
 
 def _escapeSpace(t):
@@ -151,7 +151,7 @@ def _getdir(f):
         return "."
     
 def fb2tex(infile, outfile):
-    logging.getLogger('fb2tex').info("Converting %s" % infile)
+    logging.getLogger('fb2pdf').info("Converting %s" % infile)
     
     f = open(infile, 'r')
     soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
@@ -199,7 +199,7 @@ def fb2tex(infile, outfile):
     f.write("{\\fontfamily{cmss}\\selectfont\n")
     fb = soup.find("fictionbook")
     if not fb:
-        logging.getLogger('fb2tex').exception("The file does not seems to contain 'fictionbook' root element")
+        logging.getLogger('fb2pdf').exception("The file does not seems to contain 'fictionbook' root element")
         raise PersistentError("The file does not seems to contain 'fictionbook' root element")
     
     findEnclosures(fb,outdir)
@@ -208,6 +208,9 @@ def fb2tex(infile, outfile):
     f.write("\\tableofcontents\n\\newpage\n\n");
     
     body=fb.find("body")
+    if not body:
+        logging.getLogger('fb2pdf').exception("The file does not seems to contain 'fictionbook/body' element")
+        raise PersistentError("The file does not seems to contain 'fictionbook/body' element")
     processEpigraphs(body, f)
     processSections(body, f)
     
@@ -215,7 +218,7 @@ def fb2tex(infile, outfile):
     f.write("\n\\end{document}\n")
     f.close()
 
-    logging.getLogger('fb2tex').info("Conversion successfully finished")
+    logging.getLogger('fb2pdf').info("Conversion successfully finished")
 
 def processSections(b,f):
     ss = b.findAll("section", recursive=False)
@@ -249,7 +252,7 @@ def processPoem(p,f):
     d = p.find("date", recursive=False)
     if d:
         pdate = _text(d)
-        logging.getLogger('fb2tex').warning("Unsupported element: date")
+        logging.getLogger('fb2pdf').warning("Unsupported element: date")
         #TODO find a nice way to print date
         
     f.write('\\end{verse}\n\n')
@@ -261,7 +264,7 @@ def processStanza(s, f):
         title = getSectionTitle(t)
         if title and len(title):
             # TODO: implement
-            logging.getLogger('fb2tex').warning("Unsupported element: stanza 'title'")
+            logging.getLogger('fb2pdf').warning("Unsupported element: stanza 'title'")
     
     # subtitle (optional)
     st = s.find("subtitle", recursive=False)
@@ -269,7 +272,7 @@ def processStanza(s, f):
         subtitle = getSectionTitle(st)
         if subtitle and len(subtitle):
             # TODO: implement
-            logging.getLogger('fb2tex').warning("Unsupported element: stanza 'subtitle'")
+            logging.getLogger('fb2pdf').warning("Unsupported element: stanza 'subtitle'")
 
     # 'v' - multiple    
     vv = s.findAll("v", recursive=False)
@@ -311,7 +314,7 @@ def processCite(q,f):
                 _uwrite(f,_escapeSpace(par(x)))
                 _uwrite(f, "}{%s}}\n" % _pdfString(x))
             elif x.name=="table":
-                logging.getLogger('fb2tex').warning("Unsupported element: %s" % x.name)
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.name)
                 pass # TODO
         elif isinstance(x, basestring) or isinstance(x, unicode):
             _uwrite(f,_textQuote(_text(x)))
@@ -358,10 +361,10 @@ def processSection(s, f):
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name == "table":
-                logging.getLogger('fb2tex').warning("Unsupported element: %s" % x.name)
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.name)
                 pass # TODO
             elif x.name!="title" and x.name!="epigraph":
-                logging.getLogger('fb2tex').error("Unknown section element: %s" % x.name)
+                logging.getLogger('fb2pdf').error("Unknown section element: %s" % x.name)
 
 def processAnnotation(f, an):
     if len(an):
@@ -383,10 +386,10 @@ def processAnnotation(f, an):
                 elif x.name == "cite":
                     processCite(x,f)
                 elif x.name == "table":
-                    logging.getLogger('fb2tex').warning("Unsupported element: %s" % x.name)
+                    logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.name)
                     pass # TODO
                 else:
-                    logging.getLogger('fb2tex').error("Unknown annotation element: %s" % x.name)
+                    logging.getLogger('fb2pdf').error("Unknown annotation element: %s" % x.name)
         f.write('\\end{small}\n')
         f.write('\\pagebreak\n\n')
 
@@ -405,7 +408,7 @@ def getSectionTitle(t):
             elif x.name == "empty-line":
                 res = res + u"\\vspace{10pt}"
             else:
-                logging.getLogger('fb2tex').error("Unknown section title element: %s" % x.name)
+                logging.getLogger('fb2pdf').error("Unknown section title element: %s" % x.name)
     return res
 
 def processEpigraphText(f,e):
@@ -429,7 +432,7 @@ def processEpigraphText(f,e):
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name != "text-author":
-                logging.getLogger('fb2tex').error("Unknown epigraph element: %s" % x.name)
+                logging.getLogger('fb2pdf').error("Unknown epigraph element: %s" % x.name)
         
 def processEpigraphs(s,f):
     ep = s.findAll("epigraph", recursive=False)
@@ -474,13 +477,13 @@ def authorName(a):
 
 def processDescription(desc,f):
     if not desc:
-        logging.getLogger('fb2tex').warning("Missing required 'description' element\n")
+        logging.getLogger('fb2pdf').warning("Missing required 'description' element\n")
         return
     
     # title info, mandatory element
     ti = desc.find("title-info")
     if not ti:
-        logging.getLogger('fb2tex').warning("Missing required 'title-info' element\n")
+        logging.getLogger('fb2pdf').warning("Missing required 'title-info' element\n")
         return 
     t = ti.find("book-title")
     if t:
@@ -551,7 +554,7 @@ def findEnclosures(fb,outdir):
         ct=e['content-type']
         global image_exts
         if not image_exts.has_key(ct):
-            logging.getLogger('fb2tex').warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
+            logging.getLogger('fb2pdf').warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
             continue
         fname = os.tempnam(".", "enc") + "." + image_exts[ct]
         fullfname = outdir + "/" + fname
@@ -568,11 +571,11 @@ def processInlineImage(image):
         global enclosures
         href = image.get('l:href')
         if not href or href[0]!='#':
-            logging.getLogger('fb2tex').error("Invalid inline image ref '%s'\n" % href)
+            logging.getLogger('fb2pdf').error("Invalid inline image ref '%s'\n" % href)
             return ""
         href=str(href[1:])
         if not enclosures.has_key(href):
-            logging.getLogger('fb2tex').error("Non-existing image ref '%s'\n" % href)
+            logging.getLogger('fb2pdf').error("Non-existing image ref '%s'\n" % href)
             return ""
         (ct,fname)=enclosures[href]
         return "\\begin{center}\n\\includegraphics{%s}\n\\end{center}\n" % fname
