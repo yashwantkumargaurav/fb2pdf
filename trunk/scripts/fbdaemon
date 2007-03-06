@@ -10,7 +10,7 @@ import getopt
 import logging, logging.handlers
 import sys, os, os.path, shutil
 import string, time
-import urllib, tempfile
+import urllib2, tempfile
 import traceback
 
 from xml.dom.minidom import parse, parseString
@@ -140,14 +140,14 @@ def processMessage(m):
 
     processDocument(str(src_url), str(src_type), str(src_name), str(res_key), str(log_key))
 
-def upload_file(bucket, key, filename):
+def upload_file(bucket, key, filename, disp='attachment'):
     try:
         global cfg
         c = S3Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
         b = c.create_bucket(bucket)
         k = Key(b)
         k.key = key
-        k.set_contents_from_filename(filename,{'Content-Disposition':'attachment; filename=\"%s\"' % filename})
+        k.set_contents_from_filename(filename,{'Content-Disposition':'%s; filename=\"%s\"' % (disp,filename)})
         k.set_acl('public-read')
     except S3Error, err:
         raise TemporaryError("Error uploading file '%s' to S3" % filename, err)
@@ -163,7 +163,23 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         os.chdir(tmpdirname)
         fbfilename = src_name + '.fb2'
         logging.getLogger('fbdaemon').debug("Downloading '%s' to file '%s'." % (src_url, fbfilename))
-        urllib.urlretrieve(src_url, fbfilename)
+
+        try:
+            fsock = open(fbfilename,'wb')
+            try:
+                asock = urllib2.urlopen(src_url)
+                shutil.copyfileobj(asock, fsock)
+            finally:
+                fsock.close()
+        except urllib2.HTTPError, e:
+            if e.code==404 or e.code==403:
+                raise PersistentError("Error getting FB2 file", e)
+            else:
+                raise TemporaryError("Error getting FB2 file", e)
+        except:
+            raise TemporaryError("Error getting FB2 file", e)
+            
+        
         texfilename = src_name + '.tex'
         logfilename = src_name + '.txt'
         pdffilename = src_name + '.pdf'
@@ -173,6 +189,8 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         lf = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
         lh.setFormatter(lf)
         l=logging.getLogger('fb2pdf')
+        l.addHandler(lh)
+        l=logging.getLogger('fb2tex')
         l.addHandler(lh)
         
         try:
@@ -189,7 +207,7 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         except:
             # Conversion error, upload log
             logging.getLogger('fbdaemon').exception("Conversion Failed")
-            upload_file(bucket, log_key, logfilename)
+            upload_file(bucket, log_key, logfilename, 'inline')
             raise
         
         # all OK
@@ -198,14 +216,14 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         upload_file(bucket, res_key, pdffilename)
         # upoad log (log should be uploaded AFTER PDF)
         logging.getLogger('fbdaemon').debug("Uploading log to S3")
-        upload_file(bucket, log_key, logfilename)
+        upload_file(bucket, log_key, logfilename, 'inline')
     finally:
         logging.getLogger('fbdaemon').debug("Removing temp files")
         os.chdir(basedir)
         # remove temp files
-        for f in os.listdir(tmpdirname):
-            os.remove("%s/%s" % (tmpdirname,f))
-        os.rmdir(tmpdirname)
+        #for f in os.listdir(tmpdirname):
+        #    os.remove("%s/%s" % (tmpdirname,f))
+        #os.rmdir(tmpdirname)
 
 def main():
     try:
