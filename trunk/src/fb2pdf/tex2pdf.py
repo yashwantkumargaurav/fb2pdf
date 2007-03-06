@@ -16,7 +16,7 @@ def tex2pdf(texfilename, pdffilename):
     shutil.copy(sys.prefix + '/share/texmf-local/verse.sty', "./")
     shutil.copy(sys.prefix + '/share/texmf-local/epigraph.sty', "./")
 
-    logging.getLogger('tex2pdf').debug("Converting TeX to PDF")
+    logging.getLogger('fb2pdf').debug("Converting TeX to PDF")
     
     #TODO specify PDF output filename
     rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
@@ -29,7 +29,7 @@ def tex2pdf(texfilename, pdffilename):
         raise TemporaryError("Execution of pdflatex failed with error code %d" % rc)
 
     # Optimize pdf
-    logging.getLogger('tex2pdf').debug("Optimzing PDF")
+    logging.getLogger('fb2pdf').debug("Optimzing PDF")
     tmppdf=pdffilename+".noopt"
     os.rename(pdffilename, tmppdf)
     rc = os.system("pdfopt %s %s > /dev/null" % (tmppdf,pdffilename))

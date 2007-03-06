@@ -26,7 +26,7 @@ def initLog(logfilename, log_verbosity):
     formatter = logging.Formatter('%(asctime)s [%(process)d.%(thread)d] %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     
-    flogger = logging.getLogger('fb2tex')
+    flogger = logging.getLogger('fb2pdf')
     flogger.addHandler(hdlr)
     flogger.setLevel(log_verbosity)
 
@@ -60,7 +60,7 @@ def parseCommandLine():
     console = logging.StreamHandler()
     formatter = logging.Formatter('[%(levelname)s] %(message)s')
     console.setFormatter(formatter)
-    logging.getLogger('fb2tex').addHandler(console)
+    logging.getLogger('fb2pdf').addHandler(console)
     
     return (infile, outfile)
 

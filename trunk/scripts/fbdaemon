@@ -188,10 +188,8 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         lh = logging.FileHandler(logfilename)
         lf = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
         lh.setFormatter(lf)
-        l=logging.getLogger('fb2pdf')
-        l.addHandler(lh)
-        l=logging.getLogger('fb2tex')
-        l.addHandler(lh)
+        logging.getLogger('fb2pdf').addHandler(lh)
+        logging.getLogger('fb2pdf').setLevel(logging.DEBUG)
         
         try:
             try:
@@ -201,7 +199,7 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
                 logging.getLogger('fbdaemon').debug("Converting to PDF")
                 tex2pdf.tex2pdf(texfilename, pdffilename)
             finally:
-                l.removeHandler(lh)
+                logging.getLogger('fb2pdf').removeHandler(lh)
                 lh.flush()
                 lh.close()
         except:
@@ -221,9 +219,9 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
         logging.getLogger('fbdaemon').debug("Removing temp files")
         os.chdir(basedir)
         # remove temp files
-        #for f in os.listdir(tmpdirname):
-        #    os.remove("%s/%s" % (tmpdirname,f))
-        #os.rmdir(tmpdirname)
+        for f in os.listdir(tmpdirname):
+            os.remove("%s/%s" % (tmpdirname,f))
+        os.rmdir(tmpdirname)
 
 def main():
     try:
