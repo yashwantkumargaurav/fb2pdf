@@ -424,7 +424,7 @@ def processEpigraphText(f,e):
         if isinstance(x, Tag):
             if x.name == "p":
                 if not first:
-                    f.write("\\\\")
+                    f.write("\\vspace{10pt}")
                 else:
                     first = False
                 _uwrite(f,par(x))
