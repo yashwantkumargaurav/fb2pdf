@@ -15,5 +15,11 @@ all: $(allpdf)
 %.tex: %.fb2
 	fb2tex -v -f $< -o $@
 
+install:
+	cd .. && sudo python setup.py install; cd test
+
+test:
+	./utest.sh
+
 clean:
-	rm -f *.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex
+	rm -f *.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex *.fblog
