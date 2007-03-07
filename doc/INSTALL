@@ -1,7 +1,7 @@
 Required packages: 
 
 System packages:
-. Python 2.3 or newer
+. Python 2.4
 . teTeX
 
 TeX packages
@@ -11,3 +11,4 @@ TeX packages
 Python packages:
 . http://code.google.com/p/boto/
 . http://www.pythonware.com/products/pil/
+. http://effbot.org/zone/element-index.htm
