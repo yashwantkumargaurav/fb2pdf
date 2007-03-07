@@ -107,6 +107,8 @@ def _textQuote(str, code=False):
         str = re.sub(r'\[([0-9]+)\]', r'\\string[\1\\string]', str)
         # Broken bar
         str = string.replace(str,u'\u00A6','|')
+        # caret
+        str = string.replace(str,'^','\\textasciicircum ')
         
     return str
 
