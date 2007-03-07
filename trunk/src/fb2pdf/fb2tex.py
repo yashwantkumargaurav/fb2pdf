@@ -167,6 +167,7 @@ def fb2tex(infile, outfile):
     
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
+    \\usepackage{textcomp} 
     \\usepackage[
         colorlinks=true,
         linkcolor=black,
