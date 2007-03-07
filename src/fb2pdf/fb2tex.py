@@ -74,11 +74,16 @@ def _textQuote(str, code=False):
         # backslash itself must be represented as \backslash
         # (should go first to avoid escaping backslash in TeX commands
         # produced further down this function)
-        str = string.replace(str,'\\','\\backslash\\,')
+        str = string.replace(str,'\\','$\\backslash$')
         # special chars need to be quoted with backslash
         # (should go after escaping backslash but before any of the
         # other conversions that produce TeX commands that include {})
         str = re.sub(r'([\&\$\%\#\_\{\}])',r'\\\1',str)
+        # TODO: Fix the following quick ugly hack
+        # this is here, because the line above breaks $\backslash$
+        # that comes before that, which would break stuff on the above
+        # line if it followed it
+        str = re.sub(r'\\\$\\backslash\\\$',r'$\\backslash$',str)
         
         # 'EN DASH' at the beginning of paragraph - russian direct speech
         if ord(str[0])==0x2013:
@@ -86,9 +91,9 @@ def _textQuote(str, code=False):
         # ellipses
         str = string.replace(str,'...','\\ldots')
         # caret
-        str = string.replace(str,'\^','\\textasciicircum')
+        str = re.sub(r'[\^]',r'\\textasciicircum',str)
         # tilde
-        str = string.replace(str,'\~','\\textasciitilde')
+        str = re.sub(r'[\~]',r'\\textasciitilde',str)
         # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
         str = string.replace(str,u'\u00ab','<<')
         # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
@@ -107,8 +112,8 @@ def _textQuote(str, code=False):
         str = re.sub(r'\[([0-9]+)\]', r'\\string[\1\\string]', str)
         # Broken bar
         str = string.replace(str,u'\u00A6','|')
-        # caret
-        str = string.replace(str,'^','\\textasciicircum ')
+        # plus-minus
+        str = string.replace(str,u'\u00B1','$\\pm$')
         
     return str
 
@@ -132,7 +137,7 @@ def _text(t):
     return string.join([convXMLentities(e) for e in t.contents])
 
 def _escapeSpace(t):
-    return re.sub(r'([ ])+',r'\\ ', t)
+    return re.sub(r'([ ])+',r'\\ ', unicode(t))
 
 def _pdfString(t):
     if isinstance(t, Tag):
@@ -143,7 +148,15 @@ def _pdfString(t):
     elif isinstance(t, basestring) or isinstance(t, unicode):
         return convXMLentities(t.strip())
         
-    return u''
+    return u'' # empty section titles seem to be popular for some reason
+
+def _tocElement(title, t=None):
+    return _escapeSpace(title)
+    # TODO: hyperlinks don't work in section titles
+    #if t is None:
+    #    t = title
+    #res = u'\\texorpdfstring{%s}{%s}' % (_escapeSpace(title), _pdfString(t))
+    #return res
 
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
@@ -240,10 +253,7 @@ def processPoem(p,f):
     if t:
         title = getSectionTitle(t)
         if title and len(title):
-            f.write("\\poemtitle{\\texorpdfstring{")
-            _uwrite(f,_escapeSpace(title))
-            _uwrite(f, "}{%s}}\n" % _pdfString(t))
-
+            _uwrite(f,"\\poemtitle{%s}\n" % _tocElement(title, t))
     
     # epigraphs (multiple, optional)
     processEpigraphs(p, f)
@@ -317,9 +327,7 @@ def processCite(q,f):
             elif x.name=="empty-line":
                 f.write("\\vspace{12pt}\n\n")
             elif x.name == "subtitle":
-                f.write("\\subsection*{\\texorpdfstring{")
-                _uwrite(f,_escapeSpace(par(x)))
-                _uwrite(f, "}{%s}}\n" % _pdfString(x))
+                _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x), x))
             elif x.name=="table":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.name)
                 pass # TODO
@@ -336,10 +344,7 @@ def processSection(s, f):
         title = getSectionTitle(t)
     else:
         title = ""
-
-    f.write("\n\\section{\\texorpdfstring{")
-    _uwrite(f,_escapeSpace(title)) # TODO quote
-    _uwrite(f, "}{%s}}\n" % _pdfString(t))
+    _uwrite(f,"\n\\section{%s}\n" % _tocElement(title, t))
 
     processEpigraphs(s, f)
     
@@ -362,9 +367,7 @@ def processSection(s, f):
             elif x.name == "poem":
                 processPoem(x,f)
             elif x.name == "subtitle":
-                f.write("\\subsection{\\texorpdfstring{")
-                _uwrite(f,_escapeSpace(par(x)))
-                _uwrite(f, "}{%s}}\n" % _pdfString(x))
+                _uwrite(f,"\\subsection{%s}\n" % _tocElement(par(x), x))
             elif x.name == "cite":
                 processCite(x,f)
             elif x.name == "table":
@@ -387,9 +390,7 @@ def processAnnotation(f, an):
                 elif x.name == "poem":
                     processPoem(x,f)
                 elif x.name == "subtitle":
-                    f.write("\\subsection*{\\texorpdfstring{")
-                    _uwrite(f,_escapeSpace(par(x)))
-                    _uwrite(f, "}{%s}}\n" % _pdfString(x))
+                    _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x), x))
                 elif x.name == "cite":
                     processCite(x,f)
                 elif x.name == "table":
@@ -513,9 +514,7 @@ def processDescription(desc,f):
         f.write("}\n");
 
     if title:
-        f.write("\\title{\\texorpdfstring{")
-        _uwrite(f, _escapeSpace(title))
-        _uwrite(f, "}{%s}}\n" % _pdfString(title))
+        _uwrite(f,"\\title{%s}\n" % _tocElement(title))
 
     f.write("\\date{}")
 
