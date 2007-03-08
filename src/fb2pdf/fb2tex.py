@@ -131,15 +131,6 @@ def _textQuote(str, code=False):
         
     return str
 
-def convXMLentities(s):
-    #TODO: DO WE NEED IT?
-    if s:
-        return s.replace('&lt;','<') \
-               .replace('&gt;','>') \
-               .replace('&amp;','&')
-    else:
-        return ""
-           
 def _text(t):
     res = ""
     for x in t.childNodes:
@@ -148,7 +139,7 @@ def _text(t):
         else:
             raise Exception("Expected TEXT, got " + x.tagName)
 
-    return convXMLentities(res)
+    return res
 
 def _escapeSpace(t):
     return re.sub(r'([ ])+',r'\\ ', unicode(t))
