@@ -8,6 +8,8 @@ PDFLATEXFLAGS = -halt-on-error -interaction batchmode -no-shell-escape
 
 all: $(allpdf)
 
+texfiles: $(alltex)
+
 %.pdf: %.tex
 	pdflatex $(PDFLATEXFLAGS) $<
 	pdflatex $(PDFLATEXFLAGS) $<
