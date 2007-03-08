@@ -68,7 +68,7 @@ def par(p):
             elif s.tagName == "sup":
                 res += u'$^{\\textrm{' + par(s) + '}}$'
             elif s.tagName == "code":
-                res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
+                res += u'{\\sc' + par(s) + u'}'
             elif s.tagName == "image":
                 res += processInlineImage(s)
             elif s.tagName == "l":
@@ -80,54 +80,55 @@ def par(p):
             res += _textQuote(s.data)
     return res            
 
-def _textQuote(str, code=False):
+def _textQuote(str):
     ''' Basic paragraph TeX quoting '''
     if len(str)==0:
         return str
-    if not code:
-        # backslash itself must be represented as \backslash
-        # (should go first to avoid escaping backslash in TeX commands
-        # produced further down this function)
-        str = string.replace(str,'\\','$\\backslash$')
-        # special chars need to be quoted with backslash
-        # (should go after escaping backslash but before any of the
-        # other conversions that produce TeX commands that include {})
-        str = re.sub(r'([\&\$\%\#\_\{\}])',r'\\\1',str)
-        # TODO: Fix the following quick ugly hack
-        # this is here, because the line above breaks $\backslash$
-        # that comes before that, which would break stuff on the above
-        # line if it followed it
-        str = re.sub(r'\\\$\\backslash\\\$',r'$\\backslash$',str)
-        
-        # 'EN DASH' at the beginning of paragraph - russian direct speech
-        if ord(str[0])==0x2013:
-            str="\\cdash--*" + str[1:]
-        # ellipses
-        str = string.replace(str,'...','\\ldots')
-        # caret
-        str = re.sub(r'[\^]',r'\\textasciicircum',str)
-        # tilde
-        str = re.sub(r'[\~]',r'\\textasciitilde',str)
-        # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
-        str = string.replace(str,u'\u00ab','<<')
-        # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-        str = string.replace(str,u'\u00bb','>>') # replacing with french/russian equivalent
-        # EN-DASH
-        str = string.replace(str,u'\u2013','--')
-        # EM-DASH
-        str = re.sub(r'(\s)--(\s)','---',str)
-        # preserve double quotes
-        str = string.replace(str,'"','\\symbol{34}')
-        # Fancy quotation marks (sometimes used to denote a quote
-        # inside of another quote)
-        str = string.replace(str,u'\u201e','``')
-        str = string.replace(str,u'\u201c',"''")
-        # [number]
-        str = re.sub(r'\[([0-9]+)\]', r'\\string[\1\\string]', str)
-        # Broken bar
-        str = string.replace(str,u'\u00A6','|')
-        # plus-minus
-        str = string.replace(str,u'\u00B1','$\\pm$')
+    # backslash itself must be represented as \backslash
+    # (should go first to avoid escaping backslash in TeX commands
+    # produced further down this function)
+    str = string.replace(str,'\\','$\\backslash$')
+    # special chars need to be quoted with backslash
+    # (should go after escaping backslash but before any of the
+    # other conversions that produce TeX commands that include {})
+    str = re.sub(r'([\&\$\%\#\_\{\}])',r'\\\1',str)
+    # TODO: Fix the following quick ugly hack
+    # this is here, because the line above breaks $\backslash$
+    # that comes before that, which would break stuff on the above
+    # line if it followed it
+    str = re.sub(r'\\\$\\backslash\\\$',r'$\\backslash$',str)
+
+    # 'EN DASH' at the beginning of paragraph - russian direct speech
+    if ord(str[0])==0x2013:
+        str="\\cdash--*" + str[1:]
+    # ellipses
+    str = string.replace(str,'...','\\ldots\,')
+    # caret
+    str = re.sub(r'[\^]',r'\\textasciicircum\,',str)
+    # tilde
+    str = re.sub(r'[\~]',r'\\textasciitilde\,',str)
+    # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
+    str = string.replace(str,u'\u00ab','<<')
+    # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+    str = string.replace(str,u'\u00bb','>>') # replacing with french/russian equivalent
+    # EN-DASH
+    str = string.replace(str,u'\u2013','--')
+    # EM-DASH
+    str = re.sub(r'(\s)--(\s)','---',str)
+    # preserve double quotes
+    str = string.replace(str,'"','\\symbol{34}')
+    # Fancy quotation marks (sometimes used to denote a quote
+    # inside of another quote)
+    str = string.replace(str,u'\u201e','``')
+    str = string.replace(str,u'\u201c',"''")
+    # [number]
+    str = re.sub(r'\[([0-9]+)\]', r'\\string[\1\\string]', str)
+    # Broken bar
+    str = string.replace(str,u'\u00A6','|')
+    # plus-minus
+    str = string.replace(str,u'\u00B1','$\\pm$')
+    # russian number sign
+    str = string.replace(str,u'\u2116','\\No')
         
     return str
 
@@ -156,7 +157,7 @@ def _pdfString(t):
     return u'' # empty section titles seem to be popular for some reason
 
 def _tocElement(title, t=None):
-    return _escapeSpace(title)
+    return _textQuote(title)
     # TODO: hyperlinks don't work in section titles
     #if t is None:
     #    t = title
