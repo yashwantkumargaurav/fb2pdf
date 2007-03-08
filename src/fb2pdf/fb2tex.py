@@ -313,9 +313,9 @@ def processAuthors(q,f):
     author_name = ""
     for a in aa:
         if len(author_name):
-            author_name += " \\and " + _textQuote(_text(a))
+            author_name += " \\and " + par(a)
         else:
-            author_name = _textQuote(_text(a))
+            author_name = par(a)
             
     if author_name:
         f.write("\\author{")
