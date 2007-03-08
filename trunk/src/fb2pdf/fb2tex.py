@@ -103,6 +103,7 @@ def _textQuote(str):
         str="\\cdash--*" + str[1:]
     # ellipses
     str = string.replace(str,'...','\\ldots\,')
+    str = string.replace(str,u'\u2026','\\ldots\,')
     # caret
     str = re.sub(r'[\^]',r'\\textasciicircum\,',str)
     # tilde
@@ -151,18 +152,20 @@ def _pdfString(t):
         for e in t.childNodes:
             res.append(_pdfString(e))
         return " ".join(res)
-    elif s.nodeType == Node.TEXT_NODE:
+    elif t.nodeType == Node.TEXT_NODE:
         return t.data.strip()
         
     return u'' # empty section titles seem to be popular for some reason
 
-def _tocElement(title, t=None):
-    return _textQuote(title)
-    # TODO: hyperlinks don't work in section titles
-    #if t is None:
-    #    t = title
+def _tocElement(title, t):
+    """
+    Takes quoted string 'title' and node 't' and returns a string
+    suitable for using in the section title or any other place which will
+    get included in the TOC of the PDF document.
+    """
     #res = u'\\texorpdfstring{%s}{%s}' % (_escapeSpace(title), _pdfString(t))
-    #return res
+    res = _escapeSpace(title)
+    return res
 
 def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
@@ -522,7 +525,7 @@ def processDescription(desc,f):
         f.write("}\n");
 
     if title:
-        _uwrite(f,"\\title{%s}\n" % _tocElement(title))
+        _uwrite(f,"\\title{%s}\n" % _tocElement(_textQuote(title), t))
 
     f.write("\\date{}")
 
