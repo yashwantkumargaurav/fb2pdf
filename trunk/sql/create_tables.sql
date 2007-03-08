@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS Books
         author      VARCHAR(128) NULL,
         title       VARCHAR(256) NULL,
         
-        -- conversion status (TRUE - ready, FALSE - not ready)
-        status      BOOL DEFAULT 0,
+        -- conversion status ('r' - ready, 'e' - error)
+        status      CHAR(1) DEFAULT NULL,
         
         INDEX   storage_key_idx (storage_key),
         INDEX   author_idx (author),
