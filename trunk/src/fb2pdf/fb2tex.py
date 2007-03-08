@@ -52,7 +52,7 @@ def par(p):
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
                 res += "" #TODO
             elif s.tagName == "a":
-                href=s.getAttribute('l:href')
+                href = s.getAttributeNS('http://www.w3.org/1999/xlink','href')
                 if href:
                     if href[0]=='#':
                         res += '\\hyperlink{' + href[1:] + '}{\\underline{' + _textQuote(_text(s)) + '}}'
