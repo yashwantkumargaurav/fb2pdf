@@ -12,8 +12,8 @@ import sys
 import string
 import re
 import binascii
+from xml.dom.minidom import parse, Node
 
-from BeautifulSoup import BeautifulStoneSoup, Tag, NavigableString
 import Image
 
 from exceptions import TemporaryError, PersistentError
@@ -25,45 +25,59 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 # --- globals --
 enclosures = {}
 
+def findAll(elem, what):
+    res = []
+    for x in elem.childNodes:
+        if x.nodeType == Node.ELEMENT_NODE and x.tagName==what:
+            res.append(x)
+
+    return res
+
+def find(elem, what):
+    nl=elem.getElementsByTagName(what)
+    if nl is None or len(nl)==0:
+        return None
+    else:
+        return nl[0]
+
 def par(p):
     res = u''
-    for s in p:
-        if isinstance(s, Tag):
-            if s.name == "strong":
+    for s in p.childNodes:
+        if s.nodeType == Node.ELEMENT_NODE:
+            if s.tagName == "strong":
                 res += u'{\\bf '+ par(s) + u'}'
-            elif s.name == "emphasis":
+            elif s.tagName == "emphasis":
                 res += u'{\\it '+ par(s) + u'}'
-            elif s.name == "style":
-                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.name)
+            elif s.tagName == "style":
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
                 res += "" #TODO
-            elif s.name == "a":
-                href=s.get('l:href')
+            elif s.tagName == "a":
+                href=s.getAttribute('l:href')
                 if href:
                     if href[0]=='#':
                         res += '\\hyperlink{' + href[1:] + '}{\\underline{' + _textQuote(_text(s)) + '}}'
                     else:
                         res += '\\href{' + href + '}{\\underline{' + _textQuote(_text(s)) + '}}'
                 else:
-                    print s
                     logging.getLogger('fb2pdf').warning("'a' without 'href'")
                 res += "" #TODO
-            elif s.name == "strikethrough":
+            elif s.tagName == "strikethrough":
                 res += u'\\sout{' + par(s) + u'}'
-            elif s.name == "sub":
+            elif s.tagName == "sub":
                 res += u'$_{\\textrm{' + par(s) + '}}$'
-            elif s.name == "sup":
+            elif s.tagName == "sup":
                 res += u'$^{\\textrm{' + par(s) + '}}$'
-            elif s.name == "code":
+            elif s.tagName == "code":
                 res += u'\n\\begin{verbatim}\n' + _textQuote(_text(s),code=True) + u'\n\\end{verbatim}\n'
-            elif s.name == "image":
+            elif s.tagName == "image":
                 res += processInlineImage(s)
-            elif s.name == "l":
-                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.name)
+            elif s.tagName == "l":
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
                 res += "" #TODO
             else:
-                logging.getLogger('fb2pdf').error("Unknown paragrpah element: %s" % s.name)
-        elif isinstance(s, basestring) or isinstance(s, unicode):
-            res += _textQuote(_text(s))
+                logging.getLogger('fb2pdf').error("Unknown paragrpah element: %s" % s.tagName)
+        elif s.nodeType == Node.TEXT_NODE:
+            res += _textQuote(s.data)
     return res            
 
 def _textQuote(str, code=False):
@@ -118,7 +132,7 @@ def _textQuote(str, code=False):
     return str
 
 def convXMLentities(s):
-    #TODO: proper conversion
+    #TODO: DO WE NEED IT?
     if s:
         return s.replace('&lt;','<') \
                .replace('&gt;','>') \
@@ -127,26 +141,26 @@ def convXMLentities(s):
         return ""
            
 def _text(t):
-    if isinstance(t, basestring) or isinstance(t, unicode):
-        return convXMLentities(unicode(t))
-    
-    # Temporary check. TODO: remove
-    for x in t.contents:
-        if not isinstance(x, basestring) and not isinstance(x, unicode):
-            logging.getLogger('fb2pdf').error("Unexpected element in _text: '%s'" % x)
-    return string.join([convXMLentities(e) for e in t.contents])
+    res = ""
+    for x in t.childNodes:
+        if x.nodeType == Node.TEXT_NODE:
+            res += x.data
+        else:
+            raise Exception("Expected TEXT, got " + x.tagName)
+
+    return convXMLentities(res)
 
 def _escapeSpace(t):
     return re.sub(r'([ ])+',r'\\ ', unicode(t))
 
 def _pdfString(t):
-    if isinstance(t, Tag):
+    if t.nodeType == Node.ELEMENT_NODE:
         res = []
-        for e in t:
+        for e in t.childNodes:
             res.append(_pdfString(e))
         return " ".join(res)
-    elif isinstance(t, basestring) or isinstance(t, unicode):
-        return convXMLentities(t.strip())
+    elif s.nodeType == Node.TEXT_NODE:
+        return t.data.strip()
         
     return u'' # empty section titles seem to be popular for some reason
 
@@ -172,8 +186,7 @@ def fb2tex(infile, outfile):
     logging.getLogger('fb2pdf').info("Converting %s" % infile)
     
     f = open(infile, 'r')
-
-    soup = BeautifulStoneSoup(f,selfClosingTags=['empty-line',"image"],convertEntities=[BeautifulStoneSoup.XML_ENTITIES])
+    soup = parse(f)
     f.close()
 
     f = open(outfile, 'w')
@@ -217,17 +230,18 @@ def fb2tex(infile, outfile):
     
     f.write("\n\\begin{document}\n\n")
     f.write("{\\fontfamily{cmss}\\selectfont\n")
-    fb = soup.find("fictionbook")
-    if not fb:
+    
+    fb = soup.documentElement
+    if fb.nodeType!=Node.ELEMENT_NODE or fb.tagName != "FictionBook":
         logging.getLogger('fb2pdf').exception("The file does not seems to contain 'fictionbook' root element")
         raise PersistentError("The file does not seems to contain 'fictionbook' root element")
     
     findEnclosures(fb,outdir)
-    processDescription(fb.find("description"), f)
+    processDescription(find(fb,"description"), f)
 
     f.write("\\tableofcontents\n\\newpage\n\n");
     
-    body=fb.find("body")
+    body=find(fb,"body")
     if not body:
         logging.getLogger('fb2pdf').exception("The file does not seems to contain 'fictionbook/body' element")
         raise PersistentError("The file does not seems to contain 'fictionbook/body' element")
@@ -241,7 +255,7 @@ def fb2tex(infile, outfile):
     logging.getLogger('fb2pdf').info("Conversion successfully finished")
 
 def processSections(b,f):
-    ss = b.findAll("section", recursive=False)
+    ss = findAll(b,"section")
     for s in ss:
         processSection(s, f)
 
@@ -249,7 +263,7 @@ def processPoem(p,f):
     f.write('\\begin{verse}\n\n')
     
     # title (optinal)
-    t = p.find("title", recursive=False)
+    t = find(p,"title")
     if t:
         title = getSectionTitle(t)
         if title and len(title):
@@ -259,14 +273,14 @@ def processPoem(p,f):
     processEpigraphs(p, f)
 
     # stanza (at least one!) - { title?, subtitle?, v*}
-    ss = p.findAll("stanza", recursive=False)
+    ss = findAll(p,"stanza")
     for s in ss:
         processStanza(s, f)
 
     processAuthors(p,f)
     
     # date
-    d = p.find("date", recursive=False)
+    d = find(p, "date")
     if d:
         pdate = _text(d)
         logging.getLogger('fb2pdf').warning("Unsupported element: date")
@@ -276,7 +290,7 @@ def processPoem(p,f):
 
 def processStanza(s, f):
     # title (optional)
-    t = s.find("title", recursive=False)
+    t = find(s,"title")
     if t:
         title = getSectionTitle(t)
         if title and len(title):
@@ -284,7 +298,7 @@ def processStanza(s, f):
             logging.getLogger('fb2pdf').warning("Unsupported element: stanza 'title'")
     
     # subtitle (optional)
-    st = s.find("subtitle", recursive=False)
+    st = find(s,"subtitle")
     if st:
         subtitle = getSectionTitle(st)
         if subtitle and len(subtitle):
@@ -292,7 +306,7 @@ def processStanza(s, f):
             logging.getLogger('fb2pdf').warning("Unsupported element: stanza 'subtitle'")
 
     # 'v' - multiple    
-    vv = s.findAll("v", recursive=False)
+    vv = findAll(s,"v")
     for v in vv:
         vt = par(v)
         _uwrite(f,vt)
@@ -300,7 +314,7 @@ def processStanza(s, f):
 
 
 def processAuthors(q,f):
-    aa = q.findAll("text-author")
+    aa = findAll(q,"text-author")
     author_name = ""
     for a in aa:
         if len(author_name):
@@ -317,29 +331,29 @@ def processAuthors(q,f):
 def processCite(q,f):
     f.write('\\begin{quotation}\n')
 
-    for x in q:
-        if isinstance(x, Tag):
-            if x.name=="p":
+    for x in q.childNodes:
+        if x.nodeType == Node.ELEMENT_NODE:
+            if x.tagName=="p":
                 _uwrite(f,par(x))
                 f.write("\n\n")
-            elif x.name=="poem":
+            elif x.tagName=="poem":
                 processPoem(x,f)
-            elif x.name=="empty-line":
+            elif x.tagName=="empty-line":
                 f.write("\\vspace{12pt}\n\n")
-            elif x.name == "subtitle":
+            elif x.tagName == "subtitle":
                 _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x), x))
-            elif x.name=="table":
-                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.name)
+            elif x.tagName=="table":
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.tagName)
                 pass # TODO
-        elif isinstance(x, basestring) or isinstance(x, unicode):
-            _uwrite(f,_textQuote(_text(x)))
+        elif x.nodeType == Node.TEXT_NODE:
+            _uwrite(f,_textQuote(x.data))
 
     processAuthors(q,f)
 
     f.write('\\end{quotation}\n')
     
 def processSection(s, f):
-    t = s.find("title", recursive=False)
+    t = find(s,"title")
     if t:
         title = getSectionTitle(t)
     else:
@@ -348,56 +362,60 @@ def processSection(s, f):
 
     processEpigraphs(s, f)
     
-    for x in s.contents:
-        if isinstance(x, Tag):
-            if x.name == "section":
+    for x in s.childNodes:
+        if x.nodeType == Node.ELEMENT_NODE:
+            if x.tagName == "section":
                 processSection(x,f)
-            if x.name == "p":
-                pid=x.get('id')
+            if x.tagName == "p":
+                pid=x.getAttribute('id')
                 if pid:
                     f.write('\\hypertarget{')
                     _uwrite(f,pid)
                     f.write('}{}\n')
                 _uwrite(f,par(x))
                 f.write("\n\n")
-            elif x.name == "empty-line":
+            elif x.tagName == "empty-line":
                 f.write("\\vspace{12pt}\n\n")
-            elif x.name == "image":
+            elif x.tagName == "image":
                 f.write(processInlineImage(x))
-            elif x.name == "poem":
+            elif x.tagName == "poem":
                 processPoem(x,f)
-            elif x.name == "subtitle":
+            elif x.tagName == "subtitle":
                 _uwrite(f,"\\subsection{%s}\n" % _tocElement(par(x), x))
-            elif x.name == "cite":
+            elif x.tagName == "cite":
                 processCite(x,f)
-            elif x.name == "table":
-                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.name)
+            elif x.tagName == "table":
+                logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.tagName)
                 pass # TODO
-            elif x.name!="title" and x.name!="epigraph":
-                logging.getLogger('fb2pdf').error("Unknown section element: %s" % x.name)
+            elif x.tagName=="title" or x.tagName=="epigraph":
+                pass
+            elif x.tagName=="section":
+                processSection(x, f)
+            else:
+                logging.getLogger('fb2pdf').error("Unknown section element: %s" % x.tagName)
 
 def processAnnotation(f, an):
-    if len(an):
+    if len(an.childNodes):
         f.write('\\section*{}\n')
         f.write('\\begin{small}\n')
-        for x in an:
-            if isinstance(x, Tag):
-                if x.name == "p":
+        for x in an.childNodes:
+            if x.nodeType == Node.ELEMENT_NODE:
+                if x.tagName == "p":
                     _uwrite(f,par(x))
                     f.write("\n\n")
-                elif x.name == "empty-line":
+                elif x.tagName == "empty-line":
                     f.write("\n\n") # TODO: not sure
-                elif x.name == "poem":
+                elif x.tagName == "poem":
                     processPoem(x,f)
-                elif x.name == "subtitle":
+                elif x.tagName == "subtitle":
                     _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x), x))
-                elif x.name == "cite":
+                elif x.tagName == "cite":
                     processCite(x,f)
-                elif x.name == "table":
-                    logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.name)
+                elif x.tagName == "table":
+                    logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.tagName)
                     pass # TODO
                 else:
-                    logging.getLogger('fb2pdf').error("Unknown annotation element: %s" % x.name)
+                    logging.getLogger('fb2pdf').error("Unknown annotation element: %s" % x.tagName)
         f.write('\\end{small}\n')
         f.write('\\pagebreak\n\n')
 
@@ -405,45 +423,43 @@ def getSectionTitle(t):
     ''' Section title consists of "p" and "empty-line" elements sequence'''
     first = True
     res = u''
-    for x in t:
-        if isinstance(x, Tag):
-            if x.name == "p":
+    for x in t.childNodes:
+        if x.nodeType == Node.ELEMENT_NODE:
+            if x.tagName == "p":
                 if not first:
                     res = res + u"\\\\"
                 else:
                     first = False
                 res = res + par(x)
-            elif x.name == "empty-line":
+            elif x.tagName == "empty-line":
                 res = res + u"\\vspace{10pt}"
             else:
-                logging.getLogger('fb2pdf').error("Unknown section title element: %s" % x.name)
+                logging.getLogger('fb2pdf').error("Unknown section title element: %s" % x.tagName)
     return res
 
 def processEpigraphText(f,e):
     first = True
     ''' Epigaph text consists of "p", "empty-line", "poem" and "cite" elements sequence'''
-    i=0
-    for x in e.contents:
-        i=i+1
-        if isinstance(x, Tag):
-            if x.name == "p":
+    for x in e.childNodes:
+        if x.nodeType == Node.ELEMENT_NODE:
+            if x.tagName == "p":
                 if not first:
                     f.write("\\vspace{10pt}")
                 else:
                     first = False
                 _uwrite(f,par(x))
-            elif x.name == "empty-line":
+            elif x.tagName == "empty-line":
                 f.write("\\vspace{10pt}")
-            elif x.name == "poem":
+            elif x.tagName == "poem":
                 # TODO: test how verse plays with epigraph evn.
                 processPoem(x,f)
-            elif x.name == "cite":
+            elif x.tagName == "cite":
                 processCite(x,f)
-            elif x.name != "text-author":
-                logging.getLogger('fb2pdf').error("Unknown epigraph element: %s" % x.name)
+            elif x.tagName != "text-author":
+                logging.getLogger('fb2pdf').error("Unknown epigraph element: %s" % x.tagName)
         
 def processEpigraphs(s,f):
-    ep = s.findAll("epigraph", recursive=False)
+    ep = findAll(s,"epigraph")
     if len(ep)==0:
         return
     f.write("\\begin{epigraphs}\n")
@@ -453,7 +469,7 @@ def processEpigraphs(s,f):
         f.write(" }%\n")
 
         eauthor=""
-        ea=e.find("text-author")
+        ea=find(e,"text-author")
         if ea:
             eauthor=_text(ea)
         f.write("\t{")
@@ -464,18 +480,18 @@ def processEpigraphs(s,f):
 
 
 def authorName(a):
-    fn = a.find("first-name")
+    fn = find(a,"first-name")
     if fn:
         author_name = _text(fn)
     else:
         author_name = ""
-    mn = a.find("middle-name")
+    mn = find(a,"middle-name")
     if mn:
         if author_name:
             author_name = author_name + " " + _text(mn)
         else:
             author_name = _text(mn)
-    ln = a.find("last-name")
+    ln = find(a,"last-name")
     if ln:
         if author_name:
             author_name = author_name + " " + _text(ln)
@@ -489,18 +505,18 @@ def processDescription(desc,f):
         return
     
     # title info, mandatory element
-    ti = desc.find("title-info")
+    ti = find(desc,"title-info")
     if not ti:
         logging.getLogger('fb2pdf').warning("Missing required 'title-info' element\n")
         return 
-    t = ti.find("book-title")
+    t = find(ti,"book-title")
     if t:
         title = _text(t)
     else:
         title = ""
 
     # authors
-    aa = ti.findAll("author")
+    aa = findAll(ti,"author")
     author_name = ""
     for a in aa:
         if len(author_name):
@@ -539,9 +555,9 @@ def processDescription(desc,f):
         f.write("}\n")
 
     # cover, optional
-    co = desc.find("coverpage")
+    co = find(desc,"coverpage")
     if co:
-        images = co.findAll("image", recursive=False)
+        images = findAll(co,"image")
         if len(images):
             #f.write("\\begin{titlepage}\n")
             for image in images:
@@ -549,15 +565,15 @@ def processDescription(desc,f):
             #f.write("\\end{titlepage}\n")
 
     # annotation, optional
-    an = desc.find("annotation")
+    an = find(desc,"annotation")
     if an:
         processAnnotation(f,an)
 
 def findEnclosures(fb,outdir):
-    encs = fb.findAll("binary", recursive=False)
+    encs = findAll(fb,"binary")
     for e in encs:
-        id=e['id']
-        ct=e['content-type']
+        id=e.getAttribute('id')
+        ct=e.getAttribute('content-type')
         global image_exts
         if not image_exts.has_key(ct):
             logging.getLogger('fb2pdf').warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
@@ -565,7 +581,7 @@ def findEnclosures(fb,outdir):
         fname = os.tempnam(".", "enc") + "." + image_exts[ct]
         fullfname = outdir + "/" + fname
         f = open(fullfname,"w")
-        f.write(binascii.a2b_base64(e.contents[0]))
+        f.write(binascii.a2b_base64(e.childNodes[0].data))
         f.close()
         # convert to grayscale, 166dpi (native resolution for Sony Reader)
         Image.open(fullfname).convert("L").save(fullfname, dpi=(166,166))
@@ -575,7 +591,7 @@ def findEnclosures(fb,outdir):
     
 def processInlineImage(image):
         global enclosures
-        href = image.get('l:href')
+        href = image.getAttributeNS('http://www.w3.org/1999/xlink','href')
         if not href or href[0]!='#':
             logging.getLogger('fb2pdf').error("Invalid inline image ref '%s'\n" % href)
             return ""
