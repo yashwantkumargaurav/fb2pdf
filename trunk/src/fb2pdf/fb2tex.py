@@ -361,7 +361,7 @@ def processSection(s, f):
         if x.nodeType == Node.ELEMENT_NODE:
             if x.tagName == "section":
                 processSection(x,f)
-            if x.tagName == "p":
+            elif x.tagName == "p":
                 pid=x.getAttribute('id')
                 if pid:
                     f.write('\\hypertarget{')
@@ -384,8 +384,6 @@ def processSection(s, f):
                 pass # TODO
             elif x.tagName=="title" or x.tagName=="epigraph":
                 pass
-            elif x.tagName=="section":
-                processSection(x, f)
             else:
                 logging.getLogger('fb2pdf').error("Unknown section element: %s" % x.tagName)
 
