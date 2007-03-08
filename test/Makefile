@@ -16,7 +16,7 @@ all: $(allpdf)
 	fb2tex -v -f $< -o $@
 
 install:
-	cd .. && sudo python setup.py install; cd test
+	cd .. && sudo python2.4 setup.py install; cd test
 
 test:
 	./utest.sh
