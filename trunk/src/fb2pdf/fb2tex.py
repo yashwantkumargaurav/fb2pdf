@@ -101,6 +101,9 @@ def _textQuote(str):
     # line if it followed it
     str = re.sub(r'\\\$\\backslash\\\$',r'$\\backslash$',str)
 
+    # Unicode Character 'EM DASH' (U+2014)
+    # used in some documents instead of '-'
+    str = string.replace(str,u'\u2014','---')
     # 'EN DASH' at the beginning of paragraph - russian direct speech
     if ord(str[0])==0x2013:
         str="\\cdash--*" + str[1:]
