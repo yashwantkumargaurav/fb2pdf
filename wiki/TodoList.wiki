@@ -4,7 +4,6 @@
 
   * 'table'
   * Web Design
-  * multiple 'body' elements
   * 'image' elemnt support for external images referenced by URL
 
 == Ideas ==
