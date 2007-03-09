@@ -151,6 +151,8 @@ def upload_file(bucket, key, filename, disp='attachment'):
         k.set_acl('public-read')
     except S3Error, err:
         raise TemporaryError("Error uploading file '%s' to S3" % filename, err)
+    except Exception, e:
+        raise TemporaryError("Error uploading file '%s' to S3" % filename, e)
 
 def processDocument(src_url, src_type, src_name, res_key, log_key):
     logging.getLogger('fbdaemon').info("Processing '%s'." % src_name)
