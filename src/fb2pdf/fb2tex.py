@@ -55,9 +55,9 @@ def par(p):
                 href = s.getAttributeNS('http://www.w3.org/1999/xlink','href')
                 if href:
                     if href[0]=='#':
-                        res += '\\hyperlink{' + href[1:] + '}{\\underline{' + _textQuote(_text(s)) + '}}'
+                        res += '\\hyperlink{' + href[1:] + '}{\\underline{' + par(s) + '}}'
                     else:
-                        res += '\\href{' + href + '}{\\underline{' + _textQuote(_text(s)) + '}}'
+                        res += '\\href{' + href + '}{\\underline{' + par(s) + '}}'
                 else:
                     logging.getLogger('fb2pdf').warning("'a' without 'href'")
                 res += "" #TODO
