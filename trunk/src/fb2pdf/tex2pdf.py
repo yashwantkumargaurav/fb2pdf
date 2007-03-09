@@ -19,11 +19,11 @@ def tex2pdf(texfilename, pdffilename):
     logging.getLogger('fb2pdf').debug("Converting TeX to PDF")
     
     #TODO specify PDF output filename
-    rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
+    rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape '%s' > /dev/null" % texfilename)
     if rc:
         raise PersistentError("Execution of pdflatex failed with error code %d" % rc)
     # Run again, to incorporate TOC
-    rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape %s > /dev/null" % texfilename)
+    rc = os.system("pdflatex -halt-on-error -interaction batchmode -no-shell-escape '%s' > /dev/null" % texfilename)
     if rc:
         # Since it is passed first time, second failure considered temporary error
         raise TemporaryError("Execution of pdflatex failed with error code %d" % rc)
