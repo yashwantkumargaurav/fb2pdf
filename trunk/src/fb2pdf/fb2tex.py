@@ -341,7 +341,7 @@ def processCite(q,f):
             elif x.tagName=="empty-line":
                 f.write("\\vspace{12pt}\n\n")
             elif x.tagName == "subtitle":
-                _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x), x))
+                _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x, False), x))
             elif x.tagName=="table":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.tagName)
                 pass # TODO
@@ -387,7 +387,7 @@ def processSection(s, f):
             elif x.tagName == "poem":
                 processPoem(x,f)
             elif x.tagName == "subtitle":
-                _uwrite(f,"\\subsection{%s}\n" % _tocElement(par(x), x))
+                _uwrite(f,"\\subsection{%s}\n" % _tocElement(par(x, False), x))
             elif x.tagName == "cite":
                 processCite(x,f)
             elif x.tagName == "table":
@@ -412,7 +412,7 @@ def processAnnotation(f, an):
                 elif x.tagName == "poem":
                     processPoem(x,f)
                 elif x.tagName == "subtitle":
-                    _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x), x))
+                    _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x, False), x))
                 elif x.tagName == "cite":
                     processCite(x,f)
                 elif x.tagName == "table":
