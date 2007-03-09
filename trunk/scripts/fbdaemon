@@ -251,11 +251,11 @@ def main():
                 except TemporaryError, msg:
                     logging.getLogger('fbdaemon').exception(msg)
                     if msg.nested:
-                        logging.getLogger('fbdaemon').exception("Cause", msg)
+                        logging.getLogger('fbdaemon').exception("Cause", msg.nested)
                 except PersistentError, msg:
                     logging.getLogger('fbdaemon').exception(msg)
                     if msg.nested:
-                        logging.getLogger('fbdaemon').exception("Cause", msg)
+                        logging.getLogger('fbdaemon').exception("Cause", msg.nested)
                     logging.getLogger('fbdaemon').debug("removing message due to persistent error")
                     q.delete_message(m)
                 except:
