@@ -141,18 +141,28 @@ def processMessage(m):
     processDocument(str(src_url), str(src_type), str(src_name), str(res_key), str(log_key))
 
 def upload_file(bucket, key, filename, disp='attachment'):
-    try:
-        global cfg
-        c = S3Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
-        b = c.create_bucket(bucket)
-        k = Key(b)
-        k.key = key
-        k.set_contents_from_filename(filename,{'Content-Disposition':'%s; filename=\"%s\"' % (disp,filename)})
-        k.set_acl('public-read')
-    except S3Error, err:
-        raise TemporaryError("Error uploading file '%s' to S3" % filename, err)
-    except Exception, e:
-        raise TemporaryError("Error uploading file '%s' to S3" % filename, e)
+    global cfg
+    retries = int(cfg.get('storage','retries'))
+    for i in range(retries):
+        try:
+            c = S3Connection(aws_access_key_id=cfg.get('aws','public'),
+                             aws_secret_access_key=cfg.get('aws','private'))
+            b = c.create_bucket(bucket)
+            k = Key(b)
+            k.key = key
+            k.set_contents_from_filename(filename,{'Content-Disposition':'%s; filename=\"%s\"' % (disp,filename)})
+            k.set_acl('public-read')
+            return
+        except S3Error, err:
+            if i==(retries-1):
+                raise TemporaryError("Error uploading file '%s' to S3" % filename, err)
+            else:
+                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename, err)
+        except Exception, e:
+            if i==(retries-1):
+                raise TemporaryError("Error uploading file '%s' to S3" % filename, e)
+            else:
+                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename, e)
 
 def processDocument(src_url, src_type, src_name, res_key, log_key):
     logging.getLogger('fbdaemon').info("Processing '%s'." % src_name)
