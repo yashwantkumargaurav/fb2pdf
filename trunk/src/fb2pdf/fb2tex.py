@@ -130,6 +130,9 @@ def _textQuote(str):
     str = string.replace(str,u'\u00B1','$\\pm$')
     # russian number sign
     str = string.replace(str,u'\u2116','\\No')
+    # squiare brackets
+    str = string.replace(str,'[','{[}')
+    str = string.replace(str,']','{]}')
         
     return str
 
