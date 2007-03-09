@@ -179,7 +179,7 @@ def processDocument(src_url, src_type, src_name, res_key, log_key):
             else:
                 raise TemporaryError("Error getting FB2 file", e)
         except:
-            raise TemporaryError("Error getting FB2 file", e)
+            raise TemporaryError("Error getting FB2 file")
             
         
         texfilename = src_name + '.tex'
