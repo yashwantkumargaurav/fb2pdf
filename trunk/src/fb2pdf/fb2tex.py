@@ -40,35 +40,38 @@ def find(elem, what):
     else:
         return nl[0]
 
-def par(p):
+def par(p, allowhref=True):
     res = u''
     for s in p.childNodes:
         if s.nodeType == Node.ELEMENT_NODE:
             if s.tagName == "strong":
-                res += u'{\\bf '+ par(s) + u'}'
+                res += u'{\\bf '+ par(s,allowhref) + u'}'
             elif s.tagName == "emphasis":
-                res += u'{\\it '+ par(s) + u'}'
+                res += u'{\\it '+ par(s,allowhref) + u'}'
             elif s.tagName == "style":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
                 res += "" #TODO
             elif s.tagName == "a":
-                href = s.getAttributeNS('http://www.w3.org/1999/xlink','href')
-                if href:
-                    if href[0]=='#':
-                        res += '\\hyperlink{' + href[1:] + '}{\\underline{' + par(s) + '}}'
+                if allowhref:
+                    href = s.getAttributeNS('http://www.w3.org/1999/xlink','href')
+                    if href:
+                        if href[0]=='#':
+                            res += '\\hyperlink{' + href[1:] + '}{\\underline{' + par(s,allowhref) + '}}'
+                        else:
+                            res += '\\href{' + href + '}{\\underline{' + par(s,allowhref) + '}}'
                     else:
-                        res += '\\href{' + href + '}{\\underline{' + par(s) + '}}'
+                        logging.getLogger('fb2pdf').warning("'a' without 'href'")
                 else:
-                    logging.getLogger('fb2pdf').warning("'a' without 'href'")
+                    res += par(s,allowhref)
                 res += "" #TODO
             elif s.tagName == "strikethrough":
-                res += u'\\sout{' + par(s) + u'}'
+                res += u'\\sout{' + par(s,allowhref) + u'}'
             elif s.tagName == "sub":
-                res += u'$_{\\textrm{' + par(s) + '}}$'
+                res += u'$_{\\textrm{' + par(s,allowhref) + '}}$'
             elif s.tagName == "sup":
-                res += u'$^{\\textrm{' + par(s) + '}}$'
+                res += u'$^{\\textrm{' + par(s,allowhref) + '}}$'
             elif s.tagName == "code":
-                res += u'{\\sc' + par(s) + u'}'
+                res += u'{\\sc' + par(s,allowhref) + u'}'
             elif s.tagName == "image":
                 res += processInlineImage(s)
             elif s.tagName == "l":
@@ -431,7 +434,7 @@ def getSectionTitle(t):
                     res = res + u"\\\\"
                 else:
                     first = False
-                res = res + par(x)
+                res = res + par(x, False)
             elif x.tagName == "empty-line":
                 res = res + u"\\vspace{10pt}"
             else:
