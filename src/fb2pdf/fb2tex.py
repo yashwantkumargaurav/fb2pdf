@@ -236,12 +236,13 @@ def fb2tex(infile, outfile):
 
     f.write("\\tableofcontents\n\\newpage\n\n");
     
-    body=find(fb,"body")
-    if not body:
+    body=findAll(fb,"body")
+    if not body or len(body)==0:
         logging.getLogger('fb2pdf').exception("The file does not seems to contain 'fictionbook/body' element")
         raise PersistentError("The file does not seems to contain 'fictionbook/body' element")
-    processEpigraphs(body, f)
-    processSections(body, f)
+    for b in body:
+        processEpigraphs(b, f)
+        processSections(b, f)
     
     f.write("}")
     f.write("\n\\end{document}\n")
@@ -348,6 +349,12 @@ def processCite(q,f):
     f.write('\\end{quotation}\n')
     
 def processSection(s, f):
+    pid=s.getAttribute('id')
+    if pid:
+        f.write('\\hypertarget{')
+        _uwrite(f,pid)
+        f.write('}{}\n')
+    
     t = find(s,"title")
     if t:
         title = getSectionTitle(t)
