@@ -11,4 +11,6 @@ $awsS3Bucket = "fb2pdf";
 $awsSQSQueue = "fb2pdf";
 $awsSQSTimeout = 600;
 
+// secret phrase
+$secret = "Zakovirka";
 ?>

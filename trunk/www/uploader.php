@@ -4,6 +4,7 @@ require_once 'zipparser.php';
 require_once 'awscfg.php';
 require_once 's3.php';
 require_once 'sqshelper.php';
+require_once 'utils.php';
 
 $testMode = false; // set to false for production
 
@@ -35,6 +36,7 @@ else if ($_POST['uploadtype'] == 'url')
         
     $filePath = $tempFile;
 }
+$email = $_POST['email'];
 
 // Check zip format
 $zipArr = check_zip_format($filePath);
@@ -53,7 +55,7 @@ else // zip file
 }
 
 // Process file
-$key = process_file($fbFile, $fileName);
+$key = process_file($fbFile, $fileName, $email);
 
 // remove temporary files
 if ($zipFile and !unlink($zipFile))
@@ -65,18 +67,14 @@ if ($key === false)
     die("Невозможно сохранить файл $fileName для дальнейшей конвертации. Пожалуйста, попробуйте ешё раз.");
 
 // redirect to the status page
-$host = $_SERVER["HTTP_HOST"];
-$uri  = rtrim(dirname($_SERVER["PHP_SELF"]), "/\\");
-$page = "status.php?id=$key";
-
-$url = "http://$host$uri/$page";
+$url = get_page_url("status.php?id=$key");
 header("Location: $url");
 
 // Process file.
 // Returns key or false
-function process_file($filePath, $fileName)
+function process_file($filePath, $fileName, $email)
 {
-    global $awsApiKey, $awsApiSecretKey, $awsS3Bucket, $testMode;
+    global $awsApiKey, $awsApiSecretKey, $awsS3Bucket, $testMode, $secret;
 
     // genarate key
     $md5 = md5(uniqid(""));
@@ -103,7 +101,8 @@ function process_file($filePath, $fileName)
         }
         
         // send SQS message
-        if(!sqsPutMessage($md5, "http://s3.amazonaws.com/$awsS3Bucket/$md5.fb2", $name))
+        $callbackUrl = get_page_url("conv_callback.php");
+        if(!sqsPutMessage($md5, "http://s3.amazonaws.com/$awsS3Bucket/$md5.fb2", $name, $callbackUrl, md5($secret . $md5 . ".pdf"), $email))
         {
             error_log("FB2PDF ERROR. Unable to send Amazon  SQS message for key <$md5>."); 
             return false;
@@ -111,4 +110,5 @@ function process_file($filePath, $fileName)
     }    
     return $md5;
 }
+
 ?>
