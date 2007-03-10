@@ -137,6 +137,11 @@ def _textQuote(str):
     # squiare brackets
     str = string.replace(str,'[','{[}')
     str = string.replace(str,']','{]}')
+    # Unicode Character 'MIDDLE DOT' (U+00B7)
+    str = string.replace(str,u'\u00B7','\\textperiodcentered')
+    # Greek Mu
+    str = string.replace(str,u'\u00B5','$\\mu$')
+
         
     return str
 
