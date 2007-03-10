@@ -2,27 +2,29 @@
 require_once 'awscfg.php';
 require_once 'sqs.php';
 
-function sqsPutMessage($id, $url, $name)
+function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, $email)
 {
-global $awsApiKey, $awsApiSecretKey, $awsSQSQueue, $awsSQSTimeout;
+    global $awsApiKey, $awsApiSecretKey, $awsSQSQueue, $awsSQSTimeout;
 
-$sqs = new SQS($awsApiKey, $awsApiSecretKey);
-if (!$sqs->createQueue($awsSQSQueue))
-    return false;
+    $sqs = new SQS($awsApiKey, $awsApiSecretKey);
+    if (!$sqs->createQueue($awsSQSQueue))
+        return false;
 
-$queueUrl = parseCreateQueueResponse($sqs->responseString);
-$queueUrl = str_replace("http://queue.amazonaws.com/","",$queueUrl);
+    $queueUrl = parseCreateQueueResponse($sqs->responseString);
+    $queueUrl = str_replace("http://queue.amazonaws.com/","",$queueUrl);
 
-$message = "<?xml version='1.0' encoding='UTF-8'?><fb2pdfjob version=\"2\">" . 
-    "<source url=\"$url\" type=\"application/fb2+xml\" name=\"$name\"/>" .
-    "<result key=\"$id.pdf\"/>" .
-    "<log key=\"$id.txt\"/>" .
-    "</fb2pdfjob>";
+    $message = "<?xml version='1.0' encoding='UTF-8'?><fb2pdfjob version=\"3\">" . 
+        "<source url=\"$sourceUrl\" type=\"application/fb2+xml\" name=\"$name\"/>" .
+        "<result key=\"$id.pdf\"/>" .
+        "<log key=\"$id.txt\"/>" .
+        "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email\"/>" .
+        "</fb2pdfjob>";
 
-if (!$sqs->putMessage(base64_encode($message), $queueUrl, $awsSQSTimeout))
-    return false;
+    if (!$sqs->putMessage(base64_encode($message), $queueUrl, $awsSQSTimeout))
+        return false;
 
-return true;
+    error_log("FB2PDF INFO. Sent SQS Message\n$message"); 
+    return true;
 }
 
 $sqsProcessQueueUrl=false;
