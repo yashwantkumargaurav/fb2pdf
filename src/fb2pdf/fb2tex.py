@@ -317,8 +317,13 @@ def processStanza(s, f):
     vv = findAll(s,"v")
     for v in vv:
         vt = par(v)
-        _uwrite(f,vt)
-        f.write("\\\\\n")
+        if len(vt)==0:
+            # TODO: use \vgap from verse package
+            vt="\\vspace{12pt}\n"
+            _uwrite(f,vt)
+        else:
+            _uwrite(f,vt)
+            f.write("\\\\\n")
 
 
 def processAuthors(q,f):
