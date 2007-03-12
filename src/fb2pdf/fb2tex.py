@@ -483,7 +483,7 @@ def processEpigraphs(s,f):
     for e in ep:
         f.write("\\qitem{")
         processEpigraphText(f, e)
-        f.write(" }%\n")
+        f.write("\\hspace*{\\fill}}%\n") #TODO \hspace is a workaround for #37
 
         eauthor=""
         ea=find(e,"text-author")
