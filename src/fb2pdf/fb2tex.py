@@ -128,6 +128,8 @@ def _textQuote(str):
     # inside of another quote)
     str = string.replace(str,u'\u201e','``')
     str = string.replace(str,u'\u201c',"''")
+    str = string.replace(str,u'\u201f','``')
+    str = string.replace(str,u'\u201d',"''")
     # Broken bar
     str = string.replace(str,u'\u00A6','|')
     # plus-minus
