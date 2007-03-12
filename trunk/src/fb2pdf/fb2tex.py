@@ -354,7 +354,7 @@ def processCite(q,f):
             elif x.tagName=="empty-line":
                 f.write("\\vspace{12pt}\n\n")
             elif x.tagName == "subtitle":
-                _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x, False), x))
+                _uwrite(f,"\\item\n\\subsection*{%s}\n" % _tocElement(par(x, False), x))
             elif x.tagName=="table":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.tagName)
                 pass # TODO
