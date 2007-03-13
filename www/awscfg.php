@@ -15,7 +15,8 @@ $awsSQSTimeout = 600;
 $secret = "";   // Specify secret phrase here
 
 // db settings
-$dbServer = "";       // Specify DB name here
-$dbUser = "";         // Specify DB user here
+$dbServer = "";     // Specify DB server here
+$dbName = "";       // Specify DB name here
+$dbUser = "";       // Specify DB user here
 $dbPassword = "";   // Specify DB password here
 ?>
