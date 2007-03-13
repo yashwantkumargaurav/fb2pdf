@@ -106,14 +106,14 @@ def _textQuote(str):
     str = string.replace(str,u'\u2014','---')
     # 'EN DASH' at the beginning of paragraph - russian direct speech
     if ord(str[0])==0x2013:
-        str="\\cdash--*" + str[1:]
+        str="\\cdash--*\\," + str[1:]
     # ellipses
-    str = string.replace(str,'...','\\ldots\,')
-    str = string.replace(str,u'\u2026','\\ldots\,')
+    str = string.replace(str,'...','\\ldots\\,')
+    str = string.replace(str,u'\u2026','\\ldots\\,')
     # caret
-    str = re.sub(r'[\^]',r'\\textasciicircum\,',str)
+    str = re.sub(r'[\^]',r'\\textasciicircum\\,',str)
     # tilde
-    str = re.sub(r'[\~]',r'\\textasciitilde\,',str)
+    str = re.sub(r'[\~]',r'\\textasciitilde\\,',str)
     # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
     str = string.replace(str,u'\u00ab','<<')
     # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
@@ -135,12 +135,12 @@ def _textQuote(str):
     # plus-minus
     str = string.replace(str,u'\u00B1','$\\pm$')
     # russian number sign
-    str = string.replace(str,u'\u2116','\\No')
+    str = string.replace(str,u'\u2116','\\No\\,')
     # squiare brackets
     str = string.replace(str,'[','{[}')
     str = string.replace(str,']','{]}')
     # Unicode Character 'MIDDLE DOT' (U+00B7)
-    str = string.replace(str,u'\u00B7','\\textperiodcentered')
+    str = string.replace(str,u'\u00B7','\\textperiodcentered\\,')
     # Greek Mu
     str = string.replace(str,u'\u00B5','$\\mu$')
 
