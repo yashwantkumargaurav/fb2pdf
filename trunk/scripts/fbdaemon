@@ -132,6 +132,9 @@ def processMessage(m):
     src_url  = src.getAttribute('url')
     src_type = src.getAttribute('type')
     src_name = src.getAttribute('name')
+    src_encoding = str(src.getAttribute('encoding'))
+    if len(src_encoding)==0:
+        src_encoding=None
 
     results=root.getElementsByTagName('result')
     if len(results)!=1:
@@ -170,7 +173,7 @@ def processMessage(m):
             x['params']={}
         callbacks.append(x)
 
-    processDocument(str(src_url), str(src_type), str(src_name),
+    processDocument(str(src_url), str(src_type), str(src_name), src_encoding,
                     str(res_key), res_encoding,
                     str(log_key),
                     callbacks)
@@ -220,48 +223,88 @@ def processCallbacks(res_key, status, callbacks):
         except:
             logging.getLogger('fbdaemon').exception("Error calling callback %s" % c['url'])
 
-def processDocument(src_url, src_type, src_name, res_key, res_encoding, log_key, callbacks):
-    try:
+def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_encoding, log_key, callbacks):
+
+    global cfg
+    bucket = cfg.get('storage','bucket')
+
+    logfilename = src_name + '.txt'
+    
+    try: # on err, call err. callbacks
+
+        basedir = os.getcwd()
+
         logging.getLogger('fbdaemon').info("Processing '%s'." % src_name)
         tmpdirname = tempfile.gettempdir() + '/' + str(int(time.time()))
         logging.getLogger('fbdaemon').debug("Creating temporary directory '%s'." % tmpdirname)
         os.mkdir(tmpdirname)
-        basedir = os.getcwd()
-        global cfg
-        bucket = cfg.get('storage','bucket')
-        try:
+
+        try: # finally remove temp dir
             os.chdir(tmpdirname)
-            fbfilename = src_name + '.fb2'
-            logging.getLogger('fbdaemon').debug("Downloading '%s' to file '%s'." % (src_url, fbfilename))
-
-            try:
-                fsock = open(fbfilename,'wb')
-                try:
-                    asock = urllib2.urlopen(src_url)
-                    shutil.copyfileobj(asock, fsock)
-                finally:
-                    fsock.close()
-            except urllib2.HTTPError, e:
-                if e.code==404 or e.code==403:
-                    raise PersistentError("Error getting FB2 file", e)
-                else:
-                    raise TemporaryError("Error getting FB2 file", e)
-            except:
-                raise TemporaryError("Error getting FB2 file")
-
-            texfilename = src_name + '.tex'
-            logfilename = src_name + '.txt'
-            pdffilename = src_name + '.pdf'
-
-            # Individual log file
+            
+            # Create individual log file
             lh = logging.FileHandler(logfilename)
             lf = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
             lh.setFormatter(lf)
             logging.getLogger('fb2pdf').addHandler(lh)
             logging.getLogger('fb2pdf').setLevel(logging.DEBUG)
 
-            try:
-                try:
+            try: # on PersistentError error, upload log
+                try: # finally, close logger
+        
+                    fbfilename = src_name + '.fb2'
+                    zipfilename = src_name + '.zip'
+
+                    if src_encoding=="application/zip":
+                        srcfilename = zipfilename
+                    else:
+                        srcfilename = fbfilename
+
+                    logging.getLogger('fbdaemon').debug("Downloading '%s' to file '%s'." % (src_url, srcfilename))
+
+                    try:
+                        fsock = open(srcfilename,'wb')
+                        try:
+                            asock = urllib2.urlopen(src_url)
+                            shutil.copyfileobj(asock, fsock)
+                        finally:
+                            fsock.close()
+                    except urllib2.HTTPError, e:
+                        if e.code==404 or e.code==403:
+                            logging.getLogger('fb2pdf').error("Error downloading FB2 or ZIP file.")
+                            raise PersistentError("Error downloading FB2 or ZIP file", e)
+                        else:
+                            raise TemporaryError("Error downloadingFB2 or ZIP file", e)
+                    except:
+                        raise TemporaryError("Error downloading FB2 or ZIP file")
+
+                    if src_encoding == "application/zip":
+                        try:
+                            logging.getLogger('fbdaemon').debug("Unpacking ZIP '%s'" % zipfilename)
+                            z = zipfile.ZipFile(zipfilename,'r')
+                            data = None
+                            try:
+                                flist = z.namelist()
+                                if len(flist)!=1:
+                                    logging.getLogger('fb2pdf').error("ZIP file must contain 1 file. %d found." % len(flist))
+                                    raise PersistentError("ZIP file must contain 1 file. %d found." % len(flist))
+                                else:
+                                    logging.getLogger('fb2pdf').info("Extracting '%s' from ZIP." % flist[0])
+                                data = z.read(flist[0])
+                            finally:
+                                z.close()
+                            fbf = open(fbfilename, 'wb')
+                            try:
+                                fbf.write(data)
+                            finally:
+                                fbf.close()
+                        except:
+                            logging.getLogger('fb2pdf').exception("Error extracting content from ZIP file")
+                            raise PersistentError("Error extracting content from ZIP file")
+
+                    texfilename = src_name + '.tex'
+                    pdffilename = src_name + '.pdf'
+
                     logging.getLogger('fbdaemon').debug("Converting to TeX")
                     fb2tex.fb2tex(fbfilename, texfilename)
 
@@ -276,29 +319,36 @@ def processDocument(src_url, src_type, src_name, res_key, res_encoding, log_key,
                                 zipfilename = pdffilename + '.zip'
                                 logging.getLogger('fbdaemon').debug("Creating ZIP '%s'" % zipfilename)
                                 z=zipfile.ZipFile(zipfilename,'w',compression=zipfile.ZIP_DEFLATED)
-                                z.write(pdffilename)
-                                z.close()
+                                try:
+                                    z.write(pdffilename)
+                                finally:
+                                    z.close()
                                 resfilename = zipfilename
                             except:
-                                logging.getLogger('fb2pdf').exception("ZIP error")
-                                raise PersistentError("ZIP error")
+                                logging.getLogger('fb2pdf').exception("Error creating resulting ZIP")
+                                raise PersistentError("Error creating resulting ZIP")
                         else:
+                            logging.getLogger('fb2pdf').error("Unsupporeted encoding '%s'" % res_encoding)
                             raise PersistentError("Unsupporeted encoding '%s'" % res_encoding)
-                    
+
+                    # all OK
+                    # upload PDF 
+                    logging.getLogger('fb2pdf').debug("Uploading resulting file to S3")
+                    logging.getLogger('fbdaemon').debug("Uploading resulting file to S3")
+                    upload_file(bucket, res_key, resfilename)
+
                 finally:
+                    # close logger
                     logging.getLogger('fb2pdf').removeHandler(lh)
                     lh.flush()
                     lh.close()
-            except:
+            except PersistentError, perr:
                 # Conversion error, upload log
-                logging.getLogger('fbdaemon').exception("Conversion Failed")
+                logging.getLogger('fb2pdf').error("Sorry we could not convert your file. If you feel this is a bug, please report it to us.")
+                logging.getLogger('fbdaemon').exception("Conversion Failed", perr)
                 upload_file(bucket, log_key, logfilename, 'inline')
                 raise
 
-            # all OK
-            # upload PDF 
-            logging.getLogger('fbdaemon').debug("Uploading resulting file to S3")
-            upload_file(bucket, res_key, resfilename)
             # upoad log (log should be uploaded AFTER PDF)
             logging.getLogger('fbdaemon').debug("Uploading log to S3")
             upload_file(bucket, log_key, logfilename, 'inline')
@@ -312,6 +362,7 @@ def processDocument(src_url, src_type, src_name, res_key, res_encoding, log_key,
                 os.remove("%s/%s" % (tmpdirname,f))
             os.rmdir(tmpdirname)
     except:
+        # invoke callbacks
         processCallbacks(res_key, 'e', callbacks)
         raise
 
