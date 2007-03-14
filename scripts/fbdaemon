@@ -69,7 +69,7 @@ def parseCommandLineAndReadConfiguration():
             global logfile
             logfile = argument
                 
-    if cfgfile:
+    if not cfgfile:
         raise getopt.GetoptError("configuration file not specified")
 
     if do_daemon:
