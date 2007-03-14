@@ -197,12 +197,12 @@ def upload_file(bucket, key, filename, disp='attachment'):
             if i==(retries-1):
                 raise TemporaryError("Error uploading file '%s' to S3" % filename, err)
             else:
-                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename, err)
+                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename)
         except Exception, e:
             if i==(retries-1):
                 raise TemporaryError("Error uploading file '%s' to S3" % filename, e)
             else:
-                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename, e)
+                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename)
 
 def processCallbacks(res_key, status, callbacks):
     if not callbacks:
@@ -347,7 +347,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
             except PersistentError, perr:
                 # Conversion error, upload log
                 logging.getLogger('fb2pdf').error("Sorry we could not convert your file. If you feel this is a bug, please report it to us.")
-                logging.getLogger('fbdaemon').exception("Conversion Failed", perr)
+                logging.getLogger('fbdaemon').exception("Conversion Failed")
                 upload_file(bucket, log_key, logfilename, 'inline')
                 raise
 
@@ -394,11 +394,11 @@ def main():
                 except TemporaryError, msg:
                     logging.getLogger('fbdaemon').exception(msg)
                     if msg.nested:
-                        logging.getLogger('fbdaemon').exception("Cause", msg.nested)
+                        pass #TODO Log msg.nested
                 except PersistentError, msg:
                     logging.getLogger('fbdaemon').exception(msg)
                     if msg.nested:
-                        logging.getLogger('fbdaemon').exception("Cause", msg.nested)
+                        pass #TODO Log msg nested
                     logging.getLogger('fbdaemon').debug("removing message due to persistent error")
                     q.delete_message(m)
                 except:
