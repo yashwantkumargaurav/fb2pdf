@@ -4,6 +4,7 @@ require_once 'zipparser.php';
 require_once 'awscfg.php';
 require_once 's3.php';
 require_once 'sqshelper.php';
+require_once 'db.php';
 require_once 'utils.php';
 
 $testMode = false; // set to false for production
@@ -44,18 +45,24 @@ if ($zipArr === false) //  not a zip file
 {
     $zipFile = NULL;
     $fbFile  = $filePath;
-    if (!check_fb_format($fbFile))
+    
+    $parser = new FBParser();
+    if (!$parser->parse($fbFile))
         die("$fileName не существует или не является файлом в формате ZIP или FB2. Пожалуйста, выберите ZIP или FB2 файл и попробуйте ещё раз.");
+    $bookTitle  = $parser->getTitle();
+    $bookAuthor = $parser->getAuthor();
 }
 else // zip file
 {
-    $zipFile  = $filePath;
-    $fbFile   = $zipArr["filePath"];
-    $fileName = $zipArr["fileName"];
+    $zipFile    = $filePath;
+    $fbFile     = $zipArr["filePath"];
+    $fileName   = $zipArr["fileName"];
+    $bookTitle  = $zipArr["bookTitle"];
+    $bookAuthor = $zipArr["bookAuthor"];
 }
 
 // Process file
-$key = process_file($fbFile, $fileName, $email);
+$key = process_file($fbFile, $fileName, $email, $bookTitle, $bookAuthor);
 
 // remove temporary files
 if ($zipFile and !unlink($zipFile))
@@ -72,12 +79,16 @@ header("Location: $url");
 
 // Process file.
 // Returns key or false
-function process_file($filePath, $fileName, $email)
+function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor)
 {
     global $awsApiKey, $awsApiSecretKey, $awsS3Bucket, $testMode, $secret;
+    global $dbServer, $dbName, $dbUser, $dbPassword;
 
     // genarate key
-    $md5 = md5(uniqid(""));
+    $key = md5(uniqid(""));
+    
+    // get md5 of the file content
+    $md5 = md5($fileName);
     
     // get the filename without extension
     $pathParts = pathinfo($fileName);
@@ -94,21 +105,29 @@ function process_file($filePath, $fileName, $email)
         // create an object to store source file
         $s3 = new S3($awsApiKey, $awsApiSecretKey);
 
-        if (!$s3->writeFile($awsS3Bucket, $md5 . ".fb2", $filePath, "application/fb2+xml", "public-read", "", $httpHeaders))
+        if (!$s3->writeFile($awsS3Bucket, $key . ".fb2", $filePath, "application/fb2+xml", "public-read", "", $httpHeaders))
         {
-            error_log("FB2PDF ERROR. Unable to store file with key <$md5> in the Amazon S3 storage."); 
+            error_log("FB2PDF ERROR. Unable to store file with key <$key> in the Amazon S3 storage."); 
+            return false;
+        }
+        
+        // save to DB
+        $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+        if (!$db->insertBook($key, $bookAuthor, $bookTitle, $md5, "p"))
+        {
+            error_log("FB2PDF ERROR. Unable to insert book with key <$key> into DB."); 
             return false;
         }
         
         // send SQS message
         $callbackUrl = get_page_url("conv_callback.php");
-        if(!sqsPutMessage($md5, "http://s3.amazonaws.com/$awsS3Bucket/$md5.fb2", $name, $callbackUrl, md5($secret . $md5 . ".pdf"), $email))
+        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $name, $callbackUrl, md5($secret . $key), $email))
         {
-            error_log("FB2PDF ERROR. Unable to send Amazon  SQS message for key <$md5>."); 
+            error_log("FB2PDF ERROR. Unable to send Amazon  SQS message for key <$key>."); 
             return false;
         }
     }    
-    return $md5;
+    return $key;
 }
 
 ?>
