@@ -181,6 +181,12 @@ def processMessage(m):
 def upload_file(bucket, key, filename, disp='attachment'):
     global cfg
     retries = int(cfg.get('storage','retries'))
+
+    if filename == None:
+        raise PersistentError("Invalid None filename")
+    if disp == None:
+        raise PersistentError("Invalid None disposition")
+    
     for i in range(retries):
         try:
             c = S3Connection(aws_access_key_id=cfg.get('aws','public'),
