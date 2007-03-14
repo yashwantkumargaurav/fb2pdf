@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS Books
         title       VARCHAR(256) NULL,
         
         -- md5 of the book's content
-        md5_hash    BIGINT NOT NULL,
+        md5_hash    BIGINT UNSIGNED NOT NULL,
         
         -- conversion status ('r' - ready, 'e' - error)
         status      CHAR(1) DEFAULT NULL,
