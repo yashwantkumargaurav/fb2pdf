@@ -193,11 +193,6 @@ def upload_file(bucket, key, filename, disp='attachment'):
             k.set_contents_from_filename(filename,{'Content-Disposition':'%s; filename=\"%s\"' % (disp,filename)})
             k.set_acl('public-read')
             return
-        except S3Error, err:
-            if i==(retries-1):
-                raise TemporaryError("Error uploading file '%s' to S3" % filename, err)
-            else:
-                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename)
         except Exception, e:
             if i==(retries-1):
                 raise TemporaryError("Error uploading file '%s' to S3" % filename, e)
@@ -344,7 +339,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
                     logging.getLogger('fb2pdf').removeHandler(lh)
                     lh.flush()
                     lh.close()
-            except PersistentError, perr:
+            except PersistentError:
                 # Conversion error, upload log
                 logging.getLogger('fb2pdf').error("Sorry we could not convert your file. If you feel this is a bug, please report it to us.")
                 logging.getLogger('fbdaemon').exception("Conversion Failed")
@@ -391,12 +386,12 @@ def main():
                 try:
                     processMessage(m)
                     q.delete_message(m)
-                except TemporaryError, msg:
-                    logging.getLogger('fbdaemon').exception(msg)
+                except TemporaryError, ex:
+                    logging.getLogger('fbdaemon').exception(ex)
                     if msg.nested:
                         pass #TODO Log msg.nested
-                except PersistentError, msg:
-                    logging.getLogger('fbdaemon').exception(msg)
+                except PersistentError, ex:
+                    logging.getLogger('fbdaemon').exception(ex)
                     if msg.nested:
                         pass #TODO Log msg nested
                     logging.getLogger('fbdaemon').debug("removing message due to persistent error")
