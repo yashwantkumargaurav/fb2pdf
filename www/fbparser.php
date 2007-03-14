@@ -1,49 +1,88 @@
 <?php
 
-$rootElementFound = FALSE;
-
-// Check fb format
-// Returns TRUE or FALSE
-function check_fb_format($fbfile)
+class FBParser
 {
-    global $rootElementFound;
+    var $rootElement;
+    var $stack = array();
+
+    var $ROOT = "fictionbook";
+    var $PATH_FN = array("fictionbook", "description", "title-info", "author", "first-name");
+    var $PATH_LN = array("fictionbook", "description", "title-info", "author", "last-name");
+    var $PATH_BT = array("fictionbook", "description", "title-info", "book-title");
     
-    // Read the data from file
-    $data = NULL;
-    $fp=fopen($fbfile,"r");
-    if ($fp)
+    var $title;
+    var $firstName;
+    var $lastName;
+    
+    // Returns title
+    function getTitle()
     {
-        $data=fread($fp,1024);
-        fclose($fp);
+        return $this->title;
     }
-    if (!$data)
-        return FALSE;
     
-    // Initialize the XML parser
-    $parser=xml_parser_create();
-    xml_set_element_handler($parser,"fb_element_start","fb_element_end");
+    // Returns author
+    function getAuthor()
+    {
+        return $this->lastName . ", " . $this->firstName;
+    }
     
-    $error = FALSE;
-    if (!xml_parse($parser,$data,FALSE))
-        $error = TRUE;
+    // Parse fb2 file. 
+    // Return true if this is fb2 format or false.
+    function parse($fbfile)
+    {
+        // Read the data from file
+        $data = NULL;
+        $fp = fopen($fbfile,"r");
+        if ($fp)
+        {
+            $data = fread($fp,1024);
+            fclose($fp);
+        }
+        if (!$data)
+            return false;
     
-    xml_parser_free($parser);
-    
-    return $rootElementFound and !$error;
-}
+        // Initialize the XML parser
+        $parser = xml_parser_create();
+        xml_set_object($parser, $this);
 
-// Function to use at the start of an element
-function fb_element_start($parser,$element_name,$element_attrs)
-{
-    global $rootElementFound;
-    
-    if ($element_name == "FICTIONBOOK")
-        $rootElementFound = TRUE;
-}
+        xml_set_element_handler($parser, "tagStart", "tagEnd");
+        xml_set_character_data_handler($parser, "tagContent");
 
-// Function to use at the end of an element
-function fb_element_end($parser,$element_name)
-{
+        if (!xml_parse($parser, $data, false))
+        {
+            $errMsg = xml_error_string(xml_get_error_code($parser));
+            error_log("FB2PDF ERROR. Unable parse XML: $errMsg"); 
+            
+            xml_parser_free($parser);
+            return false;
+        }
+    
+        xml_parser_free($parser);
+        return $this->rootElement == $this->ROOT;
+    }
+
+    function tagStart($parser, $tagName, $attributes)
+    {
+        array_push($this->stack, strtolower($tagName));
+        if (count($this->stack) == 1)
+            $this->rootElement = $this->stack[0];
+        
+    }
+
+    function tagEnd($parser, $tagName)
+    {
+        array_pop($this->stack);
+    }
+
+    function tagContent($parser, $content)
+    {
+        if ($this->stack == $this->PATH_FN)
+            $this->firstName = $content;
+        else if ($this->stack == $this->PATH_LN)
+            $this->lastName = $content;
+        else if ($this->stack == $this->PATH_BT)
+            $this->title = $content;
+    }
 }
 
 ?>

@@ -1,8 +1,10 @@
 <?php
 require_once 'awscfg.php';
+require_once 'db.php';
 require_once 'utils.php';
 
 global $secret;
+global $dbServer, $dbName, $dbUser, $dbPassword;
 
 //$v = var_export($_POST, true);
 //error_log("FB2PDF INFO. Callback: POST="); 
@@ -28,6 +30,12 @@ if ($status != "r" and $status != "e")
     die;
 }
 
+// remove "extension" part from the key
+$pos = strrpos($key, ".");
+if ($pos !== false) 
+    $key = substr($key, 0, $pos);
+
+
 // check password
 if ($password != md5($secret . $key))
 {
@@ -37,12 +45,14 @@ if ($password != md5($secret . $key))
 }
 
 // update status in the DB
-//TODO
+$db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+if (!$db->updateBookStatus($key, $status))
+    error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$key"); 
+
 
 // send email to user
 if ($email)
 {
-    //TODO: Strip out ".pdf" from the key
     $statusUrl = get_page_url("status.php?id=$key");
     
     $subject = "Your book is ready";
@@ -54,7 +64,7 @@ if ($email)
     $headers  = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-type: text/html; charset=utf-8" . "\r\n";    
     
-    //mail($email, $subject, $message, $headers);
+    mail($email, $subject, $message, $headers);
 }
 
 error_log("FB2PDF INFO. Callback: password=$password, key=$key, status=$status, email=$email"); 

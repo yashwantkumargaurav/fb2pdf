@@ -22,9 +22,12 @@ function check_zip_format($zipfile)
                 $zip->unzip($fileName, $tempFile);
                 
                 // check fb format
-                if (check_fb_format($tempFile))
+                $parser = new FBParser();
+                if ($parser->parse($tempFile))
                 {
                     $ret = array("fileName"=>$fileName, "filePath"=>$tempFile);
+                    $ret["bookTitle"]  = $parser->getTitle();
+                    $ret["bookAuthor"] = $parser->getAuthor();
                     break;
                 }
                 else
