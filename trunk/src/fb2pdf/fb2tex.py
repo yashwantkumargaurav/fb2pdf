@@ -270,7 +270,6 @@ def processSections(b,f):
         processSection(s, f)
 
 def processPoem(p,f):
-    f.write('\\begin{verse}\n\n')
     
     # title (optinal)
     t = find(p,"title")
@@ -278,6 +277,8 @@ def processPoem(p,f):
         title = getSectionTitle(t)
         if title and len(title):
             _uwrite(f,"\\poemtitle{%s}\n" % _tocElement(title, t))
+    
+    f.write('\\begin{verse}\n\n')
     
     # epigraphs (multiple, optional)
     processEpigraphs(p, f)
