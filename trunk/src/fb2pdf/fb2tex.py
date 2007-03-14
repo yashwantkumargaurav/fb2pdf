@@ -22,6 +22,90 @@ from exceptions import TemporaryError, PersistentError
 # -- constants --
 image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
+# Following tuples will be examined one by one and applied to the text.
+# If head is string (ASCII or unicode) all instances of it would be replaced
+# by 2nd element of the tuple.
+# If head is compiled regexp, it will be used to substitute all it's instanced
+# by 2nd element of the tuple using its .sub() method.
+TEXT_PATTERNS = [
+
+    # backslash itself must be represented as \backslash
+    # (should go first to avoid escaping backslash in TeX commands
+    # produced further down this function)
+    ('\\','$\\backslash$'),
+
+    # special chars need to be quoted with backslash
+    # (should go after escaping backslash but before any of the
+    # other conversions that produce TeX commands that include {})
+    (re.compile(r'([\&\$\%\#\_\{\}])'),r'\\\1'),
+
+    # TODO: Fix the following quick ugly hack
+    # this is here, because the line above breaks $\backslash$
+    # that comes before that, which would break stuff on the above
+    # line if it followed it
+    (re.compile(r'\\\$\\backslash\\\$'),r'$\\backslash$'),
+
+    # Unicode Character 'EM DASH' (U+2014)
+    # used in some documents instead of '-'
+    (u'\u2014','---'),
+
+    # 'EN DASH' at the beginning of paragraph - russian direct speech
+    (re.compile(r'^\u2013(.*)'), r'\\cdash--*{}\\\1'),
+
+    # ellipses
+    ('...', '\\ldots{}'),
+    (u'\u2026', '\\ldots{}'),
+
+    # caret
+    (re.compile(r'[\^]'), r'\\textasciicircum{}'),
+
+    # tilde
+    (re.compile(r'[\~]'), r'\\textasciitilde{}'),
+
+    # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
+    (u'\u00ab', '<<'),
+
+    # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+    # replacing with french/russian equivalent
+    (u'\u00bb', '>>'),
+
+    # EN-DASH
+    (u'\u2013', '--'),
+
+    # EM-DASH
+    (re.compile(r'(\s)--(\s)'), '---'),
+
+    # preserve double quotes
+    ('"', '\\symbol{34}'),
+
+    # Fancy quotation marks (sometimes used to denote a quote
+    # inside of another quote)
+    (u'\u201e', '``'),
+    (u'\u201c', "''"),
+    (u'\u201f', '``'),
+    (u'\u201d', "''"),
+
+    # Broken bar
+    (u'\u00A6', '|'),
+
+    # plus-minus
+    (u'\u00B1', '$\\pm$'),
+
+    # russian number sign
+    (u'\u2116', '\\No{}'),
+
+    # squiare brackets
+    ('[', '{[}'),
+    (']', '{]}'),
+
+    # Unicode Character 'MIDDLE DOT' (U+00B7)
+    (u'\u00B7', '\\textperiodcentered{}'),
+    
+    # Greek Mu
+    (u'\u00B5', '$\\mu$')
+]
+
+
 # --- globals --
 enclosures = {}
 
@@ -87,63 +171,12 @@ def _textQuote(str):
     ''' Basic paragraph TeX quoting '''
     if len(str)==0:
         return str
-    # backslash itself must be represented as \backslash
-    # (should go first to avoid escaping backslash in TeX commands
-    # produced further down this function)
-    str = string.replace(str,'\\','$\\backslash$')
-    # special chars need to be quoted with backslash
-    # (should go after escaping backslash but before any of the
-    # other conversions that produce TeX commands that include {})
-    str = re.sub(r'([\&\$\%\#\_\{\}])',r'\\\1',str)
-    # TODO: Fix the following quick ugly hack
-    # this is here, because the line above breaks $\backslash$
-    # that comes before that, which would break stuff on the above
-    # line if it followed it
-    str = re.sub(r'\\\$\\backslash\\\$',r'$\\backslash$',str)
 
-    # Unicode Character 'EM DASH' (U+2014)
-    # used in some documents instead of '-'
-    str = string.replace(str,u'\u2014','---')
-    # 'EN DASH' at the beginning of paragraph - russian direct speech
-    if ord(str[0])==0x2013:
-        str="\\cdash--*{}" + str[1:]
-    # ellipses
-    str = string.replace(str,'...','\\ldots{}')
-    str = string.replace(str,u'\u2026','\\ldots{}')
-    # caret
-    str = re.sub(r'[\^]',r'\\textasciicircum{}',str)
-    # tilde
-    str = re.sub(r'[\~]',r'\\textasciitilde{}',str)
-    # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
-    str = string.replace(str,u'\u00ab','<<')
-    # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-    str = string.replace(str,u'\u00bb','>>') # replacing with french/russian equivalent
-    # EN-DASH
-    str = string.replace(str,u'\u2013','--')
-    # EM-DASH
-    str = re.sub(r'(\s)--(\s)','---',str)
-    # preserve double quotes
-    str = string.replace(str,'"','\\symbol{34}')
-    # Fancy quotation marks (sometimes used to denote a quote
-    # inside of another quote)
-    str = string.replace(str,u'\u201e','``')
-    str = string.replace(str,u'\u201c',"''")
-    str = string.replace(str,u'\u201f','``')
-    str = string.replace(str,u'\u201d',"''")
-    # Broken bar
-    str = string.replace(str,u'\u00A6','|')
-    # plus-minus
-    str = string.replace(str,u'\u00B1','$\\pm$')
-    # russian number sign
-    str = string.replace(str,u'\u2116','\\No{}')
-    # squiare brackets
-    str = string.replace(str,'[','{[}')
-    str = string.replace(str,']','{]}')
-    # Unicode Character 'MIDDLE DOT' (U+00B7)
-    str = string.replace(str,u'\u00B7','\\textperiodcentered{}')
-    # Greek Mu
-    str = string.replace(str,u'\u00B5','$\\mu$')
-
+    for (a,b) in TEXT_PATTERNS:
+        if isinstance(a,unicode) or isinstance(a,basestring):
+            str = string.replace(str,a,b)
+        else:
+            str = a.sub(b,str)
         
     return str
 
