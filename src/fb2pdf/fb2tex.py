@@ -114,12 +114,11 @@ def findAll(elem, what):
     for x in elem.childNodes:
         if x.nodeType == Node.ELEMENT_NODE and x.tagName==what:
             res.append(x)
-
     return res
 
 def find(elem, what):
     nl=elem.getElementsByTagName(what)
-    if nl is None or len(nl)==0:
+    if not nl:
         return None
     else:
         return nl[0]
@@ -169,15 +168,12 @@ def par(p, allowhref=True):
 
 def _textQuote(str):
     ''' Basic paragraph TeX quoting '''
-    if len(str)==0:
-        return str
-
-    for (a,b) in TEXT_PATTERNS:
-        if isinstance(a,unicode) or isinstance(a,basestring):
-            str = string.replace(str,a,b)
-        else:
-            str = a.sub(b,str)
-        
+    if str:
+        for (a,b) in TEXT_PATTERNS:
+            if isinstance(a,unicode) or isinstance(a,basestring):
+                str = string.replace(str,a,b)
+            else:
+                str = a.sub(b,str)
     return str
 
 def _text(t):
@@ -284,7 +280,7 @@ def fb2tex(infile, outfile):
     f.write("\\tableofcontents\n\\newpage\n\n");
     
     body=findAll(fb,"body")
-    if not body or len(body)==0:
+    if not body:
         logging.getLogger('fb2pdf').exception("The file does not seems to contain 'fictionbook/body' element")
         raise PersistentError("The file does not seems to contain 'fictionbook/body' element")
     for b in body:
@@ -308,7 +304,7 @@ def processPoem(p,f):
     t = find(p,"title")
     if t:
         title = getSectionTitle(t)
-        if title and len(title):
+        if title:
             _uwrite(f,"\\poemtitle{%s}\n" % _tocElement(title, t))
     
     f.write('\\begin{verse}\n\n')
@@ -337,7 +333,7 @@ def processStanza(s, f):
     t = find(s,"title")
     if t:
         title = getSectionTitle(t)
-        if title and len(title):
+        if title:
             # TODO: implement
             logging.getLogger('fb2pdf').warning("Unsupported element: stanza 'title'")
     
@@ -345,7 +341,7 @@ def processStanza(s, f):
     st = find(s,"subtitle")
     if st:
         subtitle = getSectionTitle(st)
-        if subtitle and len(subtitle):
+        if subtitle:
             # TODO: implement
             logging.getLogger('fb2pdf').warning("Unsupported element: stanza 'subtitle'")
 
@@ -353,7 +349,7 @@ def processStanza(s, f):
     vv = findAll(s,"v")
     for v in vv:
         vt = par(v)
-        if len(vt)==0:
+        if not vt:
             # TODO: use \vgap from verse package
             vt="\\vspace{12pt}\n"
             _uwrite(f,vt)
@@ -366,7 +362,7 @@ def processAuthors(q,f):
     aa = findAll(q,"text-author")
     author_name = ""
     for a in aa:
-        if len(author_name):
+        if author_name:
             author_name += " \\and " + par(a)
         else:
             author_name = par(a)
@@ -513,7 +509,7 @@ def processEpigraphText(f,e):
         
 def processEpigraphs(s,f):
     ep = findAll(s,"epigraph")
-    if len(ep)==0:
+    if not ep:
         return
     f.write("\\begin{epigraphs}\n")
     for e in ep:
@@ -572,7 +568,7 @@ def processDescription(desc,f):
     aa = findAll(ti,"author")
     author_name = ""
     for a in aa:
-        if len(author_name):
+        if author_name:
             author_name += " \\and " + authorName(a)
         else:
             author_name = authorName(a)
@@ -611,7 +607,7 @@ def processDescription(desc,f):
     co = find(desc,"coverpage")
     if co:
         images = findAll(co,"image")
-        if len(images):
+        if images:
             #f.write("\\begin{titlepage}\n")
             for image in images:
                 f.write(processInlineImage(image))

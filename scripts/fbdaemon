@@ -69,7 +69,7 @@ def parseCommandLineAndReadConfiguration():
             global logfile
             logfile = argument
                 
-    if cfgfile is None:
+    if cfgfile:
         raise getopt.GetoptError("configuration file not specified")
 
     if do_daemon:
@@ -132,17 +132,13 @@ def processMessage(m):
     src_url  = src.getAttribute('url')
     src_type = src.getAttribute('type')
     src_name = src.getAttribute('name')
-    src_encoding = str(src.getAttribute('encoding'))
-    if len(src_encoding)==0:
-        src_encoding=None
+    src_encoding = src.getAttribute('encoding')
 
     results=root.getElementsByTagName('result')
     if len(results)!=1:
         raise PersistentError("Message must contain exactly one 'result' element")
     res_key = results[0].getAttribute('key')
-    res_encoding = str(results[0].getAttribute('encoding'))
-    if len(res_encoding)==0:
-        res_encoding=None
+    res_encoding = results[0].getAttribute('encoding')
 
     logs=root.getElementsByTagName('log')
     if len(logs)!=1:
@@ -154,14 +150,14 @@ def processMessage(m):
     for c in cb:
         x = {}
         x['url']    = c.getAttribute('url')
-        if len(x['url'])==0:
+        if not x['url']:
             logging.getLogger('fbdaemon').warning("Missing callback 'url' attribute. Skipping")
         x['method'] = c.getAttribute('method')
-        if len(x['method'])==0:
+        if not x['method']:
             x['method']='POST'
             logging.getLogger('fbdaemon').warning("Missing callback 'method' attribute. Assuming POST")
         p = c.getAttribute('params')        
-        if len(p)>0:
+        if p:
             try:
                 h = {}
                 for (n,v) in cgi.parse_qsl(p, True, True):
@@ -173,8 +169,8 @@ def processMessage(m):
             x['params']={}
         callbacks.append(x)
 
-    processDocument(str(src_url), str(src_type), str(src_name), src_encoding,
-                    str(res_key), res_encoding,
+    processDocument(str(src_url), str(src_type), str(src_name), str(src_encoding),
+                    str(res_key), str(res_encoding),
                     str(log_key),
                     callbacks)
 
@@ -209,7 +205,7 @@ def upload_file(bucket, key, filename, disp='attachment'):
                 logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename, e)
 
 def processCallbacks(res_key, status, callbacks):
-    if callbacks is None or len(callbacks)==0:
+    if not callbacks:
         return
     logging.getLogger('fbdaemon').debug("Processing callbacks")
     for c in callbacks:
@@ -319,7 +315,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
 
                     resfilename = pdffilename
                     
-                    if res_encoding is not None:
+                    if res_encoding:
                         if res_encoding=='application/zip':
                             try:
                                 zipfilename = pdffilename + '.zip'
