@@ -11,9 +11,9 @@ global $awsS3Bucket;
 $id = $_GET['id'];
 $status = getStatus($id);
 
-$originalFile  = "http://s3.amazonaws.com/$awsS3Bucket/$id.fb2";
-$convertedFile = "http://s3.amazonaws.com/$awsS3Bucket/$id.pdf";
-$logFile       = "http://s3.amazonaws.com/$awsS3Bucket/$id.txt";
+$originalFile  = "getfile.php?key=$id.fb2";
+$convertedFile = "getfile.php?key=$id.pdf";
+$logFile       = "getfile.php?key=$id.txt";
 
 function getStatus($id)
 {
@@ -23,7 +23,7 @@ function getStatus($id)
     $pdffile = $s3->objectExists($awsS3Bucket, $id . ".pdf");
     $logfile = $s3->objectExists($awsS3Bucket, $id . ".txt");
     
-    if ($pdffile)
+    if ($pdffile and $logfile)
         return STATUS_DONE;
     else
         return ($logfile) ? STATUS_ERROR : STATUS_PROGRESS;

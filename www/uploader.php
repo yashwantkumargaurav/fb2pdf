@@ -75,6 +75,7 @@ if ($key === false)
 
 // redirect to the status page
 $url = get_page_url("status.php?id=$key");
+header("HTTP/1.0 302 Found");
 header("Location: $url");
 
 // Process file.
@@ -99,6 +100,13 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor)
 
     if (!$testMode)
     {
+        $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+        
+        // check if this book already exists
+        $bookInfo = $db->getBook($md5);
+        if ($bookInfo)
+            return $bookInfo["storage_key"];
+        
         // content-disposition
         $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.fb2\"");
         
@@ -112,11 +120,10 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor)
         }
         
         // save to DB
-        $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
         if (!$db->insertBook($key, $bookAuthor, $bookTitle, $md5, "p"))
         {
             error_log("FB2PDF ERROR. Unable to insert book with key <$key> into DB."); 
-            return false;
+            // do not stop if DB is failed!
         }
         
         // send SQS message

@@ -55,9 +55,7 @@ function showForm()
 <div id="form">
     <h4 align="center">Этот сервис (альфа версия) предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://en.wikipedia.org/wiki/Sony_Reader">Sony Reader</a>.</h4>
     <p>Пожалуйста загрузите книгу в FB2 или ZIP формате (ZIP может содержать только одну книгу в FB2 формате) или укажите URL.
-    <br>Для удобства, Вы также можете (но не обязаны) указать адрес Вашей электронной почты, и мы пошлём вам письмо, как только книга будет готова. 
-    <br><br><sub>Введённый Вами адрес электронной почты используется <u>только</u> для уведомления о готовности книги. 
-    Мы гарантируем конфидициальность, и обязуемся <u>не использовать</u> указанный Вами адрес для рассылки рекламы.</sub>
+    <br>Не знаете, где можно найти книги в формате FB2? Мы рекомендуем электронные библиотеки <a href="http://fictionbook.ru/">FictionBook</a> и <a href="http://aldebaran.ru/">АЛЬДЕБАРАН</a>
     <p>
 
     <form id="uploadform" enctype="multipart/form-data" action="uploader.php" method="POST">
@@ -71,37 +69,55 @@ function showForm()
         <div id="upurl" style="display: none">
             <input type="text" id="fileupload" value="наберите URL здесь" name="url" size="30"/>
         </div>
+        <br><input type="button" onclick="doUpload()" value="Конвертировать" />
  
-        <br>email (не обязательно):
+        <p>Для удобства, Вы также можете (но не обязаны) указать адрес Вашей электронной почты, и мы пошлём вам письмо, как только книга будет готова. 
+        <br><br><sub>Введённый Вами адрес электронной почты используется <u>только</u> для уведомления о готовности книги. 
+        Мы гарантируем конфидициальность, и обязуемся <u>не использовать</u> указанный Вами адрес для рассылки рекламы.</sub>
+        <p>
+        email (не обязательно):
         <br><input type="text" id="email" value="" name="email" size="30"/>
-        
-        <br><br><input type="button" onclick="doUpload()" value="Конвертировать" />
     </form>
     
-    <h4 align="center">Новые книги</h4>
     <?php
     require_once 'awscfg.php';
     require_once 'db.php';
     require_once 'utils.php';
 
+    global $awsS3Bucket;
     global $dbServer, $dbName, $dbUser, $dbPassword;
     
     // list of new books
+    $MAX_BOOKS = 40;
+    $MAX_ROWS  = 20;
+    $MAX_COLS  = 2;
+    
     $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
-    $blist = $db->getBooks(10);
-    if ($blist !== false)
+    $list = $db->getBooks($MAX_BOOKS);
+    if ($list)
     {
-        foreach ($blist as $value) 
+        echo '<h4 align="center">Книги, сконвертированные недавно:</h4>';
+        echo '<table border="0">';
+        
+        $count = count($list);
+        for ($row = 0; $row < $MAX_ROWS; $row++) 
         {
-            $author = $value["author"];
-            $title  = $value["title"];
-            $url    = get_page_url("status.php?id=" . $value["storage_key"]);
-            echo "$author <a href=\"$url\">$title</a><br>";
-        }            
-    }
-    else
-    {
-        error_log("FB2PDF ERROR. Unable to get list of books"); 
+            echo '<tr>';
+            for ($col = 0; $col < $MAX_COLS; $col++) 
+            {
+                $i = $col * $MAX_ROWS + $row;
+                if ($i < $count)
+                {
+                    $author = $list[$i]["author"];
+                    $title  = $list[$i]["title"];
+                    $url    = "getfile.php?key=" . $list[$i]["storage_key"] . ".pdf";
+
+                    echo "<td><i>$author</i>&nbsp;&nbsp;<a href=\"$url\">\"$title\"</a></td>";
+                    echo '<td width="30"></td>';
+                }
+            }
+        }
+        echo '</table>';
     }
     ?>
     
