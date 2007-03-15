@@ -143,5 +143,40 @@ class DB
         return $list;
     }
     
+    // Get book by md5
+    function getBook($md5)
+    {
+        if(!($link = mysql_connect($this->server, $this->user, $this->password))) 
+        {
+            error_log("FB2PDF ERROR. Error connecting to the database server");
+            return false;
+        }
+
+        if(!mysql_select_db($this->name))
+        {
+            mysql_close($link);
+            error_log("FB2PDF ERROR. Error selecting database");
+            return false;
+        }
+
+		$set = @mysql_query ('SET NAMES UTF8');
+		$set = @mysql_query ('SET COLLATION_CONNECTION=UTF8_GENERAL_CI');
+        
+        $query = "SELECT * FROM Books WHERE md5_hash = 0x$md5 LIMIT 1";
+        if(!($result = mysql_query($query))) 
+        {
+            mysql_close($link);
+            error_log("FB2PDF ERROR. Query failed: $query.\n" . mysql_error());
+            return false;
+        }
+        
+   		$list = array();
+        if($row = mysql_fetch_array($result, MYSQL_ASSOC)) 
+            $list = $row;
+        mysql_free_result($result);
+        
+        mysql_close($link);
+        return $list;
+    }
 }    
 ?>
