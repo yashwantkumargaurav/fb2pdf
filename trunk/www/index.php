@@ -47,6 +47,16 @@ function showForm()
     document.getElementById('form').style.display = '';
 }
 
+function selectText(source)
+{
+    if (source)
+    {   
+        source.focus();
+        source.select();
+    }
+}
+
+
 </script>
 </head>
 <body>
@@ -67,7 +77,7 @@ function showForm()
         </div>
  
         <div id="upurl" style="display: none">
-            <input type="text" id="fileupload" value="наберите URL здесь" name="url" size="30"/>
+            <input type="text" id="fileupload" value="наберите URL здесь" name="url" size="30" onclick="selectText(this);"/>
         </div>
         <br><input type="button" onclick="doUpload()" value="Конвертировать" />
  
