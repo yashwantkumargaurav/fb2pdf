@@ -379,7 +379,11 @@ def main():
         q = c.create_queue(qname)
 
         while True:
-            m = q.read(qtimeout)
+            m = None
+            try:
+                m = q.read(qtimeout)
+            except:
+                logging.getLogger('fbdaemon').exception("Error reading queue")
             if m==None:
                 time.sleep(pdelay)
             else:
