@@ -267,6 +267,7 @@ def fb2tex(infile, outfile):
     #\renewcommand{\ttdefault}{xxx}
     
     f.write("\n\\begin{document}\n\n")
+    f.write("\\tolerance=10000\n")
     f.write("{\\fontfamily{cmss}\\selectfont\n")
     
     fb = soup.documentElement
