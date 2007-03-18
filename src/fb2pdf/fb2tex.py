@@ -583,22 +583,11 @@ def processDescription(desc,f):
             author_name += " \\and " + authorName(a)
         else:
             author_name = authorName(a)
-            
-    if author_name:
-        f.write("\\author{")
-        _uwrite(f,author_name)
-        f.write("}\n");
 
-    if title:
-        _uwrite(f,"\\title{%s}\n" % _tocElement(_textQuote(title), t))
-
-    f.write("\\date{}")
-
-    if author_name or title:
-        f.write("\\maketitle\n");
-
-    # TODO: PDF info generation temporary disabled. It seems that
-    # non ASCII characters are not allowed there!
+    # Generate PDF metadata. Must come before \maketitle,
+    # because hyperref generates additional metadata there,
+    # but Sony Reader seems to only look for the first
+    # instance of these attributes.
     if author_name or title:
         f.write("\n\\pdfinfo {\n")
 
@@ -613,6 +602,19 @@ def processDescription(desc,f):
             f.write(")\n")
 
         f.write("}\n")
+
+    if author_name:
+        f.write("\\author{")
+        _uwrite(f,author_name)
+        f.write("}\n");
+
+    if title:
+        _uwrite(f,"\\title{%s}\n" % _tocElement(_textQuote(title), t))
+
+    f.write("\\date{}")
+
+    if author_name or title:
+        f.write("\\maketitle\n");
 
     # cover, optional
     co = find(desc,"coverpage")
