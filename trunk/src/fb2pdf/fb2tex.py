@@ -14,6 +14,7 @@ import string
 import re
 import binascii
 from xml.dom.minidom import parse, Node
+import pytils.translit
 
 import Image
 
@@ -598,17 +599,17 @@ def processDescription(desc,f):
 
     # TODO: PDF info generation temporary disabled. It seems that
     # non ASCII characters are not allowed there!
-    if False and (author_name or title):
+    if author_name or title:
         f.write("\n\\pdfinfo {\n")
 
         if author_name:
             f.write("\t/Title (")
-            _uwrite(f,author_name) #TODO quoting, at least brackets
+            _uwrite(f,pytils.translit.translify(author_name))
             f.write(")\n")
 
         if title:
             f.write("\t/Author (")
-            _uwrite(f,title) #TODO quoting, at least brackets
+            _uwrite(f,pytils.translit.translify(title))
             f.write(")\n")
 
         f.write("}\n")
