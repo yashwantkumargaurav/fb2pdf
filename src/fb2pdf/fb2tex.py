@@ -8,6 +8,7 @@ Author: Vadim Zaliva <lord@crocodile.org>
 
 import logging
 import os
+import os.path
 import sys
 import string
 import re
@@ -214,11 +215,11 @@ def _uwrite(f, ustr):
     f.write(ustr.encode('utf-8')) 
 
 def _getdir(f):
-    l = string.rsplit(f,"/",1)
-    if len(l)==2:
-        return l[0]
-    else:
-        return "."
+    (dirname, filename) = os.path.split(f)
+    (filebase, fileext) = os.path.splitext(filename)
+    if len(dirname) == 0:
+        dirname = "."
+    return (dirname, filebase)
     
 def fb2tex(infile, outfile):
     logging.getLogger('fb2pdf').info("Converting %s" % infile)
@@ -229,7 +230,7 @@ def fb2tex(infile, outfile):
 
     f = open(outfile, 'w')
 
-    outdir=_getdir(outfile)
+    (outdir, outname) = _getdir(outfile)
     
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
@@ -275,7 +276,7 @@ def fb2tex(infile, outfile):
         logging.getLogger('fb2pdf').exception("The file does not seems to contain 'fictionbook' root element")
         raise PersistentError("The file does not seems to contain 'fictionbook' root element")
     
-    findEnclosures(fb,outdir)
+    findEnclosures(fb, outdir, outname)
     processDescription(find(fb,"description"), f)
 
     f.write("\\tableofcontents\n\\newpage\n\n");
@@ -619,8 +620,9 @@ def processDescription(desc,f):
     if an:
         processAnnotation(f,an)
 
-def findEnclosures(fb,outdir):
+def findEnclosures(fb, outdir, outname):
     encs = findAll(fb,"binary")
+    counter = 0
     for e in encs:
         id=e.getAttribute('id')
         ct=e.getAttribute('content-type')
@@ -628,9 +630,10 @@ def findEnclosures(fb,outdir):
         if not image_exts.has_key(ct):
             logging.getLogger('fb2pdf').warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
             continue
-        fname = os.tempnam(".", "enc") + "." + image_exts[ct]
-        fullfname = outdir + "/" + fname
-        f = open(fullfname,"w")
+        fname = "enc-%s-%d.%s" % (outname, counter, image_exts[ct])
+        counter = counter+1
+        fullfname = os.path.join(outdir, fname)
+        f = open(fullfname,"wb")
         f.write(binascii.a2b_base64(e.childNodes[0].data))
         f.close()
         # convert to grayscale, 166dpi (native resolution for Sony Reader)
