@@ -603,12 +603,12 @@ def processDescription(desc,f):
         f.write("\n\\pdfinfo {\n")
 
         if author_name:
-            f.write("\t/Title (")
+            f.write("\t/Author (")
             _uwrite(f,pytils.translit.translify(author_name))
             f.write(")\n")
 
         if title:
-            f.write("\t/Author (")
+            f.write("\t/Title (")
             _uwrite(f,pytils.translit.translify(title))
             f.write(")\n")
 
