@@ -36,7 +36,7 @@ def parseCommandLine():
     
     log_verbosity = logging.INFO
     
-    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file=", "output="])
+    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:", ["verbose", "file=", "output=", "use-koi8"])
     for option, argument in optlist:
         if option in ("-v", "--verbose"):
             log_verbosity = logging.DEBUG
@@ -47,6 +47,9 @@ def parseCommandLine():
                 raise getopt.GetoptError("input file '%s' doesn't exist" % argument)
         elif option in ("-o", "--output"):
             outfile = argument
+        elif option in ("--use-koi8"):
+            fb2tex.parameters['inputenc'] = 'koi8-r'
+            fb2tex.parameters['outcodec'] = 'koi8_r'
             
     if infile == None:
         raise getopt.GetoptError("input file not specified")

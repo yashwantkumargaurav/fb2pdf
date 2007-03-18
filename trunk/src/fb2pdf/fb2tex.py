@@ -19,6 +19,14 @@ import Image
 
 from exceptions import TemporaryError, PersistentError
 
+parameters = {
+    # inputenc option for TeX - should be consistent with output codec
+    'inputenc': 'utf-8',
+
+    # codec to use for output - should be consistent with inputenc
+    'outcodec': 'utf-8'
+}
+
 
 # -- constants --
 image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
@@ -212,7 +220,7 @@ def _tocElement(title, t):
     return res
 
 def _uwrite(f, ustr):
-    f.write(ustr.encode('utf-8')) 
+    f.write(ustr.encode(parameters['outcodec'])) 
 
 def _getdir(f):
     (dirname, filename) = os.path.split(f)
@@ -256,10 +264,10 @@ def fb2tex(infile, outfile):
     \\usepackage{epigraph}
     \\usepackage{verbatim}
     \\usepackage{ulem}
-    \\usepackage[utf-8]{inputenc}
+    \\usepackage[%(inputenc)s]{inputenc}
     \\usepackage[russian]{babel}
     \\setcounter{secnumdepth}{-2}
-    """)
+    """ % parameters )
     
     #TODO: Instead of selecting font family inside of the document 
     # section, set the defaults for the entire document

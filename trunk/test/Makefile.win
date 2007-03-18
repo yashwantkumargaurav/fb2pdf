@@ -15,7 +15,7 @@ texfiles: $(alltex)
 	pdflatex $(PDFLATEXFLAGS) $<
 
 %.tex: %.fb2
-	(export PYTHONPATH=../src; python ../scripts/fb2tex -v -f $< -o $@)
+	(export PYTHONPATH=../src; python ../scripts/fb2tex -v --use-koi8 -f $< -o $@)
 
 test:
 	./utest.sh
