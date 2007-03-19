@@ -32,6 +32,9 @@ parameters = {
 # -- constants --
 image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
+section_commands = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
+
+
 # Following tuples will be examined one by one and applied to the text.
 # If head is string (ASCII or unicode) all instances of it would be replaced
 # by 2nd element of the tuple.
@@ -296,7 +299,7 @@ def fb2tex(infile, outfile):
         raise PersistentError("The file does not seems to contain 'fictionbook/body' element")
     for b in body:
         processEpigraphs(b, f)
-        processSections(b, f)
+        processSections(b, f, 0)
     
     f.write("}")
     f.write("\n\\end{document}\n")
@@ -304,10 +307,10 @@ def fb2tex(infile, outfile):
 
     logging.getLogger('fb2pdf').info("Conversion successfully finished")
 
-def processSections(b,f):
+def processSections(b,f,level):
     ss = findAll(b,"section")
     for s in ss:
-        processSection(s, f)
+        processSection(s, f, level)
 
 def processPoem(p,f):
     
@@ -408,7 +411,7 @@ def processCite(q,f):
 
     f.write('\\end{quotation}\n')
     
-def processSection(s, f):
+def processSection(s, f, level):
     pid=s.getAttribute('id')
     if pid:
         f.write('\\hypertarget{')
@@ -420,14 +423,20 @@ def processSection(s, f):
         title = getSectionTitle(t)
     else:
         title = ""
-    _uwrite(f,"\n\\section{%s}\n" % _tocElement(title, t))
+
+    if level>=len(section_commands):
+        cmd = "section"
+    else:
+        cmd = section_commands[level]
+
+    _uwrite(f,"\n\\%s{%s}\n" % (cmd,_tocElement(title, t)))
 
     processEpigraphs(s, f)
     
     for x in s.childNodes:
         if x.nodeType == Node.ELEMENT_NODE:
             if x.tagName == "section":
-                processSection(x,f)
+                processSection(x,f,level+1)
             elif x.tagName == "p":
                 pid=x.getAttribute('id')
                 if pid:
