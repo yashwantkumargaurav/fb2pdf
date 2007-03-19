@@ -593,7 +593,8 @@ def processDescription(desc,f):
 
         if author_name:
             f.write("\t/Author (")
-            _uwrite(f,pytils.translit.translify(author_name))
+            pdf_author_name = ", ".join(author_name.split(" \\and "))
+            _uwrite(f,pytils.translit.translify(pdf_author_name))
             f.write(")\n")
 
         if title:
