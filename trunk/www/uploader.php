@@ -51,6 +51,7 @@ if ($zipArr === false) //  not a zip file
         die("$fileName не существует или не является файлом в формате ZIP или FB2. Пожалуйста, выберите ZIP или FB2 файл и попробуйте ещё раз.");
     $bookTitle  = $parser->getTitle();
     $bookAuthor = $parser->getAuthor();
+    $isbn       = $parser->getIsbn();
 }
 else // zip file
 {
@@ -59,10 +60,11 @@ else // zip file
     $fileName   = $zipArr["fileName"];
     $bookTitle  = $zipArr["bookTitle"];
     $bookAuthor = $zipArr["bookAuthor"];
+    $isbn       = $zipArr["isbn"];
 }
 
 // Process file
-$key = process_file($fbFile, $fileName, $email, $bookTitle, $bookAuthor);
+$key = process_file($fbFile, $fileName, $email, $bookTitle, $bookAuthor, $isbn);
 
 // remove temporary files
 if ($zipFile and !unlink($zipFile))
@@ -80,7 +82,7 @@ header("Location: $url");
 
 // Process file.
 // Returns key or false
-function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor)
+function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $isbn)
 {
     global $awsApiKey, $awsApiSecretKey, $awsS3Bucket, $testMode, $secret;
     global $dbServer, $dbName, $dbUser, $dbPassword;
@@ -120,7 +122,7 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor)
         }
         
         // save to DB
-        if (!$db->insertBook($key, $bookAuthor, $bookTitle, $md5, "p"))
+        if (!$db->insertBook($key . ".zip", $bookAuthor, $bookTitle, $isbn, $md5, "p"))
         {
             error_log("FB2PDF ERROR. Unable to insert book with key <$key> into DB."); 
             // do not stop if DB is failed!
@@ -128,7 +130,7 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor)
         
         // send SQS message
         $callbackUrl = get_page_url("conv_callback.php");
-        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $name, $callbackUrl, md5($secret . $key), $email))
+        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $name, $callbackUrl, md5($secret . $key . ".zip"), $email))
         {
             error_log("FB2PDF ERROR. Unable to send Amazon  SQS message for key <$key>."); 
             return false;

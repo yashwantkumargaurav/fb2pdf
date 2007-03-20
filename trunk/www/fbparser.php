@@ -6,13 +6,15 @@ class FBParser
     var $stack = array();
 
     var $ROOT = "fictionbook";
-    var $PATH_FN = array("fictionbook", "description", "title-info", "author", "first-name");
-    var $PATH_LN = array("fictionbook", "description", "title-info", "author", "last-name");
-    var $PATH_BT = array("fictionbook", "description", "title-info", "book-title");
+    var $PATH_FN   = array("fictionbook", "description", "title-info", "author", "first-name");
+    var $PATH_LN   = array("fictionbook", "description", "title-info", "author", "last-name");
+    var $PATH_BT   = array("fictionbook", "description", "title-info", "book-title");
+    var $PATH_ISBN = array("fictionbook", "description", "publish-info", "isbn");
     
     var $title;
     var $firstName;
     var $lastName;
+    var $isbn;
     
     // Returns title
     function getTitle()
@@ -23,7 +25,16 @@ class FBParser
     // Returns author
     function getAuthor()
     {
-        return $this->lastName . ", " . $this->firstName;
+        if ($this->lastName and $this->firstName)
+            return $this->lastName . ", " . $this->firstName;
+        else
+            return ($this->lastName) ?  $this->lastName : $this->firstName;
+    }
+    
+    // Returns title
+    function getIsbn()
+    {
+        return $this->isbn;
     }
     
     // Parse fb2 file. 
@@ -82,6 +93,8 @@ class FBParser
             $this->lastName = $content;
         else if ($this->stack == $this->PATH_BT)
             $this->title = $content;
+        else if ($this->stack == $this->PATH_ISBN)
+            $this->isbn = $content;
     }
 }
 

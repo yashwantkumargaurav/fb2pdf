@@ -15,7 +15,7 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
 
     $message = "<?xml version='1.0' encoding='UTF-8'?><fb2pdfjob version=\"3\">" . 
         "<source url=\"$sourceUrl\" type=\"application/fb2+xml\" name=\"$name\"/>" .
-        "<result key=\"$id.pdf\"/>" .
+        "<result key=\"$id.zip\" encoding=\"application/zip\"/>" .
         "<log key=\"$id.txt\"/>" .
         "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email\"/>" .
         "</fb2pdfjob>";

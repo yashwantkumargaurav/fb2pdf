@@ -6,14 +6,12 @@ require_once 'utils.php';
 global $secret;
 global $dbServer, $dbName, $dbUser, $dbPassword;
 
-//$v = var_export($_POST, true);
-//error_log("FB2PDF INFO. Callback: POST="); 
-//error_log($v); 
-
 $password = trim($_POST['pass']);
 $email    = trim($_POST['email']);
 $key      = trim($_POST['key']);
 $status   = trim($_POST['status']);
+
+error_log("FB2PDF INFO. Callback: password=$password, key=$key, status=$status, email=$email"); 
 
 // check parameters
 if (!$key)
@@ -29,12 +27,6 @@ if ($status != "r" and $status != "e")
     send_response("400 Bad Request", "Missing or wrong parameter status");
     die;
 }
-
-// remove "extension" part from the key
-$pos = strrpos($key, ".");
-if ($pos !== false) 
-    $key = substr($key, 0, $pos);
-
 
 // check password
 if ($password != md5($secret . $key))
@@ -74,7 +66,6 @@ if ($email)
     mail($email, $subject, $message, $headers);
 }
 
-error_log("FB2PDF INFO. Callback: password=$password, key=$key, status=$status, email=$email"); 
 send_response("200 OK", "");
 
 function send_response($httpCode, $message)

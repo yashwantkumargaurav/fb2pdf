@@ -16,7 +16,7 @@ class DB
 	}
     
     // Insert a new book
-    function insertBook($storageKey, $author, $title, $md5, $status)
+    function insertBook($storageKey, $author, $title, $isbn, $md5, $status)
     {
         if(!($link = mysql_connect($this->server, $this->user, $this->password))) 
         {
@@ -34,10 +34,12 @@ class DB
 		$set = @mysql_query ('SET NAMES UTF8');
 		$set = @mysql_query ('SET COLLATION_CONNECTION=UTF8_GENERAL_CI');
         
-        $author     = mysql_real_escape_string($author);
-        $title      = mysql_real_escape_string($title);
+        $author = mysql_real_escape_string($author);
+        $title  = mysql_real_escape_string($title);
+        $isbn   = mysql_real_escape_string($isbn);
         
-        $query = "INSERT INTO Books (storage_key, author, title, md5_hash, status) VALUES(\"$storageKey\", \"$author\", \"$title\", 0x$md5, \"$status\")";
+        $query = "INSERT INTO Books (storage_key, author, title, isbn, md5_hash, status, converted) 
+            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", 0x$md5, \"$status\",  UTC_TIMESTAMP())";
         if(!($result = mysql_query($query))) 
         {
             mysql_close($link);
@@ -67,7 +69,37 @@ class DB
 		$set = @mysql_query ('SET NAMES UTF8');
 		$set = @mysql_query ('SET COLLATION_CONNECTION=UTF8_GENERAL_CI');
         
-        $query = "UPDATE Books SET status = \"$status\" WHERE storage_key = \"$storageKey\"";
+        $query = "UPDATE Books SET status = \"$status\",  converted = UTC_TIMESTAMP() WHERE storage_key = \"$storageKey\"";
+        if(!($result = mysql_query($query))) 
+        {
+            mysql_close($link);
+            error_log("FB2PDF ERROR. Query failed: $query.\n" . mysql_error());
+            return false;
+        }
+        mysql_close($link);
+        return true;
+    }
+    
+    // Updade status
+    function updateBookCounter($storageKey)
+    {
+        if(!($link = mysql_connect($this->server, $this->user, $this->password))) 
+        {
+            error_log("FB2PDF ERROR. Error connecting to the database server");
+            return false;
+        }
+
+        if(!mysql_select_db($this->name))
+        {
+            mysql_close($link);
+            error_log("FB2PDF ERROR. Error selecting database");
+            return false;
+        }
+
+		$set = @mysql_query ('SET NAMES UTF8');
+		$set = @mysql_query ('SET COLLATION_CONNECTION=UTF8_GENERAL_CI');
+        
+        $query = "UPDATE Books SET counter = counter + 1 WHERE storage_key = \"$storageKey\"";
         if(!($result = mysql_query($query))) 
         {
             mysql_close($link);

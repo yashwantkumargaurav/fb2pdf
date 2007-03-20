@@ -120,12 +120,15 @@ function selectText(source)
                 {
                     $author = $list[$i]["author"];
                     $title  = $list[$i]["title"];
-                    $url    = "getfile.php?key=" . $list[$i]["storage_key"] . ".pdf";
+                    $key    = $list[$i]["storage_key"];
+                    if (strrpos($key, ".") === false) // old style key (no extension)
+                        $key = $key . ".pdf";
 
-                    echo "<td><i>$author</i>&nbsp;&nbsp;<a href=\"$url\">\"$title\"</a></td>";
+                    echo "<td><i>$author</i>&nbsp;&nbsp;<a href=\"getfile.php?key=$key\">\"$title\"</a></td>";
                     echo '<td width="30"></td>';
                 }
             }
+            echo '</tr>';
         }
         echo '</table>';
     }
