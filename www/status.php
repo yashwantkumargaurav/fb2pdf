@@ -9,11 +9,19 @@ define('STATUS_ERROR',     2);
 global $awsS3Bucket;
 
 $id = $_GET['id'];
-$status = getStatus($id);
+
+// remove "extension" part from the key
+$pos = strrpos($id, ".");
+if ($pos !== false) 
+    $id = substr($id, 0, $pos);
+
+$res = getStatus($id);
 
 $originalFile  = "getfile.php?key=$id.fb2";
-$convertedFile = "getfile.php?key=$id.pdf";
-$logFile       = "getfile.php?key=$id.txt";
+
+$convertedFile = "getfile.php?key=" . $res["convertedFile"];
+$logFile       = "getfile.php?key=" . $res["logFile"];
+$status        = $res["status"];
 
 function getStatus($id)
 {
@@ -21,12 +29,29 @@ function getStatus($id)
     
     $s3 = new S3($awsApiKey, $awsApiSecretKey);
     $pdffile = $s3->objectExists($awsS3Bucket, $id . ".pdf");
+    $zipfile = $s3->objectExists($awsS3Bucket, $id . ".zip");
     $logfile = $s3->objectExists($awsS3Bucket, $id . ".txt");
     
-    if ($pdffile and $logfile)
-        return STATUS_DONE;
+    $res = array();
+    if (($pdffile or $zipfile) and $logfile)
+    {
+        $res["status"] = STATUS_DONE;
+        $res["convertedFile"] = ($pdffile) ? "$id.pdf" : "$id.zip";
+        $res["logFile"] = "$id.txt";
+    }
+    else if ($logfile)
+    {
+        $res["status"] = STATUS_ERROR;
+        $res["convertedFile"] = NULL;
+        $res["logFile"] = "$id.txt";
+    }        
     else
-        return ($logfile) ? STATUS_ERROR : STATUS_PROGRESS;
+    {
+        $res["status"] = STATUS_PROGRESS;
+        $res["convertedFile"] = NULL;
+        $res["logFile"] = NULL;
+    }
+    return $res;
 }
 ?>
 

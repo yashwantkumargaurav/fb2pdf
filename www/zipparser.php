@@ -28,6 +28,7 @@ function check_zip_format($zipfile)
                     $ret = array("fileName"=>$fileName, "filePath"=>$tempFile);
                     $ret["bookTitle"]  = $parser->getTitle();
                     $ret["bookAuthor"] = $parser->getAuthor();
+                    $ret["isbn"]       = $parser->getIsbn();
                     break;
                 }
                 else
