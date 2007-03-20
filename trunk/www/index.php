@@ -124,6 +124,11 @@ function selectText(source)
                     if (strrpos($key, ".") === false) // old style key (no extension)
                         $key = $key . ".pdf";
 
+                    if (!$author)
+                        $author = "Автор неизвестен";
+                    if (!$title)
+                        $title = "Название неизвестно";
+                    
                     echo "<td><i>$author</i>&nbsp;&nbsp;<a href=\"getfile.php?key=$key\">\"$title\"</a></td>";
                     echo '<td width="30"></td>';
                 }
