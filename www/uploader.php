@@ -76,9 +76,8 @@ if ($key === false)
     die("Невозможно сохранить файл $fileName для дальнейшей конвертации. Пожалуйста, попробуйте ешё раз.");
 
 // redirect to the status page
-$url = get_page_url("status.php?id=$key");
 header("HTTP/1.0 302 Found");
-header("Location: $url");
+header("Location: status.php?id=$key");
 
 // Process file.
 // Returns key or false
@@ -100,6 +99,9 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
     if ($pos !== false) 
         $name = substr($name, 0, $pos);
 
+    if (!$name) // if name is empty
+        $name = $key;
+    
     if (!$testMode)
     {
         $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
@@ -107,7 +109,15 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
         // check if this book already exists
         $bookInfo = $db->getBook($md5);
         if ($bookInfo)
-            return $bookInfo["storage_key"];
+        {
+            $key = $bookInfo["storage_key"];
+            
+            // send email to user
+            if ($email)
+                notifyUserByEmail($email, $key);
+            
+            return $key;
+        }
         
         // content-disposition
         $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.fb2\"");
@@ -129,7 +139,7 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
         }
         
         // send SQS message
-        $callbackUrl = get_page_url("conv_callback.php");
+        $callbackUrl = getFullUrl("conv_callback.php");
         if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $name, $callbackUrl, md5($secret . $key . ".zip"), $email))
         {
             error_log("FB2PDF ERROR. Unable to send Amazon  SQS message for key <$key>."); 

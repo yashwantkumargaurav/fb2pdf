@@ -13,7 +13,7 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
     $queueUrl = parseCreateQueueResponse($sqs->responseString);
     $queueUrl = str_replace("http://queue.amazonaws.com/","",$queueUrl);
 
-    $message = "<?xml version='1.0' encoding='UTF-8'?><fb2pdfjob version=\"3\">" . 
+    $message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><fb2pdfjob version=\"3\">" . 
         "<source url=\"$sourceUrl\" type=\"application/fb2+xml\" name=\"$name\"/>" .
         "<result key=\"$id.zip\" encoding=\"application/zip\"/>" .
         "<log key=\"$id.txt\"/>" .
@@ -23,7 +23,6 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
     if (!$sqs->putMessage(base64_encode($message), $queueUrl, $awsSQSTimeout))
         return false;
 
-    error_log("FB2PDF INFO. Sent SQS Message\n$message"); 
     return true;
 }
 
