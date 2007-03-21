@@ -270,6 +270,7 @@ def fb2tex(infile, outfile):
     \\usepackage{ulem}
     \\usepackage[%(inputenc)s]{inputenc}
     \\usepackage[russian]{babel}
+    \\usepackage{sectsty}
     \\setcounter{secnumdepth}{-2}
     """ % parameters )
     
@@ -281,7 +282,15 @@ def fb2tex(infile, outfile):
     
     f.write("\n\\begin{document}\n\n")
     f.write("\\tolerance=10000\n")
+    f.write("\\partfont{\\raggedright}\n")
+    f.write("\\chapterfont{\\raggedright}\n")
+    f.write("\\sectionfont{\\raggedright}\n")
+    f.write("\\subsectionfont{\\raggedright}\n")
+    f.write("\\subsubsectionfont{\\raggedright}\n")
+    
     f.write("{\\fontfamily{cmss}\\selectfont\n")
+
+    
     
     fb = soup.documentElement
     if fb.nodeType!=Node.ELEMENT_NODE or fb.tagName != "FictionBook":
