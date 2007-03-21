@@ -250,8 +250,7 @@ def fb2tex(infile, outfile):
     \\usepackage[
         colorlinks=true,
         linkcolor=black,
-        bookmarks=true,
-        bookmarksnumbered=true,
+        bookmarks=false,
         hypertexnames=false,
         plainpages=false,
         pdfpagelabels,
