@@ -140,40 +140,44 @@ def find(elem, what):
     else:
         return nl[0]
 
-def par(p, allowhref=True):
+def par(p, intitle=False):
     res = u''
     for s in p.childNodes:
         if s.nodeType == Node.ELEMENT_NODE:
             if s.tagName == "strong":
-                res += u'{\\bf '+ par(s,allowhref) + u'}'
+                res += u'{\\bf '+ par(s,intitle) + u'}'
             elif s.tagName == "emphasis":
-                res += u'{\\it '+ par(s,allowhref) + u'}'
+                res += u'{\\it '+ par(s,intitle) + u'}'
             elif s.tagName == "style":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
                 res += "" #TODO
             elif s.tagName == "a":
-                if allowhref:
+                if not intitle:
                     href = s.getAttributeNS('http://www.w3.org/1999/xlink','href')
                     if href:
                         if href[0]=='#':
-                            res += '\\hyperlink{' + href[1:] + '}{\\underline{' + par(s,allowhref) + '}}'
+                            res += '\\hyperlink{' + href[1:] + '}{\\underline{' + par(s,intitle) + '}}'
                         else:
-                            res += '\\href{' + href + '}{\\underline{' + par(s,allowhref) + '}}'
+                            res += '\\href{' + href + '}{\\underline{' + par(s,intitle) + '}}'
                     else:
                         logging.getLogger('fb2pdf').warning("'a' without 'href'")
                 else:
-                    res += par(s,allowhref)
+                    res += par(s,intitle)
                 res += "" #TODO
             elif s.tagName == "strikethrough":
-                res += u'\\sout{' + par(s,allowhref) + u'}'
+                res += u'\\sout{' + par(s,intitle) + u'}'
             elif s.tagName == "sub":
-                res += u'$_{\\textrm{' + par(s,allowhref) + '}}$'
+                res += u'$_{\\textrm{' + par(s,intitle) + '}}$'
             elif s.tagName == "sup":
-                res += u'$^{\\textrm{' + par(s,allowhref) + '}}$'
+                res += u'$^{\\textrm{' + par(s,intitle) + '}}$'
             elif s.tagName == "code":
-                res += u'{\\sc' + par(s,allowhref) + u'}'
+                res += u'{\\sc' + par(s,intitle) + u'}'
             elif s.tagName == "image":
-                res += processInlineImage(s)
+                if not intitle:
+                    res += processInlineImage(s)
+                else:
+                    # TODO: nicer workaround for issue #44
+                    res += "[...]"
             elif s.tagName == "l":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
                 res += "" #TODO
@@ -412,7 +416,7 @@ def processCite(q,f):
             elif x.tagName=="empty-line":
                 f.write("\\vspace{12pt}\n\n")
             elif x.tagName == "subtitle":
-                _uwrite(f,"\\item\n\\subsection*{%s}\n" % _tocElement(par(x, False), x))
+                _uwrite(f,"\\item\n\\subsection*{%s}\n" % _tocElement(par(x, True), x))
             elif x.tagName=="table":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.tagName)
                 pass # TODO
@@ -464,7 +468,7 @@ def processSection(s, f, level):
             elif x.tagName == "poem":
                 processPoem(x,f)
             elif x.tagName == "subtitle":
-                _uwrite(f,"\\subsection{%s}\n" % _tocElement(par(x, False), x))
+                _uwrite(f,"\\subsection{%s}\n" % _tocElement(par(x, True), x))
             elif x.tagName == "cite":
                 processCite(x,f)
             elif x.tagName == "table":
@@ -489,7 +493,7 @@ def processAnnotation(f, an):
                 elif x.tagName == "poem":
                     processPoem(x,f)
                 elif x.tagName == "subtitle":
-                    _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x, False), x))
+                    _uwrite(f,"\\subsection*{%s}\n" % _tocElement(par(x, True), x))
                 elif x.tagName == "cite":
                     processCite(x,f)
                 elif x.tagName == "table":
@@ -511,7 +515,7 @@ def getSectionTitle(t):
                     res = res + u"\\\\"
                 else:
                     first = False
-                res = res + par(x, False)
+                res = res + par(x, True)
             elif x.tagName == "empty-line":
                 res = res + u"\\vspace{10pt}"
             else:
