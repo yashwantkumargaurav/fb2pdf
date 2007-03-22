@@ -115,7 +115,11 @@ TEXT_PATTERNS = [
     (u'\u00B7', '\\textperiodcentered{}'),
     
     # Greek Mu
-    (u'\u00B5', '$\\mu$')
+    (u'\u00B5', '$\\mu$'),
+
+    # Unicode Character 'COMBINING ACUTE ACCENT' (U+0301)
+    (re.compile(u'(.)\u0301'), u'\\\'{\\1}')
+    
 ]
 
 
