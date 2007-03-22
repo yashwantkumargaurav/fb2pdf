@@ -281,8 +281,8 @@ def fb2tex(infile, outfile):
     
     f.write("\n\\begin{document}\n\n")
     f.write("\\tolerance=10000\n")
-    f.write("\\partfont{\\raggedright}\n")
-    f.write("\\chapterfont{\\raggedright}\n")
+    f.write("\\partfont{\\Large\\raggedright}\n")
+    f.write("\\chapterfont{\\large\\raggedright}\n")
     f.write("\\sectionfont{\\raggedright}\n")
     f.write("\\subsectionfont{\\raggedright}\n")
     f.write("\\subsubsectionfont{\\raggedright}\n")
