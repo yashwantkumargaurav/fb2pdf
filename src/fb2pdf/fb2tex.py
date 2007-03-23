@@ -118,8 +118,13 @@ TEXT_PATTERNS = [
     (u'\u00B5', '$\\mu$'),
 
     # Unicode Character 'COMBINING ACUTE ACCENT' (U+0301)
-    (re.compile(u'(.)\u0301'), u'\\\'{\\1}')
-    
+    (re.compile(u'(.)\u0301'), u'\\\'{\\1}'),
+
+    #Unicode Character 'SUPERSCRIPT TWO' (U+00B2)
+    (u'\u00B2', '$^2$'),
+
+    #Unicode Character 'SUPERSCRIPT THREE' (U+00B3)    
+    (u'\u00B3', '$^3$'),
 ]
 
 
