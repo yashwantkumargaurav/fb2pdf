@@ -254,6 +254,7 @@ def fb2tex(infile, outfile):
     
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
+    \\usepackage{verse}
     \\usepackage{textcomp} 
     \\usepackage[
         colorlinks=true,
