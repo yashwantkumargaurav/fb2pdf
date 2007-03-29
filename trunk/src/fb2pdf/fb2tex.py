@@ -158,7 +158,7 @@ def par(p, intitle=False):
                 res += "" #TODO
             elif s.tagName == "a":
                 if not intitle:
-                    href = s.getAttributeNS('http://www.w3.org/1999/xlink','href')
+                    href = s.getAttributeNS('http://www.w3.org/1999/xlink','href') or s.getAttribute('href') 
                     if href:
                         if href[0]=='#':
                             res += '\\hyperlink{' + href[1:] + '}{\\underline{' + par(s,intitle) + '}}'
