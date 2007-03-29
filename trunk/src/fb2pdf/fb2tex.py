@@ -564,7 +564,7 @@ def processEpigraphs(s,f):
         if ea:
             eauthor=_text(ea)
         f.write("\t{")
-        _uwrite(f,eauthor)
+        _uwrite(f,_textQuote(eauthor))
         f.write("}\n")
         
     f.write("\\end{epigraphs}\n")
