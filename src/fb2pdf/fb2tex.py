@@ -564,11 +564,11 @@ def processEpigraphs(s,f):
         f.write("\\hspace*{\\fill}}%\n") #TODO \hspace is a workaround for #37
 
         eauthor=""
-        ea=find(e,"text-author")
+        ea = find(e,"text-author")
         if ea:
-            eauthor=_text(ea)
+            eauthor=par(ea)
         f.write("\t{")
-        _uwrite(f,_textQuote(eauthor))
+        _uwrite(f,eauthor)
         f.write("}\n")
         
     f.write("\\end{epigraphs}\n")
