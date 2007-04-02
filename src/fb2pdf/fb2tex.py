@@ -125,6 +125,10 @@ TEXT_PATTERNS = [
 
     #Unicode Character 'SUPERSCRIPT THREE' (U+00B3)    
     (u'\u00B3', '$^3$'),
+
+    # Unicode Character 'INFINITY' (U+221E)
+    (u'\u221e','$\\infty$'),
+    
 ]
 
 
