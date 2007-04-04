@@ -64,7 +64,7 @@ function selectText(source)
 <!-- div to display upload form -->
 <div id="form">
     <h4 align="center">Этот сервис (альфа версия) предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://www.anrdoezrs.net/click-2348710-10383604?url=http%3A%2F%2Fwww.sonystyle.com%2Fis-bin%2FINTERSHOP.enfinity%2FeCS%2FStore%2Fen%2F-%2FUSD%2FSY_DisplayProductInformation-Start%3FProductSKU%3DPRS500U2%26CategoryName%3Dpa_portablereader%26DCMP%3DCJ_SS%26HQS%3DPRS500U2&cjsku=PRS-500" target="_blank">Sony Reader</a><img src="http://www.awltovhc.com/image-2348710-10383604" width="1"  height="1" border="0"/>.</h4>
-    <p>Пожалуйста загрузите книгу в FB2 или ZIP формате (ZIP может содержать только одну книгу в FB2 формате) или укажите URL.
+    <p>Пожалуйста, загрузите книгу в FB2 или ZIP формате (ZIP может содержать только одну книгу в FB2 формате) или укажите URL.
     <br>Не знаете, где можно найти книги в формате FB2? Мы рекомендуем электронные библиотеки <a href="http://fictionbook.ru/">FictionBook</a> и <a href="http://aldebaran.ru/">АЛЬДЕБАРАН</a>
     <p>
 
@@ -83,7 +83,7 @@ function selectText(source)
  
         <p>Для удобства, Вы также можете (но не обязаны) указать адрес Вашей электронной почты, и мы пошлём вам письмо, как только книга будет готова. 
         <br><br><sub>Введённый Вами адрес электронной почты используется <u>только</u> для уведомления о готовности книги. 
-        Мы гарантируем конфидициальность, и обязуемся <u>не использовать</u> указанный Вами адрес для рассылки рекламы.</sub>
+        Мы гарантируем конфиденциальность, и обязуемся <u>не использовать</u> указанный Вами адрес для рассылки рекламы.</sub>
         <p>
         email (не обязательно):
         <br><input type="text" id="email" value="" name="email" size="30"/>
