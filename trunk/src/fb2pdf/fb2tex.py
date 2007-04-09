@@ -596,13 +596,13 @@ def authorName(a):
 
 def processDescription(desc,f):
     if not desc:
-        logging.getLogger('fb2pdf').warning("Missing required 'description' element\n")
+        logging.getLogger('fb2pdf').warning("Missing required 'description' element")
         return
     
     # title info, mandatory element
     ti = find(desc,"title-info")
     if not ti:
-        logging.getLogger('fb2pdf').warning("Missing required 'title-info' element\n")
+        logging.getLogger('fb2pdf').warning("Missing required 'title-info' element")
         return 
     t = find(ti,"book-title")
     if t:
@@ -675,7 +675,7 @@ def findEnclosures(fb, outdir, outname):
         ct=e.getAttribute('content-type')
         global image_exts
         if not image_exts.has_key(ct):
-            logging.getLogger('fb2pdf').warning("Unknown content-type '%s' for binary with id %s. Skipping\n" % (ct,id))
+            logging.getLogger('fb2pdf').warning("Unknown content-type '%s' for binary with id %s. Skipping" % (ct,id))
             continue
         fname = "enc-%s-%d.%s" % (outname, counter, image_exts[ct])
         counter = counter+1
@@ -683,21 +683,26 @@ def findEnclosures(fb, outdir, outname):
         f = open(fullfname,"wb")
         f.write(binascii.a2b_base64(e.childNodes[0].data))
         f.close()
-        # convert to grayscale, 166dpi (native resolution for Sony Reader)
-        Image.open(fullfname).convert("L").save(fullfname, dpi=(166,166))
-        #TODO: scale down large images        
-        global enclosures
-        enclosures[id]=(ct, fname)
+        try:
+            # convert to grayscale, 166dpi (native resolution for Sony Reader)
+            Image.open(fullfname).convert("L").save(fullfname, dpi=(166,166))
+            #TODO: scale down large images        
+            global enclosures
+            enclosures[id]=(ct, fname)
+        except:
+            logging.getLogger('fb2pdf').warning("Error converting enclosure '%s'. Replacing with broken image icon" % id)
+            global enclosures
+            enclosures[id]=(ct, sys.prefix + '/share/fb2pdf/broken-image.png')
     
 def processInlineImage(image):
         global enclosures
         href = image.getAttributeNS('http://www.w3.org/1999/xlink','href')
         if not href or href[0]!='#':
-            logging.getLogger('fb2pdf').error("Invalid inline image ref '%s'\n" % href)
+            logging.getLogger('fb2pdf').error("Invalid inline image ref '%s'" % href)
             return ""
         href=str(href[1:])
         if not enclosures.has_key(href):
-            logging.getLogger('fb2pdf').error("Non-existing image ref '%s'\n" % href)
+            logging.getLogger('fb2pdf').error("Non-existing image ref '%s'" % href)
             return ""
         (ct,fname)=enclosures[href]
         return "\\begin{center}\n\\includegraphics{%s}\n\\end{center}\n" % fname
