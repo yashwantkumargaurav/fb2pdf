@@ -128,6 +128,9 @@ TEXT_PATTERNS = [
 
     # Unicode Character 'INFINITY' (U+221E)
     (u'\u221e','$\\infty$'),
+
+    # Unicode Character 'INFINITY' (U+221E)
+    ('*','$\\ast$'),
     
 ]
 
