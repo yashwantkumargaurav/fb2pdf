@@ -131,6 +131,20 @@ class S3
             return false;
     }
     
+  	// Delete object
+    function deleteObject($bucket, $object)
+    {
+        $resource = $bucket . "/" . $object;
+        
+        $this->request =& new HTTP_Request($this->serviceUrl . $resource);
+		$this->initRequest("DELETE", $resource, "", "private", "", "");
+        
+        $this->request->sendRequest();
+        $this->gotResponse();
+        
+        return ($this->responseCode == 200 or $this->responseCode == 204) ? true : false;
+    }
+    
     //initializes common elements of all REST requests
 	function initRequest($verb, $resource, $contentType, $acl, $metadata, $extraHttpHeaders)
     {
