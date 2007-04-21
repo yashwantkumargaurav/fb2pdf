@@ -107,35 +107,63 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
         $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
         
         // check if this book already exists
+        $isNewBook = true;
         $bookInfo = $db->getBook($md5);
         if ($bookInfo)
         {
             $key = $bookInfo["storage_key"];
-            
-            // send email to user
-            if ($email)
-                notifyUserByEmail($email, $key);
-            
-            return $key;
+            if ($bookInfo["status"] != 'e')
+            {
+                // send email to user
+                if ($email)
+                    notifyUserByEmail($email, $key);
+                
+                return $key;
+            }
+            else
+            {
+                $isNewBook = false;
+            }
         }
-        
-        // content-disposition
-        $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.fb2\"");
         
         // create an object to store source file
         $s3 = new S3($awsApiKey, $awsApiSecretKey);
 
-        if (!$s3->writeFile($awsS3Bucket, $key . ".fb2", $filePath, "application/fb2+xml", "public-read", "", $httpHeaders))
+        if ($isNewBook)
         {
-            error_log("FB2PDF ERROR. Unable to store file with key <$key> in the Amazon S3 storage."); 
-            return false;
+            $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$name.fb2\"");
+            if (!$s3->writeFile($awsS3Bucket, $key . ".fb2", $filePath, "application/fb2+xml", "public-read", "", $httpHeaders))
+            {
+                error_log("FB2PDF ERROR. Unable to store file with key <$key> in the Amazon S3 storage."); 
+                return false;
+            }
+            
+            // save to DB
+            if (!$db->insertBook($key . ".zip", $bookAuthor, $bookTitle, $isbn, $md5, "p"))
+            {
+                error_log("FB2PDF ERROR. Unable to insert book with key <$key> into DB."); 
+                // do not stop if DB is failed!
+            }
         }
-        
-        // save to DB
-        if (!$db->insertBook($key . ".zip", $bookAuthor, $bookTitle, $isbn, $md5, "p"))
+        else
         {
-            error_log("FB2PDF ERROR. Unable to insert book with key <$key> into DB."); 
-            // do not stop if DB is failed!
+            // update book status in the DB
+            if (!$db->updateBookStatus($key, "p"))
+            {
+                error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$key"); 
+                // do not stop if DB is failed!
+            }
+            
+            // remove log file
+            $pos = strrpos($key, ".");
+            if ($pos !== false) 
+                $key = substr($key, 0, $pos);
+                
+            if (!$s3->deleteObject($awsS3Bucket, $key . ".txt"))
+            {
+                error_log("FB2PDF ERROR. Unable to delete log file <$key.txt> in the Amazon S3 storage."); 
+                // do not stop if failed!
+            }
         }
         
         // send SQS message
