@@ -31,6 +31,9 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
 section_commands = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 
+version = '3.14'
+url = 'http://www.codeminders.com/fb2pdf'
+
 
 # Following tuples will be examined one by one and applied to the text.
 # If head is string (ASCII or unicode) all instances of it would be replaced
@@ -149,6 +152,11 @@ def find(elem, what):
         return None
     else:
         return nl[0]
+
+def _translify(s):
+    for symb_in, symb_out in pytils.translit.TRANSTABLE:
+        s = s.replace(symb_in, symb_out)
+    return s
 
 def par(p, intitle=False):
     res = u''
@@ -348,6 +356,8 @@ def fb2tex(infile, outfile):
         raise PersistentError("The file does not seems to contain 'fictionbook/body' element")
     for b in body:
         _uwrite(f, processBody(b))
+
+    _uwrite(f,vanitySection())
     
     f.write("}")
     f.write("\n\\end{document}\n")
@@ -454,6 +464,14 @@ def processCite(q):
 
     res+=processAuthors(q)
     res+='\\end{quotation}\n'
+    return res
+
+def vanitySection():
+    res = u''
+    res+="\n\\%s*{%s}\n" % (section_commands[0],"PDF Generation")
+    res+="Generatred at \\textit{\\today} by {\\bf fb2pdf} version \\textit{%s}\n" % (version)
+    res+='\n\n\\hyperlink{' + url + '}{\\underline{' + url + '}}'
+
     return res
     
 def processSection(s, level):
@@ -655,7 +673,7 @@ def processDescription(desc):
 
         if title:
             res+="\t/Title ("
-            res+=pytils.translit.translify(title)
+            res+=_translify(title)
             res+=")\n"
 
         res+="}\n"
