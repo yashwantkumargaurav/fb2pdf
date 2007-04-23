@@ -6,6 +6,10 @@ FictionBook2 -> TeX converter
 Author: Vadim Zaliva <lord@crocodile.org>
 '''
 
+__author__ = "Vadim Zaliva"
+__copyright__ = "Copyright (C) 2007 Vadim Zaliva"
+__version__ = "3.14"
+
 import logging
 import os, os.path, sys
 import string, re
@@ -31,7 +35,6 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
 section_commands = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 
-version = '3.14'
 url = 'http://www.codeminders.com/fb2pdf'
 
 
@@ -468,7 +471,7 @@ def processCite(q):
 
 def vanitySection():
     res = u"\n\\appendix\n\\pagebreak\n\\section*{PDF Generation}\n"
-    res += "Generatred on \\textit{\\today} by {\\bf fb2pdf} version \\textit{%s}\n" % (version)
+    res += "Generatred on \\textit{\\today} by {\\bf fb2pdf} version \\textit{%s}\n" % (__version__)
     res += '\n\n\\hyperlink{' + url + '}{\\underline{' + url + '}}'
     return res
     

@@ -210,6 +210,7 @@ def processCallbacks(res_key, status, callbacks):
             logging.getLogger('fbdaemon').debug("Calling callback %s" % u)
             p['key'] = res_key
             p['status'] = status
+            p['ver'] = fb2tex.__version__
             pe = urllib.urlencode(p)
             logging.getLogger('fbdaemon').debug("Calling '%s' with '%s'" % (u,pe))
             if c['method']=='POST':
