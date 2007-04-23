@@ -467,11 +467,9 @@ def processCite(q):
     return res
 
 def vanitySection():
-    res = u''
-    res+="\n\\%s*{%s}\n" % (section_commands[0],"PDF Generation")
-    res+="Generatred at \\textit{\\today} by {\\bf fb2pdf} version \\textit{%s}\n" % (version)
-    res+='\n\n\\hyperlink{' + url + '}{\\underline{' + url + '}}'
-
+    res = u"\n\\appendix\n\\pagebreak\n\\section*{PDF Generation}\n"
+    res += "Generatred at \\textit{\\today} by {\\bf fb2pdf} version \\textit{%s}\n" % (version)
+    res += '\n\n\\hyperlink{' + url + '}{\\underline{' + url + '}}'
     return res
     
 def processSection(s, level):
