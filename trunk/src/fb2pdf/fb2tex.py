@@ -207,7 +207,7 @@ def par(p, intitle=False):
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
                 res += "" #TODO
             else:
-                logging.getLogger('fb2pdf').error("Unknown paragrpah element: %s" % s.tagName)
+                logging.getLogger('fb2pdf').error("Unknown paragraph element: %s" % s.tagName)
         elif s.nodeType == Node.TEXT_NODE:
             res += _textQuote(s.data)
     return res            
@@ -471,7 +471,7 @@ def processCite(q):
 
 def vanitySection():
     res = u"\n\\appendix\n\\pagebreak\n\\section*{PDF Generation}\n"
-    res += "Generatred on \\textit{\\today} by {\\bf fb2pdf} version \\textit{%s}\n" % (__version__)
+    res += "Generated on \\textit{\\today} by {\\bf fb2pdf} version \\textit{%s}\n" % (__version__)
     res += '\n\n\\hyperlink{' + url + '}{\\underline{' + url + '}}'
     return res
     
