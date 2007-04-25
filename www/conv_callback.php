@@ -6,10 +6,17 @@ require_once 'utils.php';
 global $secret;
 global $dbServer, $dbName, $dbUser, $dbPassword;
 
+error_log("FB2PDF INFO. conv_callback POST=" . var_export($_POST, TRUE)); 
+
 $password = trim($_POST['pass']);
 $email    = trim($_POST['email']);
 $key      = trim($_POST['key']);
 $status   = trim($_POST['status']);
+
+if (isset ($_POST['ver']))
+    $ver = trim($_POST['ver']);
+else
+    $ver = 0;
 
 // check parameters
 if (!$key)
@@ -36,7 +43,8 @@ if ($password != md5($secret . $key))
 
 // update status in the DB
 $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
-if (!$db->updateBookStatus($key, $status))
+error_log("FB2PDF INFO. Updating books status $key: Status=$status, Version=$ver"); 
+if (!$db->updateBookStatus($key, $status, $ver))
     error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$key"); 
 
 

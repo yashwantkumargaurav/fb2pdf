@@ -19,4 +19,7 @@ $dbServer = "";     // Specify DB server here
 $dbName = "";       // Specify DB name here
 $dbUser = "";       // Specify DB user here
 $dbPassword = "";   // Specify DB password here
+
+// converter version
+$convVersion = 3.14;
 ?>

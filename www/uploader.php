@@ -85,6 +85,7 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
 {
     global $awsApiKey, $awsApiSecretKey, $awsS3Bucket, $testMode, $secret;
     global $dbServer, $dbName, $dbUser, $dbPassword;
+    global $convVersion;
 
     // genarate key
     $key = md5(uniqid(""));
@@ -112,7 +113,10 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
         if ($bookInfo)
         {
             $key = $bookInfo["storage_key"];
-            if ($bookInfo["status"] != 'e')
+            // check error status and converter version
+            $bookStatus = $bookInfo["status"];
+            $bookVer    = $bookInfo["conv_ver"];
+            if (($bookStatus == 'r' and $bookVer >= $convVersion) or $bookStatus == 'p') 
             {
                 // send email to user
                 if ($email)
@@ -120,8 +124,9 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
                 
                 return $key;
             }
-            else
+            else 
             {
+                error_log("FB2PDF INFO. Books $key needs to be converted again. Status=$bookStatus, Version=$bookVer"); 
                 $isNewBook = false;
             }
         }
@@ -148,20 +153,26 @@ function process_file($filePath, $fileName, $email, $bookTitle, $bookAuthor, $is
         else
         {
             // update book status in the DB
-            if (!$db->updateBookStatus($key, "p"))
+            if (!$db->updateBookStatus($key, "p", 0))
             {
                 error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$key"); 
                 // do not stop if DB is failed!
             }
             
-            // remove log file
+            // remove result/log file
             $pos = strrpos($key, ".");
             if ($pos !== false) 
                 $key = substr($key, 0, $pos);
                 
+            if (!$s3->deleteObject($awsS3Bucket, $key . ".zip"))
+            {
+                error_log("FB2PDF ERROR. Unable to delete converted file <$key.zip> from the Amazon S3 storage."); 
+                // do not stop if failed!
+            }
+            
             if (!$s3->deleteObject($awsS3Bucket, $key . ".txt"))
             {
-                error_log("FB2PDF ERROR. Unable to delete log file <$key.txt> in the Amazon S3 storage."); 
+                error_log("FB2PDF ERROR. Unable to delete log file <$key.txt> from the Amazon S3 storage."); 
                 // do not stop if failed!
             }
         }
