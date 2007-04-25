@@ -6,8 +6,6 @@ require_once 'utils.php';
 global $secret;
 global $dbServer, $dbName, $dbUser, $dbPassword;
 
-error_log("FB2PDF INFO. conv_callback POST=" . var_export($_POST, TRUE)); 
-
 $password = trim($_POST['pass']);
 $email    = trim($_POST['email']);
 $key      = trim($_POST['key']);
