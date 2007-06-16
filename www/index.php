@@ -61,6 +61,10 @@ function selectText(source)
 </head>
 <body>
 
+<?php
+$url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
+?>
+
 <!-- div to display upload form -->
 <div id="form">
     <h4 align="center">Этот сервис (альфа версия) предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://www.anrdoezrs.net/click-2348710-10383604?url=http%3A%2F%2Fwww.sonystyle.com%2Fis-bin%2FINTERSHOP.enfinity%2FeCS%2FStore%2Fen%2F-%2FUSD%2FSY_DisplayProductInformation-Start%3FProductSKU%3DPRS500U2%26CategoryName%3Dpa_portablereader%26DCMP%3DCJ_SS%26HQS%3DPRS500U2&cjsku=PRS-500" target="_blank">Sony Reader</a><img src="http://www.awltovhc.com/image-2348710-10383604" width="1"  height="1" border="0"/>.</h4>
@@ -69,15 +73,15 @@ function selectText(source)
     <p>
 
     <form id="uploadform" enctype="multipart/form-data" action="uploader.php" method="POST">
-        <input type="radio" name="uploadtype" value="file" onclick="toggleUploadMode(true);" checked /> file
-        <input type="radio" name="uploadtype" value="url" onclick="toggleUploadMode(false);" /> url
+        <input type="radio" name="uploadtype" value="file" onclick="toggleUploadMode(true);" <?php if (!$url) print "checked" ?> /> file
+        <input type="radio" name="uploadtype" value="url" onclick="toggleUploadMode(false);" <?php if ( $url) print "checked" ?> /> url
 
-        <div id="upfile">
+        <div id="upfile" <?php if ($url) print 'style="display: none"' ?>>
             <input type="file" name="fileupload" size="30" id="fileupload"/>
         </div>
  
-        <div id="upurl" style="display: none">
-            <input type="text" id="fileupload" value="наберите URL здесь" name="url" size="30" onclick="selectText(this);"/>
+        <div id="upurl" <?php if (!$url) print 'style="display: none"' ?>>
+            <input type="text" id="fileupload" value="<?php print ($url) ? $url : "наберите URL здесь" ?>" name="url" size="30" onclick="selectText(this);"/>
         </div>
         <br><input type="button" onclick="doUpload()" value="Конвертировать" />
  
