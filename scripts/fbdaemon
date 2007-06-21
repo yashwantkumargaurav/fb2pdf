@@ -17,11 +17,11 @@ import zipfile
 from xml.dom.minidom import parse, parseString
 from ConfigParser import ConfigParser
 
-from boto.connection import SQSConnection
+from boto.sqs import Connection
 from boto.sqs.message import Message
-from boto.exception import SQSError, S3Error
+from boto.exception import SQSError
 
-from boto.connection import S3Connection
+from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
 from fb2pdf.daemon import createDaemon
@@ -371,7 +371,7 @@ def main():
 
         logging.getLogger('fbdaemon').info("Starting")
             
-        c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
+        c = Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
         
         qname = cfg.get('queue','name')
         qtimeout = int(cfg.get('queue','timeout'))
