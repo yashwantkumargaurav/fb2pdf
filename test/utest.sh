@@ -12,7 +12,7 @@ for i in ${FB2FILES}; do
     N=`basename $i .fb2`
     t=${N}.tex
     echo $N
-    fb2tex -v -f $i -o $t > $N.fblog 2>&1
+    python2.4 `which fb2tex` -v -f $i -o $t > $N.fblog 2>&1
     if [ $? -ne 0 ]; then
         TEXFAILED="${TEXFAILED} $i"
     else

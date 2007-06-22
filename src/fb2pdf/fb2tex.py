@@ -101,6 +101,11 @@ TEXT_PATTERNS = [
     (u'\u201f', '``'),
     (u'\u201d', "''"),
 
+    # U+2018 LEFT SINGLE QUOTATION MARK
+    (u'\u2018', "`"),
+    # U+2019 RIGHT SINGLE QUOTATION MARK
+    (u'\u2019', "'"),
+
     # Broken bar
     (u'\u00A6', '|'),
 

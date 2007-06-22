@@ -15,7 +15,7 @@ texfiles: $(alltex)
 	pdflatex $(PDFLATEXFLAGS) $<
 
 %.tex: %.fb2
-	fb2tex -v -f $< -o $@
+	python2.4 `which fb2tex` -v -f $< -o $@
 
 install:
 	cd .. && sudo python2.4 setup.py install; cd test
