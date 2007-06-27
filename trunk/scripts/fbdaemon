@@ -13,6 +13,7 @@ import string, time
 import urllib2, tempfile, cgi, urllib
 import traceback
 import zipfile
+import pytils.translit
 
 from xml.dom.minidom import parse, parseString
 from ConfigParser import ConfigParser
@@ -39,6 +40,20 @@ logfile = '/var/log/fbdaemon.log'
 log_verbosity = logging.INFO
 
 # --- Code ---
+
+def _translify(s):
+    for symb_in, symb_out in pytils.translit.TRANSTABLE:
+        s = s.replace(symb_in, symb_out)
+    return s
+
+def _makefname(s):
+    s = _translify(s)
+    res = ""
+    for c in s:
+        if not ((c>='a' and c<='z') or (c>='A' and c<='Z') or (c>='0' and c<='9')):
+            c='_'
+        res+=c
+    return str(res)
 
 def usage():
     sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-p pidfile] [-l logfile] [-v] [-d]\n")
@@ -169,7 +184,7 @@ def processMessage(m):
             x['params']={}
         callbacks.append(x)
 
-    processDocument(str(src_url), str(src_type), str(src_name), str(src_encoding),
+    processDocument(str(src_url), str(src_type), src_name, str(src_encoding),
                     str(res_key), str(res_encoding),
                     str(log_key),
                     callbacks)
@@ -226,13 +241,15 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
     global cfg
     bucket = cfg.get('storage','bucket')
 
-    logfilename = src_name + '.txt'
+    src_fname = _makefname(src_name)
+    
+    logfilename = src_fname + '.txt'
     
     try: # on err, call err. callbacks
 
         basedir = os.getcwd()
 
-        logging.getLogger('fbdaemon').info("Processing '%s'." % src_name)
+        logging.getLogger('fbdaemon').info("Processing '%s'." % src_fname)
         tmpdirname = tempfile.gettempdir() + '/' + str(int(time.time()))
         logging.getLogger('fbdaemon').debug("Creating temporary directory '%s'." % tmpdirname)
         os.mkdir(tmpdirname)
@@ -250,8 +267,8 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
             try: # on PersistentError error, upload log
                 try: # finally, close logger
         
-                    fbfilename = src_name + '.fb2'
-                    zipfilename = src_name + '.zip'
+                    fbfilename = src_fname + '.fb2'
+                    zipfilename = src_fname + '.zip'
 
                     if src_encoding=="application/zip":
                         srcfilename = zipfilename
@@ -300,8 +317,8 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
                             logging.getLogger('fb2pdf').exception("Error extracting content from ZIP file")
                             raise PersistentError("Error extracting content from ZIP file")
 
-                    texfilename = src_name + '.tex'
-                    pdffilename = src_name + '.pdf'
+                    texfilename = src_fname + '.tex'
+                    pdffilename = src_fname + '.pdf'
 
                     logging.getLogger('fbdaemon').debug("Converting to TeX")
                     fb2tex.fb2tex(fbfilename, texfilename)
