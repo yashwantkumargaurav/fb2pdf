@@ -5,6 +5,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 
+<script src="js/yahoo.js"></script>
+<script src="js/connection.js"></script>
+
 <script type="text/javascript">
 function get(id)
 {
@@ -12,19 +15,58 @@ function get(id)
 }
 
 //  Show/Hide 5 first titles
-function bookTitles(divName,imgName)
+function bookTitles(author, divName, imgName)
 {
-
     if ( get(divName).style.display == 'none') 
     {
-        get(divName).style.display="inline";
-        get(imgName).src = get(imgName).src.replace('_plus', '_minus');
+        // request url 
+        var baseUrl = 'query_books.php';
+        var queryString = encodeURI('?author=' + author + '&' + 'count=' + 5);
+        //var queryString = '?author=' + author + '&' + 'count=' + 5;
+        var url = baseUrl + queryString;
+
+        // callback
+        var callback =
+        {
+            success: successHandler,
+            failure: failureHandler,
+            argument: { divName: divName,  imgName: imgName}
+        };
+        
+        // Initiate the HTTP GET request.
+        var request = YAHOO.util.Connect.asyncRequest('GET', url, callback);
     }   
     else
     {
         get(divName).style.display="none";
         get(imgName).src = get(imgName).src.replace('_minus', '_plus');
     }
+}
+
+function successHandler(o)
+{
+    var div = document.getElementById(o.argument.divName);
+    var img = document.getElementById(o.argument.imgName);
+    
+    // format and display results.
+    var root = o.responseXML.documentElement;
+    var channels = root.getElementsByTagName("channel");
+    var items = channels[0].getElementsByTagName("item");
+    
+    var title = items[0].getElementsByTagName("title")[0].firstChild.nodeValue;
+    var link  = items[0].getElementsByTagName("link")[0].firstChild.nodeValue;
+    
+    div.innerHTML =  '<a href="' + link + '">' + title + '</a><br>';
+    div.innerHTML += '<a href=\"#\">&nbsp;Другие...</a>';
+        
+    // display list
+    div.style.display="inline";
+    img.src = img.src.replace('_plus', '_minus');
+}
+
+function failureHandler(o)
+{
+    alert(o.status + " " + o.statusText);
 }
 
 function rollOver(imgName)
@@ -38,7 +80,6 @@ function rollOver(imgName)
         get(imgName).src = get(imgName).src.replace('_on', '_off');
     }
 }
-
 </script>
 </head>
 <body>
@@ -119,11 +160,17 @@ function rollOver(imgName)
                             $author = $list[$i]["author"];
                             $number = $list[$i]["number"];
                             
-                            echo "<img id=\"bt$author\" src=\"images/bt_plus_off.gif\" alt=\"plus\"";
-                            echo " onclick=\"bookTitles('$author', 'bt$author');\"";
-                            echo " onmouseover=\"rollOver('bt$author');\"";
-                            echo " onmouseout=\"rollOver('bt$author');\"/>";
+                            $author_md5 = md5($author);
+                            
+                            echo "<img id=\"bt$author_md5\" src=\"images/bt_plus_off.gif\" alt=\"plus\"";
+                            echo " onclick=\"bookTitles('$author', '$author_md5', 'bt$author_md5');\"";
+                            echo " onmouseover=\"rollOver('bt$author_md5');\"";
+                            echo " onmouseout=\"rollOver('bt$author_md5');\"/>";
                             echo "&nbsp;&nbsp;$author&nbsp;&nbsp;<br/>"; 
+                            echo "<div id=\"$author_md5\" style=\"display:none;\">";
+                            // 5 books
+                            echo "<a href=\"#\">&nbsp;Другие...</a>";
+                            echo "</div>";
                         }
                         echo "</p>";
                     }
