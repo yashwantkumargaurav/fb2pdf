@@ -1,6 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="css/main.css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 
@@ -11,7 +12,8 @@ function toggleUploadMode(file)
     {
         document.getElementById('upfile').style.display='block';
         document.getElementById('upurl').style.display='none';
-    } else 
+    } 
+    else 
     {
         document.getElementById('upfile').style.display='none';
         document.getElementById('upurl').style.display='block';
@@ -56,7 +58,6 @@ function selectText(source)
     }
 }
 
-
 </script>
 </head>
 <body>
@@ -65,96 +66,149 @@ function selectText(source)
 $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
 ?>
 
-<!-- div to display upload form -->
-<div id="form">
-    <h4 align="center">Этот сервис (альфа версия) предназначен для конвертации книг из формата <a href="http://ru.wikipedia.org/wiki/FictionBook">FictionBook2(FB2)</a> в формат <a href="http://www.anrdoezrs.net/click-2348710-10383604?url=http%3A%2F%2Fwww.sonystyle.com%2Fis-bin%2FINTERSHOP.enfinity%2FeCS%2FStore%2Fen%2F-%2FUSD%2FSY_DisplayProductInformation-Start%3FProductSKU%3DPRS500U2%26CategoryName%3Dpa_portablereader%26DCMP%3DCJ_SS%26HQS%3DPRS500U2&cjsku=PRS-500" target="_blank">Sony Reader</a><img src="http://www.awltovhc.com/image-2348710-10383604" width="1"  height="1" border="0"/>.</h4>
-    <p>Пожалуйста, загрузите книгу в FB2 или ZIP формате (ZIP может содержать только одну книгу в FB2 формате) или укажите URL.
-    <br>Не знаете, где можно найти книги в формате FB2? Мы рекомендуем электронные библиотеки <a href="http://fictionbook.ru/">FictionBook</a> и <a href="http://aldebaran.ru/">АЛЬДЕБАРАН</a>
-    <p>
-
-    <form id="uploadform" enctype="multipart/form-data" action="uploader.php" method="POST">
-        <input type="radio" name="uploadtype" value="file" onclick="toggleUploadMode(true);" <?php if (!$url) print "checked" ?> /> file
-        <input type="radio" name="uploadtype" value="url" onclick="toggleUploadMode(false);" <?php if ( $url) print "checked" ?> /> url
-
-        <div id="upfile" <?php if ($url) print 'style="display: none"' ?>>
-            <input type="file" name="fileupload" size="30" id="fileupload"/>
-        </div>
- 
-        <div id="upurl" <?php if (!$url) print 'style="display: none"' ?>>
-            <input type="text" id="fileupload" value="<?php print ($url) ? $url : "наберите URL здесь" ?>" name="url" size="30" onclick="selectText(this);"/>
-        </div>
-        <br><input type="button" onclick="doUpload()" value="Конвертировать" />
- 
-        <p>Для удобства, Вы также можете (но не обязаны) указать адрес Вашей электронной почты, и мы пошлём вам письмо, как только книга будет готова. 
-        <br><br><sub>Введённый Вами адрес электронной почты используется <u>только</u> для уведомления о готовности книги. 
-        Мы гарантируем конфиденциальность, и обязуемся <u>не использовать</u> указанный Вами адрес для рассылки рекламы.</sub>
-        <p>
-        email (не обязательно):
-        <br><input type="text" id="email" value="" name="email" size="30"/>
-    </form>
-    
-    <?php
-    require_once 'awscfg.php';
-    require_once 'db.php';
-    require_once 'utils.php';
-
-    global $awsS3Bucket;
-    global $dbServer, $dbName, $dbUser, $dbPassword;
-    
-    // list of new books
-    $MAX_BOOKS = 40;
-    $MAX_ROWS  = 20;
-    $MAX_COLS  = 2;
-    
-    $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
-    $list = $db->getBooks($MAX_BOOKS);
-    if ($list)
-    {
-        echo '<h4 align="center">Книги, сконвертированные недавно:</h4>';
-        echo '<table border="0">';
-        
-        $count = count($list);
-        for ($row = 0; $row < $MAX_ROWS; $row++) 
-        {
-            echo '<tr>';
-            for ($col = 0; $col < $MAX_COLS; $col++) 
-            {
-                $i = $col * $MAX_ROWS + $row;
-                if ($i < $count)
-                {
-                    $author = $list[$i]["author"];
-                    $title  = $list[$i]["title"];
-                    $key    = $list[$i]["storage_key"];
-                    if (strrpos($key, ".") === false) // old style key (no extension)
-                        $key = $key . ".pdf";
-
-                    if (!$author)
-                        $author = "Автор неизвестен";
-                    if (!$title)
-                        $title = "Название неизвестно";
-                    
-                    echo "<td><i>$author</i>&nbsp;&nbsp;<a href=\"getfile.php?key=$key\">\"$title\"</a></td>";
-                    echo '<td width="30"></td>';
-                }
-            }
-            echo '</tr>';
-        }
-        echo '</table>';
-    }
+<center>
+<div id="container" class="WidthPage">
+    <?php 
+    include 'header.inc.php'; 
+    $active_menu = 'main';
+    include 'menu.inc.php'; 
     ?>
     
-    <p>Обнаружили ошибку? У Вас есть предложения по улучшению сервиса? Хотите оставить комментарий?
-    <br>Это можно сделать <a href="http://groups.google.com/group/fb2pdf-users/about?hl=ru">здесь</a>
-</div>
+    <div id="tab_box">
+        <b class="xtop"><b class="xb1"></b><b class="xb2"></b><b class="xb3"></b><b class="xb4"></b></b>
+        <div class="tab_box_content">
+            <div id="convert_box">
+            <div id="more_news"><a href="#"><u>Все новости</u></a></div>
+            <p class="news"><span class="light_green">Новость:</span>&nbsp;&nbsp;<span class="green">06.11.07</span>&nbsp;&nbsp;--&nbsp;&nbsp;Добавлена возможность 
+            поиска, а также новые ссылки на библиотеки fb2.. </p>
+                <b class="ctop"><b class="cb1"></b><b class="cb2"></b><b class="cb3"></b><b class="cb4"></b></b>
+                <div class="conv_box_content">
+                    <div id="intro">
+                        <div id="width480">
+                        <div class="roundedcornr_box_fr">
+                        <div class="roundedcornr_top_line_fr"><div class="roundedcornr_top_fr"><div></div></div></div>
+                        <div class="roundedcornr_left_line_fr">
+                            <div class="roundedcornr_content_fr">
+                            <p class="justify">Пожалуйста загрузите книгу в FB2 или ZIP формате (ZIP может содержать только одну книгу в FB2 формате) или укажите URL.</p>
+                    
+                    <form id="uploadform" enctype="multipart/form-data" action="uploader.php" method="POST">
+                            <input type="radio" class="red_line" name="uploadtype" value="file" onclick="toggleUploadMode(true);" <?php if (!$url) print "checked" ?> /> Файл
+                            <input type="radio" name="uploadtype" value="url" onclick="toggleUploadMode(false);" <?php if ( $url) print "checked" ?> /> URL
+                            
+                            <div id="upfile" <?php if ($url) print 'style="display: none"' ?>>
+                                <input type="file" name="fileupload" id="fileupload" size="25"/>
+                            </div> 
+                            
+                            <div id="upurl" <?php if (!$url) print 'style="display: none"' ?>>
+                                <p align="center">
+                                <input type="text" id="fileupload" value="<?php print ($url) ? $url : "наберите URL здесь" ?>" name="url" size="30" onclick="selectText(this);"/>
+                            </div>
+                            
+                            </div><!--end roundedcornr_content_fr-->
+                            <div class="roundedcornr_bottom_line_fr"><div class="roundedcornr_bottom_fr"><div></div></div></div>
+                        </div><!--roundedcornr_left_line_fr-->
+                        </div><!--end roundedcornr_box_fr-->
+                        
+                        <div id="arrow"><img src="images/arrow.gif" alt="arrow"/></div>
+                        </div> <!-- width480-->	
+                        
+                        <div id="email_div">
+                            <p class="left"> email (не обязательно):    
+                            <input type="text" id="email" value="" name="email" size="30"/>
+                            </p>
+                            
+                            <p class="justify"><span class="small">Вы можете указать адрес Вашей электронной почты, и мы пошлём вам письмо, 
+                            как только книга будет готова.
+                            <span class="grey">Введённый Вами адрес используется <u>только</u> для уведомления о готовности книги.              
+                            Мы гарантируем конфидeнциальность, и обязуемся <u>не использовать</u> указанный Вами адрес для рассылки рекламы.   
+                            </span></span>
+                            </p>
+                        </div><!--email_div-->
+                    </div> <!--intro-->  
+                    
+                    <div id="sony_reader">
+                        <img src="images/sony_reader.jpg" alt="sony reader"/>
+                        <input id="ConvertBtnUpld" style="margin: 5px 0px 0px 0px;"
+                            onmouseup  ="this.src='images/button.gif'" 
+                            onmousedown="this.src='images/button_pressed.gif'"
+                            onmouseover="this.src='images/button_active.gif'" 
+                            onmouseout ="this.src='images/button.gif'"
+                            onclick    ="doUpload();" 
+                            type="image" src="images/button.gif" />
+                    </div>
+                    </form>
+                </div> <!--end of convert box content-->	
+            <b class="cbottom"><b class="cb4"></b><b class="cb3"></b><b class="cb2"></b><b class="cb1"></b></b>
+            </div>  <!--end of convert box -->
+            
+            <div id="more_books"><a href="#"><u>Все книги</u></a></div>
+            <h4>Книги, сконвертированные недавно:</h4> 
+            <img src="images/green_px.gif" class="line"/>
 
-<!-- div to display progress indicator -->
-<div id="progress" style="display:none;text-align:center">
-    <h4 align="center">Загрузка файла. Пожалуйста, подождите...</h4> 
-    <img id="pimage" src="images/progress.gif"/>
-</div>
+            <?php
+            require_once 'awscfg.php';
+            require_once 'db.php';
+            require_once 'utils.php';
 
-<hr WIDTH="100%">
-<a href="http://www.crocodile.org/"><img src="http://www.crocodile.org/noir.png"></a> 
+            global $awsS3Bucket;
+            global $dbServer, $dbName, $dbUser, $dbPassword;
+            
+            // list of new books
+            $MAX_BOOKS = 40;
+            $MAX_ROWS  = 20;
+            $MAX_COLS  = 2;
+            
+            $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+            $list = $db->getBooks($MAX_BOOKS);
+            if ($list)
+            {
+                $count = count($list);
+                for ($col = $MAX_COLS - 1; $col >= 0 ; $col--)
+                {
+                    if ($col == 0)
+                        echo '<div class="left_book">';
+                    else
+                        echo '<div class="right_book">';
+                    
+                    for ($row = 0; $row < $MAX_ROWS; $row++)
+                    {
+                        $i = $col * $MAX_ROWS + $row;
+                        if ($i < $count)
+                        {
+                            $author = $list[$i]["author"];
+                            $title  = $list[$i]["title"];
+                            $key    = $list[$i]["storage_key"];
+                            if (strrpos($key, ".") === false) // old style key (no extension)
+                                $key = $key . ".pdf";
 
+                            if (!$author)
+                                $author = "Автор неизвестен";
+                            if (!$title)
+                                $title = "Название неизвестно";
+                            
+                            echo "$author&nbsp;&nbsp;<a href=\"getfile.php?key=$key\">\"$title\"</a><br/>";
+                        }
+                    }
+                    echo '</div>';
+                }
+            }
+            ?>
+
+            <img src="images/green_px.gif" class="line"/>
+            <?php include 'footer.inc.php'; ?>
+
+            <!-- div to display progress indicator --> 
+            <div id="progress" style="display:none;text-align:center">
+                <h4 align="center">Загрузка файла. Пожалуйста, подождите...</h4>
+                <img id="pimage" src="images/progress.gif" alt="progress bar"/>
+            </div>
+        </div>  <!--end of tab box content-->	
+        <b class="xbottom"><b class="xb4"></b><b class="xb3"></b><b class="xb2"></b><b class="xb1"></b></b>
+    </div> <!--end of tab box -->
+<br/>
+<br/>
+</div> <!--end of container-->
+</center>
 </body>
+</html>
  

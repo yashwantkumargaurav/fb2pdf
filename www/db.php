@@ -2,24 +2,24 @@
 
 class DB
 {
-	var $server;
-	var $name;
-   	var $user;
-   	var $password;
-	
+    var $server;
+    var $name;
+    var $user;
+    var $password;
+
     var $link;
     var $result;
     
-	function DB($server, $name, $user, $password) 
+    function DB($server, $name, $user, $password) 
     {
-    	$this->server   = $server;
-    	$this->name     = $name;
-       	$this->user     = $user;
-       	$this->password = $password;
+        $this->server   = $server;
+        $this->name     = $name;
+        $this->user     = $user;
+        $this->password = $password;
         
-       	$this->link     = NULL;
-       	$this->result   = NULL;
-	}
+        $this->link     = NULL;
+        $this->result   = NULL;
+    }
     
     // Insert a new book
     function insertBook($storageKey, $author, $title, $isbn, $md5, $status)
@@ -87,7 +87,29 @@ class DB
         if (!$this->_execQuery($query))
             return false;
         
-   		$list = array();
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
+            $list[$count++] = $row;
+        
+        $this->_freeQuery();
+        return $list;
+    }
+    
+    // Get list of books by author.
+    // if number == 0, no limit
+    function getBooksByAuthor($author, $number)
+    {
+        $author = mysql_real_escape_string($author);
+        
+        $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY title DESC";
+        if ($number > 0) 
+            $query += " LIMIT $number";
+            
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
         $count = 0;
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list[$count++] = $row;
@@ -103,7 +125,7 @@ class DB
         if (!$this->_execQuery($query))
             return false;
         
-   		$list = array();
+        $list = array();
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list = $row;
             
@@ -119,7 +141,7 @@ class DB
         if (!$this->_execQuery($query))
             return false;
         
-   		$list = array();
+        $list = array();
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
         {        
             $letter = $row["letter"];
@@ -139,7 +161,7 @@ class DB
         if (!$this->_execQuery($query))
             return false;
         
-   		$list = array();
+        $list = array();
         $count = 0;
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
             $list[$count++] = $row;
@@ -164,8 +186,8 @@ class DB
             return false;
         }
 
-		$set = @mysql_query ('SET NAMES UTF8');
-		$set = @mysql_query ('SET COLLATION_CONNECTION=UTF8_GENERAL_CI');
+        $set = @mysql_query ('SET NAMES UTF8');
+        $set = @mysql_query ('SET COLLATION_CONNECTION=UTF8_GENERAL_CI');
 
         if(!($this->result = mysql_query($query))) 
         {
