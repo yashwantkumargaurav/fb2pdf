@@ -24,6 +24,9 @@ class DB
     // Insert a new book
     function insertBook($storageKey, $author, $title, $isbn, $md5, $status)
     {
+        if (!$this->_connect())
+            return false;
+            
         $storageKey = mysql_real_escape_string($storageKey);
         $author     = mysql_real_escape_string($author);
         $title      = mysql_real_escape_string($title);
@@ -42,6 +45,9 @@ class DB
     // Updade status
     function updateBookStatus($storageKey, $status, $ver)
     {
+        if (!$this->_connect())
+            return false;
+            
         $storageKey = mysql_real_escape_string($storageKey);
         $status     = mysql_real_escape_string($status);
         $ver        = mysql_real_escape_string($ver);
@@ -57,6 +63,9 @@ class DB
     // Updade status
     function updateBookCounter($storageKey)
     {
+        if (!$this->_connect())
+            return false;
+            
         $storageKey = mysql_real_escape_string($storageKey);
         
         $query = "UPDATE Books SET counter = counter + 1 WHERE storage_key = \"$storageKey\"";
@@ -70,6 +79,9 @@ class DB
     // Delete book
     function deleteBook($storageKey)
     {
+        if (!$this->_connect())
+            return false;
+            
         $storageKey = mysql_real_escape_string($storageKey);
         
         $query = "DELETE FROM Books WHERE storage_key = \"$storageKey\"";
@@ -83,6 +95,9 @@ class DB
     // Get list of books
     function getBooks($number)
     {
+        if (!$this->_connect())
+            return false;
+            
         $query = "SELECT * FROM Books WHERE status = \"r\" ORDER BY id DESC LIMIT $number";
         if (!$this->_execQuery($query))
             return false;
@@ -100,6 +115,9 @@ class DB
     // if number == 0, no limit
     function getBooksByAuthor($author, $number)
     {
+        if (!$this->_connect())
+            return false;
+            
         $author = mysql_real_escape_string($author);
         
         $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY title DESC";
@@ -121,6 +139,9 @@ class DB
     // Get book by md5
     function getBook($md5)
     {
+        if (!$this->_connect())
+            return false;
+            
         $query = "SELECT * FROM Books WHERE md5_hash = 0x$md5 LIMIT 1";
         if (!$this->_execQuery($query))
             return false;
@@ -137,6 +158,9 @@ class DB
     // Returns array where key/value is a first letter
     function getAuthorsFirstLetters()
     {
+        if (!$this->_connect())
+            return false;
+            
         $query = "SELECT DISTINCT UPPER(LEFT(author,1)) as letter FROM Books WHERE status = \"r\"";
         if (!$this->_execQuery($query))
             return false;
@@ -157,6 +181,11 @@ class DB
     // This array is sorted by authors.
     function getAuthorsByFirstLetter($letter)
     {
+        if (!$this->_connect())
+            return false;
+            
+        $letter = mysql_real_escape_string($letter);
+        
         $query = "SELECT author, count(id) AS number FROM Books WHERE author LIKE \"$letter%\" AND status=\"r\" GROUP BY author ORDER BY author ASC";
         if (!$this->_execQuery($query))
             return false;
@@ -171,7 +200,7 @@ class DB
     }
     
     // Internal methods
-    function _execQuery($query)
+    function _connect()
     {
         if(!($this->link = mysql_connect($this->server, $this->user, $this->password))) 
         {
@@ -182,6 +211,7 @@ class DB
         if(!mysql_select_db($this->name))
         {
             mysql_close($this->link);
+            $this->link = NULL;
             error_log("FB2PDF ERROR. Error selecting database");
             return false;
         }
@@ -189,9 +219,15 @@ class DB
         $set = @mysql_query ('SET NAMES UTF8');
         $set = @mysql_query ('SET COLLATION_CONNECTION=UTF8_GENERAL_CI');
 
+        return true;
+    }
+    
+    function _execQuery($query)
+    {
         if(!($this->result = mysql_query($query))) 
         {
             mysql_close($this->link);
+            $this->link = NULL;
             error_log("FB2PDF ERROR. Query failed: $query.\n" . mysql_error());
             return false;
         }
