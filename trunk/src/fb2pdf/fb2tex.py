@@ -217,23 +217,26 @@ def par(p, intitle=False):
             res += _textQuote(s.data)
     return res            
 
-def norec(ns,an,defret):
-    def decorate(f):
-        def new_f(*args, **kwds):
-            a0=args[an]
-            if a0 in ns:
-                #print "recursion detected at '%s' in %s" % (a0, str(ns))
-                return defret
-            else:
-                ns.append(a0)
-                x = f(*args, **kwds)
-                ns.remove(a0)
-                return x
-        return new_f
-    return decorate
+def norec(an,defret,initial=[]):
+    class decorate:
+        def __init__(self):
+            self.ns=initial
+            
+        def __call__(self, f):
+            def new_f(*args, **kwds):
+                a0=args[an]
+                if a0 in self.ns:
+                    #print "recursion detected at '%s' in %s" % (a0, str(self.ns))
+                    return defret
+                else:
+                    self.ns.append(a0)
+                    x = f(*args, **kwds)
+                    self.ns.remove(a0)
+                    return x
+            return new_f
+    return decorate()
 
-notes_stack=[]    
-@norec(notes_stack, 0, "")
+@norec(0, "")
 def processFootnote(href,s,intitle):
     doc  = s
     while doc.parentNode:
