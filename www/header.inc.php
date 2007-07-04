@@ -10,7 +10,7 @@
             </strong>
         </h4>          
         <div class="search">Поиск по библиотеке:
-            <br/><input type="text" id="search" value="" name="search" size="15"/>
+            <br/><input type="text" id="search" value="" name="search" size="15" disabled />
         </div>		
     </div><!--header_box_content-->
     <b class="hbottom"><b class="hb4"></b><b class="hb3"></b><b class="hb2"></b><b class="hb1"></b></b>
