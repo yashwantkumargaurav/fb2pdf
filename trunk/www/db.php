@@ -115,14 +115,17 @@ class DB
     // if number == 0, no limit
     function getBooksByAuthor($author, $number)
     {
+        if (!is_numeric($number))
+            return false;
+            
         if (!$this->_connect())
             return false;
             
         $author = mysql_real_escape_string($author);
         
         $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY title DESC";
-        if ($number > 0) 
-            $query += " LIMIT $number";
+        if ($number > 0)
+            $query = $query . " LIMIT $number";
             
         if (!$this->_execQuery($query))
             return false;

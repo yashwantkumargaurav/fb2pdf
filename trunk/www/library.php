@@ -9,20 +9,19 @@
 <script src="js/connection.js"></script>
 
 <script type="text/javascript">
-function get(id)
-{
-    return document.getElementById(id);
-}
-
 //  Show/Hide 5 first titles
 function bookTitles(author, divName, imgName)
 {
-    if ( get(divName).style.display == 'none') 
+    if ( document.getElementById(divName).style.display == 'none') 
     {
+        // show progress indicator
+        var div = document.getElementById(divName);
+        div.innerHTML = '<img id="pimage" src="images/progress.gif" alt="progress bar"/>';
+        div.style.display="inline";
+        
         // request url 
         var baseUrl = 'query_books.php';
         var queryString = encodeURI('?author=' + author + '&' + 'count=' + 5);
-        //var queryString = '?author=' + author + '&' + 'count=' + 5;
         var url = baseUrl + queryString;
 
         // callback
@@ -38,8 +37,8 @@ function bookTitles(author, divName, imgName)
     }   
     else
     {
-        get(divName).style.display="none";
-        get(imgName).src = get(imgName).src.replace('_minus', '_plus');
+        document.getElementById(divName).style.display="none";
+        document.getElementById(imgName).src = document.getElementById(imgName).src.replace('_minus', '_plus');
     }
 }
 
@@ -50,34 +49,46 @@ function successHandler(o)
     
     // format and display results.
     var root = o.responseXML.documentElement;
-    var channels = root.getElementsByTagName("channel");
-    var items = channels[0].getElementsByTagName("item");
+    var channel = root.getElementsByTagName("channel")[0];
     
-    var title = items[0].getElementsByTagName("title")[0].firstChild.nodeValue;
-    var link  = items[0].getElementsByTagName("link")[0].firstChild.nodeValue;
+    var items = channel.getElementsByTagName("item");
     
-    div.innerHTML =  '<a href="' + link + '">' + title + '</a><br>';
-    div.innerHTML += '<a href=\"#\">&nbsp;Другие...</a>';
+    div.innerHTML = '';
+    for (var i = 0; i < items.length; i++)
+    {
+        var title = items[i].getElementsByTagName("title")[0].firstChild.nodeValue;
+        var link  = items[i].getElementsByTagName("link")[0].firstChild.nodeValue;
         
+        div.innerHTML +=  '<a href="' + link + '">' + title + '</a><br>';
+    }
+    div.innerHTML += '<a href=\"#\"><i>Все книги автора...</i></a>';
+    
     // display list
-    div.style.display="inline";
+    div.style.display = "inline";
     img.src = img.src.replace('_plus', '_minus');
 }
 
 function failureHandler(o)
 {
-    alert(o.status + " " + o.statusText);
+    alert("Внутренняя ошибка системы (" + o.status + " " + o.statusText + ")");
+    
+    var div = document.getElementById(o.argument.divName);
+    var img = document.getElementById(o.argument.imgName);
+    
+    div.innerHTML = '';
+    div.style.display = "none";
+    img.src = img.src.replace('_minus', '_plus');
 }
 
 function rollOver(imgName)
 {
-    if ( get(imgName).src.search('_off') > 0 )
+    if (document.getElementById(imgName).src.search('_off') > 0)
     {
-        get(imgName).src = get(imgName).src.replace('_off', '_on');
+        document.getElementById(imgName).src = document.getElementById(imgName).src.replace('_off', '_on');
     }
     else
     {
-        get(imgName).src = get(imgName).src.replace('_on', '_off');
+        document.getElementById(imgName).src = document.getElementById(imgName).src.replace('_on', '_off');
     }
 }
 </script>
@@ -162,7 +173,7 @@ function rollOver(imgName)
                             
                             $author_md5 = md5($author);
                             
-                            echo "<img id=\"bt$author_md5\" src=\"images/bt_plus_off.gif\" alt=\"plus\"";
+                            echo "<img id=\"bt$author_md5\" src=\"images/bt_plus_off.gif\" style=\"cursor:pointer\"";
                             echo " onclick=\"bookTitles('$author', '$author_md5', 'bt$author_md5');\"";
                             echo " onmouseover=\"rollOver('bt$author_md5');\"";
                             echo " onmouseout=\"rollOver('bt$author_md5');\"/>";
