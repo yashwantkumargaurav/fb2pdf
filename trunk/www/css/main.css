@@ -443,7 +443,7 @@ a:hover
 {
     float: left;
     margin: 0px 0px 7px 30px;
-    *margin: 0px 0px 0px 30px;
+    *margin: 0px -30px 0px 30px;
     width: 310px;
 }
 
@@ -454,14 +454,32 @@ a:hover
     margin: 5px 0px 5px 0px;
 }
 
+.book
+{
+    width: 150px;
+    height: 203px;
+    margin: 5px 5px 5px 5px;
+    border: solid #333 1px;
+}
+
+.book_txt
+{
+    width: 150px;
+    margin: 5px 5px 5px 5px;
+    font: bold 0.7em Verdana, Arial, Helvetica, sans-serif;
+    color: #666;
+}
+
+.book_header
+{
+    margin: 0px 5px 5px 5px;
+    font: bold 0.9em Verdana, Arial, Helvetica, sans-serif;
+    color: #006633;
+}
+
 .red_line
 {
     margin: 0px 0px 0px 50px;
-}
-
-#upfile
-{
-    margin: 5px 0px 0px 0px;
 }
 
 .right_bt
@@ -472,6 +490,13 @@ a:hover
 .WidthPage
 {
     width: 782px;
+}
+
+.upfield
+{
+    margin: 5px 0px 5px 0px;
+    height:2em;
+    *height:auto;
 }
 
 .justify
