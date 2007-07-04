@@ -100,7 +100,6 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
                             </div> 
                             
                             <div id="upurl" class="upfield" <?php if (!$url) print 'style="display: none"' ?>>
-                                <p align="center">
                                 <input type="text" id="fileupload" value="<?php print ($url) ? $url : "наберите URL здесь" ?>" name="url" size="30" onclick="selectText(this);"/>
                             </div>
                             
