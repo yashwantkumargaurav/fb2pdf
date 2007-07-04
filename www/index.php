@@ -95,11 +95,11 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
                             <input type="radio" class="red_line" name="uploadtype" value="file" onclick="toggleUploadMode(true);" <?php if (!$url) print "checked" ?> /> Файл
                             <input type="radio" name="uploadtype" value="url" onclick="toggleUploadMode(false);" <?php if ( $url) print "checked" ?> /> URL
                             
-                            <div id="upfile" <?php if ($url) print 'style="display: none"' ?>>
+                            <div id="upfile" class="upfield" <?php if ($url) print 'style="display: none"' ?>>
                                 <input type="file" name="fileupload" id="fileupload" size="25"/>
                             </div> 
                             
-                            <div id="upurl" <?php if (!$url) print 'style="display: none"' ?>>
+                            <div id="upurl" class="upfield" <?php if (!$url) print 'style="display: none"' ?>>
                                 <p align="center">
                                 <input type="text" id="fileupload" value="<?php print ($url) ? $url : "наберите URL здесь" ?>" name="url" size="30" onclick="selectText(this);"/>
                             </div>
