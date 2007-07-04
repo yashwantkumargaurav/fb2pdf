@@ -23,7 +23,7 @@ function toggleUploadMode(file)
 function doUpload()
 {
     // hide form
-    document.getElementById('form').style.display = 'none';
+    document.getElementById('container').style.display = 'none';
     // show progress indicator
     document.getElementById('progress').style.display = '';
     // submit form
@@ -46,7 +46,7 @@ function showForm()
     // hide progress indicator
     document.getElementById('progress').style.display = 'none';
     // show form
-    document.getElementById('form').style.display = '';
+    document.getElementById('container').style.display = '';
 }
 
 function selectText(source)
@@ -78,7 +78,7 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
         <b class="xtop"><b class="xb1"></b><b class="xb2"></b><b class="xb3"></b><b class="xb4"></b></b>
         <div class="tab_box_content">
             <div id="convert_box">
-            <div id="more_news"><a href="#"><u>Все новости</u></a></div>
+            <div id="more_news"><a href="news.php"><u>Все новости</u></a></div>
             <p class="news"><span class="light_green">Новость:</span>&nbsp;&nbsp;<span class="green">06.11.07</span>&nbsp;&nbsp;--&nbsp;&nbsp;Добавлена возможность 
             поиска, а также новые ссылки на библиотеки fb2.. </p>
                 <b class="ctop"><b class="cb1"></b><b class="cb2"></b><b class="cb3"></b><b class="cb4"></b></b>
@@ -141,7 +141,7 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
             <b class="cbottom"><b class="cb4"></b><b class="cb3"></b><b class="cb2"></b><b class="cb1"></b></b>
             </div>  <!--end of convert box -->
             
-            <div id="more_books"><a href="#"><u>Все книги</u></a></div>
+            <div id="more_books"><a href="library.php"><u>Все книги</u></a></div>
             <h4>Книги, сконвертированные недавно:</h4> 
             <img src="images/green_px.gif" class="line"/>
 
@@ -197,17 +197,19 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
             <img src="images/green_px.gif" class="line"/>
             <?php include 'footer.inc.php'; ?>
 
-            <!-- div to display progress indicator --> 
-            <div id="progress" style="display:none;text-align:center">
-                <h4 align="center">Загрузка файла. Пожалуйста, подождите...</h4>
-                <img id="pimage" src="images/progress.gif" alt="progress bar"/>
-            </div>
         </div>  <!--end of tab box content-->	
         <b class="xbottom"><b class="xb4"></b><b class="xb3"></b><b class="xb2"></b><b class="xb1"></b></b>
     </div> <!--end of tab box -->
 <br/>
 <br/>
 </div> <!--end of container-->
+
+<!-- div to display progress indicator --> 
+<div id="progress" style="display:none;text-align:center">
+    <h4 align="center">Загрузка файла. Пожалуйста, подождите...</h4>
+    <img id="pimage" src="images/progress.gif" alt="progress bar"/>
+</div>
+
 </center>
 </body>
 </html>
