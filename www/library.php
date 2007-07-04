@@ -153,7 +153,7 @@ function rollOver(imgName)
                 $count = count($list);
                 
                 $MAX_COLS  = 2;
-                $MAX_ROWS  = ($count + $MAX_COLS - 1) / $MAX_COLS;
+                $MAX_ROWS  = floor(($count + $MAX_COLS - 1) / $MAX_COLS);
                 
                 for ($col = $MAX_COLS - 1; $col >= 0 ; $col--)
                 {
@@ -179,8 +179,6 @@ function rollOver(imgName)
                             echo " onmouseout=\"rollOver('bt$author_md5');\"/>";
                             echo "&nbsp;&nbsp;$author&nbsp;&nbsp;<br/>"; 
                             echo "<div id=\"$author_md5\" style=\"display:none;\">";
-                            // 5 books
-                            echo "<a href=\"#\">&nbsp;Другие...</a>";
                             echo "</div>";
                         }
                         echo "</p>";
