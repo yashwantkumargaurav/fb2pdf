@@ -1,22 +1,36 @@
+<?php
+function menu_item($name, $url, $title, $text)
+{
+    global $active_menu;
+    
+    if ($name == $active_menu)
+    {
+        $menuClass = "menu_active";
+    }
+    else
+    {
+        $menuClass = "menu";
+    }
+    
+    if (!$url)
+        $url = '#';
+        
+    echo "<li class=\"$menuClass\">";
+    echo "<a href=\"$url\" title=\"$title\"><span style=\"cursor:pointer\">$text</span></a>";
+    echo "</li>";
+}
+?>
+
 <div id="menu"> 
     <div class="tabsC">
         <ul>
-            <?php global $active_menu; ?>
-            <li class=<?php print ($active_menu == 'main')    ? "menu_active" : "menu" ?>>
-                <a href="index.php" title="Главная"><span>&nbsp;Главная&nbsp;</span></a>
-            </li>
-            <li class=<?php print ($active_menu == 'about')   ? "menu_active" : "menu" ?>>
-                <a href="#" title="О сервисе"><span>О сервисе&nbsp;</span></a>
-            </li>
-            <li class=<?php print ($active_menu == 'store')   ? "menu_active" : "menu" ?>>
-                <a href="#" title="Магазин"><span>&nbsp;Магазин&nbsp;</span></a>
-            </li>
-            <li class=<?php print ($active_menu == 'library') ? "menu_active" : "menu" ?>>
-                <a href="library.php" title="Библиотека"><span>Библиотекa</span></a>
-            </li>
-            <li class=<?php print ($active_menu == 'faq')     ? "menu_active" : "menu" ?>>
-                <a href="#" title="FAQ"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FAQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></a>
-            </li>
+            <?php 
+            menu_item('main', 'index.php', 'Главная', '&nbsp;Главная&nbsp;'); 
+            menu_item('about', NULL, 'О сервисе', 'О сервисе&nbsp;'); 
+            menu_item('store', NULL, 'Магазин', '&nbsp;Магазин&nbsp;'); 
+            menu_item('library', 'library.php', 'Библиотека', 'Библиотекa'); 
+            menu_item('faq', NULL, 'Главная', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FAQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'); 
+            ?>
         </ul>
     </div>
 </div>

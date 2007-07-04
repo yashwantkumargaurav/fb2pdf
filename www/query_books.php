@@ -14,17 +14,24 @@ if (!$author || !is_numeric($count))
     header("HTTP/1.0 400 Bad Request");
     header('Content-type: text/html');    
     if (!$author)
-        echo "<html><body>Missing \"author\" paremeter</body></html>";
-    else if (!is_numeric($count))
-        echo "<html><body>The \"count\" paremeter must be a number</body></html>";
+        echo "<html><body>Missing \"author\" parameter</body></html>";
+    else
+        echo "<html><body>Parameter \"count\" must be a number</body></html>";
+    die;
+}
+
+$db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+$list = $db->getBooksByAuthor($author, $count);
+if ($list === false)
+{
+    header("HTTP/1.0 500 Internal Server Error");
+    header('Content-type: text/html');    
+    echo "<html><body>Internal Error</body></html>";
     die;
 }
 
 header('HTTP/1.0 200 OK');
 header('Content-type: text/xml');    
-
-$db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
-$list = $db->getBooksByAuthor($author, $count);
 
 // generate rss xml
 echo '<?xml version="1.0" encoding="UTF-8"?>';
