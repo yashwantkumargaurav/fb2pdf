@@ -110,7 +110,32 @@ class DB
         $this->_freeQuery();
         return $list;
     }
-    
+    //Get books by parcial author
+	function getBooksByParcialAuthor($author, $number)
+	{
+		if (!is_numeric($number))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $author = mysql_real_escape_string($author);
+        
+        $query = "SELECT * FROM Books WHERE author LIKE \"%$author%\" AND status = \"r\" ORDER BY title DESC";
+        if ($number > 0)
+            $query = $query . " LIMIT $number";
+            
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
+            $list[$count++] = $row;
+        
+        $this->_freeQuery();
+        return $list;	
+	}
     // Get list of books by author.
     // if number == 0, no limit
     function getBooksByAuthor($author, $number)
