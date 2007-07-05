@@ -1,4 +1,9 @@
 <?php
+function formatDateIntoAtom($date)
+{
+	$date = str_replace(" ", "T", $date. "Z");
+	return $date;
+}
 function getFullUrl($page)
 {
     $host = $_SERVER["HTTP_HOST"];
