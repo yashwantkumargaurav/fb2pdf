@@ -2,6 +2,7 @@
 	require_once "awscfg.php";
 	require_once "db.php";
 	require_once "utils.php";
+	
 	$current_url  =     getFullUrl("atom.php");
 	$db           =     new DB($dbServer, $dbName, $dbUser, $dbPassword);
 	$limit        =    (isset($_GET["limit"]))  ? $_GET["limit"] : 15;
@@ -22,7 +23,6 @@
 	<updated>".date("Y\-m\-d\TH\:i\:s\Z")."</updated>
 	";
 	
-	
 	if ($limit > count($list))
 		$limit = count($list);
 	
@@ -42,7 +42,7 @@
 			</author>
 			<id>urn:uuid:$id</id>
 			<updated>$date</updated>
-			<summaray>$author. $title</summary>
+			<summary><a href=\"$key\">$author. $title</a></summary>
 		</entry>
 		";
 	}
