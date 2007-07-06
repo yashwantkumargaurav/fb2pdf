@@ -41,8 +41,8 @@
 				<name>$author</name>
 			</author>
 			<id>urn:uuid:$id</id>
-			<updated>$date</updated>
-			<summary><a href=\"$key\">$author. $title</a></summary>
+			<updated>$date</updated>	
+			<content type=\"html\"><a href=\"$key\">$author. $title</a></content>
 		</entry>
 		";
 	}
