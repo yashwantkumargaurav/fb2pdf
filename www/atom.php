@@ -42,7 +42,7 @@
 			</author>
 			<id>urn:uuid:$id</id>
 			<updated>$date</updated>	
-			<content type=\"html\"><a href=\"$key\">$author. $title</a></content>
+			<content type=\"html\">&lt;a href=\"$key\"&gt;$author. $title&lt;/a&gt;</content>
 		</entry>
 		";
 	}
