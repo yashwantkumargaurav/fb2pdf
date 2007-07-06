@@ -42,6 +42,7 @@
 			</author>
 			<id>urn:uuid:$id</id>
 			<updated>$date</updated>
+			<summaray>$author. $title</summary>
 		</entry>
 		";
 	}
