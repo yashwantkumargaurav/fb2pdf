@@ -6,10 +6,9 @@
 	$db         =    new DB($dbServer, $dbName, $dbUser, $dbPassword);
 	$limit      =    (isset($_GET["limit"]))  ? $_GET["limit"] : 15;
 	$list       =    (isset($_GET["author"])) ? $db->getBooksByParcialAuthor($_GET["author"], $limit)  :   $db->getBooks($limit);
-	$lastdate   =    (isset($_GET["author"])) ? $db->getBooksByParcialAuthor($_GET["author"], 1)       :   $db->getBooks(1);
 	
 	header("Content-Type : application/atom+xml; charset=utf-8"); 
-	header("Last-Modified : ".$lastdate[0]["converted"]."");
+	header("Last-Modified : ".$list[0]["converted"]."");
 	
 	$current_url = getFullUrl("atom.php");
 	//Normally I would indent and put propper spacing, but it doesn't work any other way
