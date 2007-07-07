@@ -284,12 +284,6 @@ a:hover
     float: left;
 }
 
-#width470
-
-{
-    width: 480px;
-}
-
 #arrow
 {
     float: left;
@@ -385,7 +379,7 @@ a:hover
 {
     float: right;
     font: normal 0.7em Verdana, Arial, Helvetica, sans-serif;
-    margin: 3px 0px 0px 0px;   
+    margin: 0px 0px 0px 0px;   
     *margin: 0px 30px 0px 0px;   
     width: 340px;
     text-align: left;
@@ -420,15 +414,11 @@ a:hover
     text-decoration: underline; 
     color: #fff;
     background:#339933;
-/*
-    background:#990099;
-*/
 }
 
 .active
 {
     color: #33CC00;
-/*    background:#B6DF9F;*/
 }
 
 .left_book div
@@ -450,8 +440,8 @@ a:hover
 .line
 {
     width: 660px;
-    height: 2px;
-    margin: 5px 0px 5px 0px;
+    height: 1px;
+    margin: 10px 0px 10px 0px;
 }
 
 .book
@@ -477,9 +467,28 @@ a:hover
     color: #006633;
 }
 
+.author
+{
+    color: #333;
+    float: left;
+    clear: right;
+    width: 680px;
+    font-size: 1.3em;    
+    text-align: left;
+    margin: 0px 0px 5px 50px;
+    *margin: 0px 0px 5px 25px;
+}
+
+.tab_box_content h5
+{
+    font-size: 1.2em;
+    font-weight: normal;    
+    color: #000;
+}
+
 .red_line
 {
-    margin: 0px 0px 0px 50px;
+    margin: 0px 0px 0px 70px;
 }
 
 .right_bt
@@ -497,6 +506,17 @@ a:hover
     margin: 5px 0px 5px 0px;
     height:2em;
     *height:auto;
+}
+
+.message
+{
+    text-align: justify;
+    margin: 10px 0px 10px 150px;
+}
+
+.message h3
+{
+    font-size: 1.0em;
 }
 
 .justify
