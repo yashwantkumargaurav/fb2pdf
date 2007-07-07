@@ -7,7 +7,6 @@
 	$db           =     new DB($dbServer, $dbName, $dbUser, $dbPassword);
 	$limit        =    (isset($_GET["limit"]))  ? $_GET["limit"] : 15;
 	$list         =    (isset($_GET["author"])) ? $db->getBooksByParcialAuthor($_GET["author"], $limit)  :   $db->getBooks($limit);
-	$byauthor     =    (isset($_GET["author"])) ? "по автору" : null;
 	
 	header("Content-Type: application/atom+xml; charset=utf-8"); 
 	header("Last-Modified: ". date(DATE_RFC822, $list[0]["converted"]) );
@@ -16,9 +15,15 @@
 	echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 	<feed xmlns=\"http://www.w3.org/2005/Atom\">
 	<link rel=\"self\" href=\"$current_url\"/> 
+	";
 
-	<title>Книги, сконвертированные недавно $byauthor</title>
-	<link href=\"http://codeminders.com/fb2pdf/staging/\"/>
+	$byauthor = $_GET["author"];
+    if (isset($byauthor))
+        echo "<title>$byauthor</title>";
+    else
+        echo "<title>Книги, сконвертированные недавно</title>";
+    
+	echo "<link href=\"http://codeminders.com/fb2pdf/staging/\"/>
 	<id>urn:uuid:60a76c80</id>
 	<updated>".date("Y\-m\-d\TH\:i\:s\Z")."</updated>
 	";
