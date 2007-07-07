@@ -1,19 +1,23 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="css/main.css"/>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="alternate" type="application/atom+xml" title="Atom" href="atom.php" />
-<title>Конвертор FictionBook2 в PDF для Sony Reader</title>
-</head>
-<body>
-
+<?php
+	$author = $_GET["author"];
+	echo "
+	<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
+	<html>
+	<head>
+	<link rel=\"stylesheet\" type=\"text/css\" href=\"css/main.css\"/>
+	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">
+	<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Atom\" href=\"atom.php?author=$author\" />
+	<title>Конвертор FictionBook2 в PDF для Sony Reader</title>
+	</head>
+	<body>
+	";
+?>
 <center>
 <div id="container" class="WidthPage">
     <?php 
     include 'header.inc.php'; 
-    $active_menu = 'library';
     include 'menu.inc.php'; 
+    include 'utils.php'; 
     ?>
 
     <div id="tab_box">
@@ -29,7 +33,6 @@
                 die;
             }
             
-            $author = $_GET["author"];
             
             require_once 'awscfg.php';
             require_once 'db.php';
