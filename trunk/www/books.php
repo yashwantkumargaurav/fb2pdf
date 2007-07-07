@@ -1,23 +1,30 @@
 <?php
-	$author = $_GET["author"];
-	echo "
-	<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
-	<html>
-	<head>
-	<link rel=\"stylesheet\" type=\"text/css\" href=\"css/main.css\"/>
-	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">
-	<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Atom\" href=\"atom.php?author=$author\" />
-	<title>Конвертор FictionBook2 в PDF для Sony Reader</title>
-	</head>
-	<body>
-	";
+if (!isset ($_GET["author"]))
+{
+    header("HTTP/1.0 400 Bad Request");
+    header('Content-type: text/html');    
+    echo "<html><body>Missing \"author\" paremeter</body></html>";
+    die;
+}
+$author = $_GET["author"];
 ?>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/main.css"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="alternate" type="application/atom+xml" title="Atom" href="atom.php?author=<?php echo $author; ?>" />
+<title>Конвертор FictionBook2 в PDF для Sony Reader</title>
+</head>
+
+<body>
 <center>
 <div id="container" class="WidthPage">
     <?php 
     include 'header.inc.php'; 
+    $active_menu = 'books';
     include 'menu.inc.php'; 
-    include 'utils.php'; 
     ?>
 
     <div id="tab_box">
@@ -25,15 +32,6 @@
         <div class="tab_box_content">
         
             <?php
-            if (!isset ($_GET["author"]))
-            {
-                header("HTTP/1.0 400 Bad Request");
-                header('Content-type: text/html');    
-                echo "<html><body>Missing \"author\" paremeter</body></html>";
-                die;
-            }
-            
-            
             require_once 'awscfg.php';
             require_once 'db.php';
             require_once 'utils.php';
@@ -41,7 +39,6 @@
             global $awsS3Bucket;
             global $dbServer, $dbName, $dbUser, $dbPassword;
                 
-            
             $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
             $list = $db->getBooksByAuthor($author, 0);
             if ($list)
