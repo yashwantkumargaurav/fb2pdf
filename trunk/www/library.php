@@ -11,7 +11,7 @@
 
 <script type="text/javascript">
 //  Show/Hide 5 first titles
-function bookTitles(author, divName, imgName)
+function bookTitles(author, totalNumber, divName, imgName)
 {
     if ( document.getElementById(divName).style.display == 'none') 
     {
@@ -30,7 +30,7 @@ function bookTitles(author, divName, imgName)
         {
             success: successHandler,
             failure: failureHandler,
-            argument: { divName: divName, imgName: imgName }
+            argument: { divName: divName, imgName: imgName, author: author, totalNumber: totalNumber }
         };
         
         // Initiate the HTTP GET request.
@@ -47,12 +47,14 @@ function successHandler(o)
 {
     var div = document.getElementById(o.argument.divName);
     var img = document.getElementById(o.argument.imgName);
+    var author = o.argument.author;
+    var totalNumber = o.argument.totalNumber;
     
     // format and display results.
     var root = o.responseXML.documentElement;
     var channel = root.getElementsByTagName("channel")[0];
     
-    var author = channel.getElementsByTagName("title")[0].firstChild.nodeValue;
+    //var author = channel.getElementsByTagName("title")[0].firstChild.nodeValue;
     
     var items = channel.getElementsByTagName("item");
     
@@ -65,8 +67,11 @@ function successHandler(o)
         div.innerHTML +=  '<a href="' + link + '">' + title + '</a><br>';
     }
     
-    var queryString = encodeURI('?author=' + author);
-    div.innerHTML += '<a href="books.php' + queryString + '"><i>Все книги автора...</i></a>';
+    if (totalNumber > 5)
+    {
+        var queryString = encodeURI('?author=' + author);
+        div.innerHTML += '<a href="books.php' + queryString + '"><i>Все книги автора...</i></a>';
+    }
     
     // display list
     div.style.display = "inline";
@@ -179,7 +184,7 @@ function rollOver(imgName)
                             $author_md5 = md5($author);
                             
                             echo "<img id=\"bt$author_md5\" src=\"images/bt_plus_off.gif\" style=\"cursor:pointer\"";
-                            echo " onclick=\"bookTitles('$author', '$author_md5', 'bt$author_md5');\"";
+                            echo " onclick=\"bookTitles('$author', $number, '$author_md5', 'bt$author_md5');\"";
                             echo " onmouseover=\"rollOver('bt$author_md5');\"";
                             echo " onmouseout=\"rollOver('bt$author_md5');\"/>";
                             echo "&nbsp;&nbsp;$author&nbsp;&nbsp;<br/>"; 
