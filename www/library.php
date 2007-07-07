@@ -30,7 +30,7 @@ function bookTitles(author, divName, imgName)
         {
             success: successHandler,
             failure: failureHandler,
-            argument: { divName: divName,  imgName: imgName}
+            argument: { divName: divName, imgName: imgName }
         };
         
         // Initiate the HTTP GET request.
@@ -52,6 +52,8 @@ function successHandler(o)
     var root = o.responseXML.documentElement;
     var channel = root.getElementsByTagName("channel")[0];
     
+    var author = channel.getElementsByTagName("title")[0].firstChild.nodeValue;
+    
     var items = channel.getElementsByTagName("item");
     
     div.innerHTML = '';
@@ -62,7 +64,9 @@ function successHandler(o)
         
         div.innerHTML +=  '<a href="' + link + '">' + title + '</a><br>';
     }
-    div.innerHTML += '<a href=\"#\"><i>Все книги автора...</i></a>';
+    
+    var queryString = encodeURI('?author=' + author);
+    div.innerHTML += '<a href="books.php' + queryString + '"><i>Все книги автора...</i></a>';
     
     // display list
     div.style.display = "inline";
