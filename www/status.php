@@ -6,9 +6,17 @@ define('STATUS_PROGRESS',  0);
 define('STATUS_DONE',      1);
 define('STATUS_ERROR',     2);
 
+if (!isset ($_GET['id']))
+{
+    header("HTTP/1.0 400 Bad Request");
+    header('Content-type: text/html');    
+    echo "<html><body>Missing \"id\" paremeter</body></html>";
+    die;
+}
+$id = $_GET['id'];
+
 global $awsS3Bucket;
 
-$id = $_GET['id'];
 
 // remove "extension" part from the key
 $pos = strrpos($id, ".");
@@ -55,9 +63,12 @@ function getStatus($id)
 }
 ?>
 
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="css/main.css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="alternate" type="application/atom+xml" title="Atom" href="atom.php" />
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 
 <?php
@@ -68,38 +79,61 @@ if ($status == STATUS_PROGRESS)
 </head>
 <body>
 
-<?php
-
-if ($status == STATUS_DONE)
-{
-    echo "<h4 align=\"center\">Ваш файл был успешно сконвертирован. Теперь Вы можете <a href=\"$convertedFile\">загрузить</a> сконветрированный файл и записать его в Ваш Sony Reader.";
-    echo "<br>(Возможные ошибки и предупреждения, возникшие в результате конвертации Вы можете посмотреть <a href=\"$logFile\">здесь</a>.)</h4>";
-    echo "<br><br><a href=\"$originalFile\">Посмотреть исходный файл.</a>";
-}
-else if ($status == STATUS_ERROR)
-{
-    echo "<h4 align=\"center\">При конвертации произошла ошибка. Вы можете посмотреть её <a href=\"$logFile\">здесь</a>.</h4>";
-    echo "Хотите нам сообщить об ошибке? Это можно сделать <a href=\"http://groups.google.com/group/fb2pdf-users/about?hl=ru\">здесь</a>";
-    echo "<br>Не забудьте скопировать <a href=\"$logFile\">информацию об ошибке</a> в текст Вашего сообщения.";
+<center>
+<div id="container" class="WidthPage">
+    <?php 
+    include 'header.inc.php'; 
+    $active_menu = 'status';
+    include 'menu.inc.php'; 
+    ?>
     
-    echo "<br><br><a href=\"$originalFile\">Посмотреть исходный файл.</a>";
-}
-else
-{
-    echo "<h4 align=\"center\">Конвертация Вашего файла может занять около пяти минут. Пожалуйста, подождите...</h4>"; 
-    echo "<div style=\"text-align:center\"><img src=\"images/progress_conv.gif\"/></div>";
-    echo "<p>Эта страница обновится автоматически, когда процесс конвертации будет закончен.";
-    echo "Вы можете также сохранить URL этой страницы и вернуться к ней в любое удобное для Вас время, чтобы забрать готовый сконвертированный файл.";
-}
-
-?>
-
-<br><br><a href="index.php">Сконвертировать ещё один файл.</a>
-<br><br>Обнаружили ошибку? У Вас есть предложения по улучшению сервиса? Хотите оставить комментарий?
-<br>Это можно сделать <a href="http://groups.google.com/group/fb2pdf-users/about?hl=ru">здесь</a>.
-
-<hr WIDTH="100%">
-<a href="http://www.crocodile.org/"><img src="http://www.crocodile.org/noir.png"></a> 
-
+    <div id="tab_box">
+        <b class="xtop"><b class="xb1"></b><b class="xb2"></b><b class="xb3"></b><b class="xb4"></b></b>
+        <div class="tab_box_content">
+            <img src="images/lg_px.gif" class="line"/>
+            <div class="message">
+                
+                <?php
+                if ($status == STATUS_DONE)
+                {
+                    echo "<h3>Ваш файл был успешно сконвертирован.</h3>
+                    <p>Теперь Вы можете <b><a href=\"$convertedFile\">загрузить сконветрированный файл</a></b> и записать его в Ваш Sony Reader.
+                    (Возможные ошибки и предупреждения, возникшие в результате конвертации Вы можете посмотреть <a href=<a href=\"$logFile\">здесь</a>.)</p>
+                    <p>
+                    <a href=\"$originalFile\">Посмотреть исходный файл.</a><br/>
+                    <a href=\"index.php\">Сконвертировать ещё один файл.</a><br/>
+                    </p>";
+                }
+                else if ($status == STATUS_ERROR)
+                {
+                    echo "<h3>При конвертации произошла ошибка.<br/> Вы можете посмотреть её <a href=\"$logFile\">здесь</a>.</h3>
+                    <p>Хотите нам сообщить об ошибке? Это можно сделать <a href=\"http://groups.google.com/group/fb2pdf-users/about?hl=ru\">здесь</a><br/>
+                    Не забудьте скопировать <a href=\"$logFile\">информацию об ошибке</a> в текст Вашего сообщения.</p>
+                    <p>
+                    <a href=\"$originalFile\">Посмотреть исходный файл.</a><br/>
+                    <a href=\"index.php\">Сконвертировать ещё один файл.</a><br/>
+                    </p>";
+                }
+                else
+                {
+                    echo "<h3 class=\"center\">Конвертация Вашего файла может занять около пяти минут.<br/> Пожалуйста, подождите...</h3>
+                    <p class=\"center\"><img src=\"images/progress_conv.gif\"/></p>
+                    <p>Эта страница обновится автоматически, когда процесс конвертации будет закончен. 
+                    Вы можете также сохранить URL этой страницы и вернуться к ней в любое удобное для Вас время, 
+                    чтобы забрать готовый сконвертированный файл.</p>
+                    <p><a href=\"index.php\">Сконвертировать ещё один файл.</a><br/></p>";
+                }
+                ?>
+            
+            </div>
+            <img src="images/lg_px.gif" class="line"/>
+            <?php include 'footer.inc.php'; ?>
+        </div>  <!--end of tab box content-->	
+        <b class="xbottom"><b class="xb4"></b><b class="xb3"></b><b class="xb2"></b><b class="xb1"></b></b>
+    </div> <!--end of tab box -->
+<br/>
+<br/>
+</div> <!--end of container-->
+</center>
 </body>
 </html>

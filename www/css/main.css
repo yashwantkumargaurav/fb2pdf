@@ -511,7 +511,9 @@ a:hover
 .message
 {
     text-align: justify;
-    margin: 10px 0px 10px 150px;
+    font: normal 0.8em Verdana, Arial, Helvetica, sans-serif;
+    margin: 10px 0px 10px 0px;
+    width: 530px;
 }
 
 .message h3
@@ -527,4 +529,9 @@ a:hover
 .left
 {
     text-align: left;
+}
+
+.center
+{
+    text-align: center;
 }
