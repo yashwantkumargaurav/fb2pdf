@@ -26,7 +26,7 @@ function menu_item($name, $url, $title, $text)
         <ul>
             <?php 
             menu_item('main', 'index.php', 'Главная', '&nbsp;Главная&nbsp;');
-			menu_item('library', 'library.php', 'Библиотека', 'Библиотекa');
+            menu_item('library', 'library.php', 'Библиотека', 'Библиотекa');
             menu_item('about', 'about.php', 'О сервисе', 'О сервисе&nbsp;'); 
             menu_item('store', 'store.php', 'Магазин', '&nbsp;Магазин&nbsp;');  
             menu_item('faq', 'faq.php', 'FAQ', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FAQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'); 
