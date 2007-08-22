@@ -32,9 +32,10 @@ class DB
         $title      = mysql_real_escape_string($title);
         $isbn       = mysql_real_escape_string($isbn);
         $status     = mysql_real_escape_string($status);
+        $md5        = mysql_real_escape_string($md5);
         
-        $query = "INSERT INTO Books (storage_key, author, title, isbn, md5_hash, status, converted) 
-            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", 0x$md5, \"$status\",  UTC_TIMESTAMP())";
+        $query = "INSERT INTO Books (storage_key, author, title, isbn, md5hash, status, converted) 
+            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", \"$status\",  UTC_TIMESTAMP())";
         if (!$this->_execQuery($query))
             return false;
         
@@ -111,9 +112,9 @@ class DB
         return $list;
     }
     //Get books by parcial author
-	function getBooksByParcialAuthor($author, $number)
-	{
-		if (!is_numeric($number))
+    function getBooksByParcialAuthor($author, $number)
+    {
+        if (!is_numeric($number))
             return false;
             
         if (!$this->_connect())
@@ -134,8 +135,8 @@ class DB
             $list[$count++] = $row;
         
         $this->_freeQuery();
-        return $list;	
-	}
+        return $list;
+    }
     // Get list of books by author.
     // if number == 0, no limit
     function getBooksByAuthor($author, $number)
@@ -170,7 +171,9 @@ class DB
         if (!$this->_connect())
             return false;
             
-        $query = "SELECT * FROM Books WHERE md5_hash = 0x$md5 LIMIT 1";
+        $md5 = mysql_real_escape_string($md5);
+        
+        $query = "SELECT * FROM Books WHERE md5hash = \"$md5\" LIMIT 1";
         if (!$this->_execQuery($query))
             return false;
         
