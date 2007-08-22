@@ -8,8 +8,10 @@
 	$limit        =    (isset($_GET["limit"]))  ? $_GET["limit"] : 15;
 	$list         =    (isset($_GET["author"])) ? $db->getBooksByParcialAuthor($_GET["author"], $limit)  :   $db->getBooks($limit);
 	
-	header("Content-Type: application/atom+xml; charset=utf-8"); 
-	header("Last-Modified: ". date(DATE_RFC822, $list[0]["converted"]) );
+	$last_modified = date(DATE_RFC822, $list[0]["converted"]);
+    
+    header("Content-Type: application/atom+xml; charset=utf-8"); 
+	header("Last-Modified: ". $last_modified);
 	
 	
 	echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
@@ -17,11 +19,13 @@
 	<link rel=\"self\" href=\"$current_url\"/> 
 	";
 
-	$byauthor = $_GET["author"];
-    if (isset($byauthor))
-        echo "<title>$byauthor</title>";
+    if (isset($_GET["author"]))
+    {
+        $byauthor = $_GET["author"];
+        echo "<title>FB2PDF. Новые книги $byauthor.</title>";
+    }
     else
-        echo "<title>Книги, сконвертированные недавно</title>";
+        echo "<title>FB2PDF. Новые книги.</title>";
     
 	echo "<link href=\"http://codeminders.com/fb2pdf/\"/>
 	<id>urn:uuid:60a76c80</id>
