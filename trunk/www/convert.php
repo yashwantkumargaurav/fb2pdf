@@ -10,7 +10,15 @@ else
 {
     // redirect to the index page
     $url = $_GET["url"];
-    header("HTTP/1.0 302 Found");
-    header("Location: index.php?url=$url");
+    if (isset ($_GET["auto"]))
+    {
+        header("HTTP/1.0 302 Found");
+        header("Location: uploader.php?url=$url");
+    }
+    else
+    {
+        header("HTTP/1.0 302 Found");
+        header("Location: index.php?url=$url");
+    }
 }
 ?>

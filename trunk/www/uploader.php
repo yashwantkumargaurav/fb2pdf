@@ -13,7 +13,19 @@ $filePath = NULL;
 $fileName = NULL;
 $tempFile = tempnam(md5(uniqid(rand(), TRUE)), '');
 
-if ($_POST['uploadtype'] == 'file')
+$url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
+
+if ($url || $_POST['uploadtype'] == 'url')
+{
+    $filePath = ($url) ? $url : $_POST['url'];
+    $fileName = $filePath;
+    
+    if (!copy($filePath, $tempFile))
+        die("Внутренняя ошибка системы. Невозможно загрузить файл. Пожалуйста, попробуйте ешё раз.");
+        
+    $filePath = $tempFile;
+}
+else if ($_POST['uploadtype'] == 'file')
 {
     // check uploaded file
     $filePath = $_FILES['fileupload']['tmp_name'];
@@ -23,16 +35,6 @@ if ($_POST['uploadtype'] == 'file')
         die("Пожалуйста, укажите FB2 файл, который Вы бы хотели сконвертировать.");
         
     if (!move_uploaded_file($filePath, $tempFile)) 
-        die("Внутренняя ошибка системы. Невозможно загрузить файл. Пожалуйста, попробуйте ешё раз.");
-        
-    $filePath = $tempFile;
-}
-else if ($_POST['uploadtype'] == 'url')
-{
-    $filePath = $_POST['url'];
-    $fileName = $filePath;
-    
-    if (!copy($filePath, $tempFile))
         die("Внутренняя ошибка системы. Невозможно загрузить файл. Пожалуйста, попробуйте ешё раз.");
         
     $filePath = $tempFile;
