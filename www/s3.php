@@ -148,8 +148,8 @@ class S3
     //initializes common elements of all REST requests
 	function initRequest($verb, $resource, $contentType, $acl, $metadata, $extraHttpHeaders)
     {
-        define('DATE_RFC822', 'D, d M Y H:i:s T');
-        $httpDate = gmdate(DATE_RFC822);
+        $date_rfc822 = "D, d M Y H:i:s T";
+        $httpDate = gmdate($date_rfc822);
         
         $this->request->setMethod($verb);
         $this->request->addHeader("content-type", $contentType);
