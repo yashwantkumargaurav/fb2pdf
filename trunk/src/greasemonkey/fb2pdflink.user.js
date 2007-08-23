@@ -42,7 +42,7 @@ var replaceLinks = function() {
         if(thisLink.href.match(/^http:\/\/.*\.fb2$/i) || thisLink.href.match(/^http:\/\/.*\.fb2\.zip$/i)) {
             //alert("link"+thisLink);
             newElement = document.createElement('span');
-            postUrl = 'http://www.codeminders.com/fb2pdf/convert.php?url=' + encodeURIComponent(thisLink.href);
+            postUrl = 'http://www.codeminders.com/fb2pdf/convert.php?auto=yes&url=' + encodeURIComponent(thisLink.href);
             newElement.innerHTML='&nbsp[<a target=\'_blank\' href="' + postUrl + '">SonyReader PDF</a>]';
             thisLink.parentNode.insertBefore(newElement, thisLink.nextSibling);
         }
