@@ -321,7 +321,7 @@ def _getdir(f):
         dirname = "."
     return (dirname, filebase)
     
-def fb2tex(infile, outfile):
+def fb2tex(infile, outfile,flavor=None):
     logging.getLogger('fb2pdf').info("Converting %s" % infile)
     
     f = open(infile, 'r')
@@ -332,6 +332,15 @@ def fb2tex(infile, outfile):
     f = open(outfile, 'w')
 
     (outdir, outname) = _getdir(outfile)
+
+    if flavor==None or flavor=='PRS-500':
+        parameters['papersize']='90.6mm,122.4mm'
+    elif flavor=='iPhone' or flavor=='iPhone-portrait':
+        parameters['papersize']='61mm,115mm'
+    elif flavor=='iPhone-landscape':
+        parameters['papersize']='115mm,61mm'
+    else:
+        raise PersistentError("Unknown flavour '%s'" % flavour)
     
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
@@ -347,7 +356,7 @@ def fb2tex(infile, outfile):
         unicode=true
     ]{hyperref}
     \\usepackage[
-        papersize={90.6mm,122.4mm},
+        papersize={%(papersize)s},
         margin=1mm,
         ignoreall,
         pdftex
