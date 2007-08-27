@@ -321,7 +321,7 @@ def _getdir(f):
         dirname = "."
     return (dirname, filebase)
     
-def fb2tex(infile, outfile,flavor=None):
+def fb2tex(infile, outfile,flavour=None):
     logging.getLogger('fb2pdf').info("Converting %s" % infile)
     
     f = open(infile, 'r')
@@ -333,11 +333,11 @@ def fb2tex(infile, outfile,flavor=None):
 
     (outdir, outname) = _getdir(outfile)
 
-    if flavor==None or flavor=='PRS-500':
+    if flavour==None or flavour=='PRS-500':
         parameters['papersize']='90.6mm,122.4mm'
-    elif flavor=='iPhone' or flavor=='iPhone-portrait':
+    elif flavour=='iPhone' or flavour=='iPhone-portrait':
         parameters['papersize']='61mm,115mm'
-    elif flavor=='iPhone-landscape':
+    elif flavour=='iPhone-landscape':
         parameters['papersize']='115mm,61mm'
     else:
         raise PersistentError("Unknown flavour '%s'" % flavour)
