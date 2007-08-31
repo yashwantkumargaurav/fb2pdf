@@ -5,6 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="alternate" type="application/atom+xml" title="Atom" href="atom.php" />
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
+<?php include 'analytics.inc.php'; ?>
 
 <script type="text/javascript">
 function toggleUploadMode(file) 

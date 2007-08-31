@@ -27,7 +27,7 @@
     else
         echo "<title>FB2PDF. Новые книги.</title>";
     
-	echo "<link href=\"http://codeminders.com/fb2pdf/\"/>
+	echo "<link href=\"http://fb2pdf.com/\"/>
 	<id>urn:uuid:60a76c80</id>
 	<updated>".date("Y\-m\-d\TH\:i\:s\Z")."</updated>
 	";
