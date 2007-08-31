@@ -25,8 +25,7 @@
                 <br/><b>Электронные библиотеки с книгами в формате FB2</b><br/><br/>
             </div>
             
-            <div class="right_book">&nbsp;</div>
-            <div class="left_book">
+            <div style="width: 640px; text-align: left;">
                 <p>
                     <a href="http://lib.aldebaran.ru/">Библиотека Альдебаран</a><br/>
                     <a href="http://www.fictionbook.ru/">Библиотека FictionBook</a><br/>
@@ -41,7 +40,7 @@
             <div style="width: 640px; text-align: left;">
                 <p>Если Вы используете FireFox, установите себе специальное расширение, которое позволит Вам конвертировать книги прямо с вэб сайта любой электронной библиотеки, в которой есть книги в FB2 формате. Для установки надо:<br/>
                 1. Установить Greasemonkey FireFox Extension. Это можно сделать <a href="https://addons.mozilla.org/en-US/firefox/addon/748">здесь</a><br/>
-                2. Нажать на <a href="http://www.codeminders.com/fb2pdf/fb2pdflink.user.js">эту ссылку</a>.<br/><br/>
+                2. Нажать на <a href="http://fb2pdf.com/fb2pdflink.user.js">эту ссылку</a>.<br/><br/>
                 Теперь, при заходе на сайт электронной библиотеки, возле ссылки на книгу в формате FB2 появится ссылка на конвертацию этой книги для чтения в SonyReader: <u>[SonyReader PDF]</u>.<br>
                 Нажимайте на эту ссылку и выбранная Вами книга будет сконвертированна!
                 </p>
