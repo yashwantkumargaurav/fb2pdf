@@ -1,6 +1,6 @@
 // Hello World! example user script
-// version 0.1
-// 2007-08-22
+// version 0.2
+// 2007-08-30
 // Copyright (c) 2005, Vadim Zaliva
 // Released under the GPL license
 // http://www.gnu.org/copyleft/gpl.html
@@ -21,11 +21,13 @@
 //
 // ==UserScript==
 // @name          fb2pdf
-// @namespace     http://codeminders.com/fb2pdf/
+// @namespace     http://fb2pdf.com/
 // @description   Suppliment links to .fb2 files with links to .pdf files for SonyReader converted via FB2PDF converter
 // @include       *
-// @exclude       http://codeminders.com/*
-// @exclude       http://www.codeminders.com/*
+// @exclude       http://codeminders.com/fb2pdf/*
+// @exclude       http://www.codeminders.com/fb2pdf/*
+// @exclude       http://fb2pdf.com/*
+// @exclude       http://www.fb2pdf.com/*
 // @exclude       http://www.diveintogreasemonkey.org/*
 // ==/UserScript==
 
@@ -42,7 +44,7 @@ var replaceLinks = function() {
         if(thisLink.href.match(/^http:\/\/.*\.fb2$/i) || thisLink.href.match(/^http:\/\/.*\.fb2\.zip$/i)) {
             //alert("link"+thisLink);
             newElement = document.createElement('span');
-            postUrl = 'http://www.codeminders.com/fb2pdf/convert.php?auto=yes&url=' + encodeURIComponent(thisLink.href);
+            postUrl = 'http://www.fb2pdf.com/convert.php?auto=yes&url=' + encodeURIComponent(thisLink.href);
             newElement.innerHTML='&nbsp[<a target=\'_blank\' href="' + postUrl + '">SonyReader PDF</a>]';
             thisLink.parentNode.insertBefore(newElement, thisLink.nextSibling);
         }
