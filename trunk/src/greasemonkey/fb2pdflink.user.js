@@ -1,5 +1,5 @@
-// Hello World! example user script
-// version 0.2
+// FB2PDF - download FB2 books in SonyReader-optimized PDF
+// version 0.5
 // 2007-08-30
 // Copyright (c) 2005, Vadim Zaliva
 // Released under the GPL license
@@ -41,8 +41,17 @@ var replaceLinks = function() {
         null);
     for (var i = 0; i < allLinks.snapshotLength; i++) {
         thisLink = allLinks.snapshotItem(i);
-        if(thisLink.href.match(/^http:\/\/.*\.fb2$/i) || thisLink.href.match(/^http:\/\/.*\.fb2\.zip$/i)) {
-            //alert("link"+thisLink);
+        if(thisLink.href.match(/^http:\/\/.*\.fb2$/i) || 
+           thisLink.href.match(/^http:\/\/.*\.fb2\.zip$/i) ||
+
+           thisLink.href.match(/^http:\/\/(www\.)?lib.rus.ec\/pl\/2\.pl\?[0-9]+/i) ||
+           (thisLink.href.match(/^\/pl\/2\.pl\?[0-9]+/i) && document.location.match(/^http:\/\/(www\.)?lib\.rus\.ec\//i)) ||
+
+           thisLink.href.match(/^http:\/\/(www\.)?fenzin\.org\/downloadfb2\.php\?book\=[0-9]+/i) ||
+           (thisLink.href.match(/^\/downloadfb2\.php\?book\=[0-9]+/i) && document.location.match(/http:\/\/(www\.)?fenzin\.org\//i))
+           
+          ) {
+            //alert("link: "+thisLink);
             newElement = document.createElement('span');
             postUrl = 'http://www.fb2pdf.com/convert.php?auto=yes&url=' + encodeURIComponent(thisLink.href);
             newElement.innerHTML='&nbsp[<a target=\'_blank\' href="' + postUrl + '">SonyReader PDF</a>]';
