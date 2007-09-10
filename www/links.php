@@ -30,6 +30,8 @@
                     <a href="http://lib.aldebaran.ru/">Библиотека Альдебаран</a><br/>
                     <a href="http://www.fictionbook.ru/">Библиотека FictionBook</a><br/>
                     <a href="http://fanlib.ru/">Библиотека FanLib</a>
+                    <a href="http://fenzin.org/">"Фензин" - сайт о фантастике и фэнтези</a>
+                    <a href="http://lib.rus.ec/">Либрусек - библиотека в Эквадоре</a>
                 </p>
             </div>
 
