@@ -95,6 +95,7 @@ def parseCommandLineAndReadConfiguration():
 
         # change process name, important for init.d script on Linux
         if os.path.exists('/lib/libc.so.6'):
+            import dl
             libc = dl.open('/lib/libc.so.6')
             libc.call('prctl', 15, 'fbdaemon', 0, 0, 0)
         
