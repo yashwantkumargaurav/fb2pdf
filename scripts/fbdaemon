@@ -91,6 +91,8 @@ def parseCommandLineAndReadConfiguration():
         # Detach
         createDaemon()
 
+        os.umask(022) # S_IWGRP|S_IWOTH (022, write access for the owner only).  
+
         # change process name, important for init.d script on Linux
         if os.path.exists('/lib/libc.so.6'):
             libc = dl.open('/lib/libc.so.6')
