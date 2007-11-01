@@ -35,7 +35,7 @@ SUPPORTED_MSG_FORMAT_VER=[2,3]
 
 # --- Defaults ---
 
-pidfile='/var/run/updater.pid'
+pidfile='/var/run/fbdaemon.pid'
 logfile = '/var/log/fbdaemon.log'
 log_verbosity = logging.INFO
 
@@ -94,7 +94,7 @@ def parseCommandLineAndReadConfiguration():
         # change process name, important for init.d script on Linux
         if os.path.exists('/lib/libc.so.6'):
             libc = dl.open('/lib/libc.so.6')
-            libc.call('prctl', 15, 'updater', 0, 0, 0)
+            libc.call('prctl', 15, 'fbdaemon', 0, 0, 0)
         
         # write PID file
         p = open(pidfile, "w")
