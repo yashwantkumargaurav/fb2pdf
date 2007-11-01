@@ -435,6 +435,7 @@ def main():
     except:
         info = sys.exc_info()
         traceback.print_exc()
+        logging.getLogger('fbdaemon').exception('Fatal error')
         return 3
 
     
