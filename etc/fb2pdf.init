@@ -1,59 +1,45 @@
 #!/bin/bash
 #
-# init script for fb2pdf daemon
-#
-# chkconfig: 2345 80 30
-# description: fb2pdf dameon
-# processname: fb2pdf
+# chkconfig: - 91 35
+# description: Starts and stops fb2pdf.
 
+# Source function library.
 . /etc/init.d/functions
 
-RETVAL=0
-prog="fb2pdf"
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+unset FB2PDFARGS
+FB2PDFARGS="-c ~fb2pdf/src/fb2pdf/etc/aws.cfg -p ~fb2pdf/tmp/fbdaemon.pid -l ~fb2pdf/tmp/fbdaemon.log -v"
+
+prog="fbdaemon"
+USER="fb2pdf"
 
 start() {
-        echo -n $"Starting $prog: "
-        if [ $UID -ne 0 ]; then
-                RETVAL=1
-                failure
-        else
-                daemon /usr/local/src/fb2pdf/fbdaemon.py 
-                RETVAL=$?
-                [ $RETVAL -eq 0 ] && touch /var/lock/subsys/fb2pdf
-        fi;
-        echo 
-        return $RETVAL
+    echo -n $"Starting $prog: "
+    RETVAL=0
+    runuser -l ${USER} -c "cd ~${USER} && fbdaemon ${FB2PDFARGS}" > /dev/null &
+    RETVAL=$?
+    [ "$RETVAL" -eq 0 ] && success $"fb2pdf startup" || \
+        failure $"fb2pdf start"
+    echo
+    [ "$RETVAL" -eq 0 ] && touch /var/lock/subsys/fb2pdf
 }
 
 stop() {
-        echo -n $"Stopping $prog: "
-        if [ $UID -ne 0 ]; then
-                RETVAL=1
-                failure
-        else
-            killproc $prog
-            RETVAL=$?
-            [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/fb2pdf
-        fi;
-        echo
-        return $RETVAL
+    echo -n $"Shutting down $prog: "
+    killproc fbdaemon
+    RETVAL=$?
+    [ "$RETVAL" -eq 0 ] && success $"fb2pdf shutdown" || \
+        failure $"fb2pdf shutdown"
+    echo
+    [ "$RETVAL" -eq 0 ] && rm -f /var/lock/subsys/fb2pdf
 }
 
-reload(){
-	restart
-}
-
-restart(){
-	stop
-	start
-}
-
-condrestart(){
-    [ -e /var/lock/subsys/fb2pdf ] && restart
-    return 0
-    return 0
-}
-
+# See how we were called.
 case "$1" in
   start)
 	start
@@ -61,22 +47,23 @@ case "$1" in
   stop)
 	stop
 	;;
-  restart)
-	restart
-        ;;
-  reload)
-	reload
-        ;;
+  restart|reload)
+	stop
+	sleep 3
+	start
+	;;
   condrestart)
-	condrestart
+	if [ -f /var/lock/subsys/fb2pdf ]; then
+	    stop
+	    sleep 3
+	    start
+	fi
 	;;
   status)
-        status fb2pdf
-	RETVAL=$?
-        ;;
+	status fbdaemon
+	;;
   *)
-	echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
-	RETVAL=1
+	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
 esac
 
-exit $RETVAL
