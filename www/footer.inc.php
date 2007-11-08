@@ -15,3 +15,6 @@ echo "
 ";
 ?>
 <img src="images/atom.gif"/></a>&nbsp;&nbsp;<a href="http://www.crocodile.org/"><img src="images/noir.png" class="left" width="80" height="15"></a>
+<div>
+    <script type="text/javascript" src="http://www.crocodile.org/linknet/adblock.php?lang=en,ru&charsset=koi8-r"></script>
+</div>
