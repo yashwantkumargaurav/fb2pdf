@@ -1,0 +1,26 @@
+%%
+%% This is file `t2afaq.sty'
+%% [ AntiquaPSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afaq.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/AntiquaPSCyr]
+
+\DeclareFontFamily{T2A}{faq}{}
+
+\DeclareFontShape{T2A}{faq}{m}{n}{<-> faqr6a}{}
+\DeclareFontShape{T2A}{faq}{m}{it}{<-> faqri6a}{}
+\DeclareFontShape{T2A}{faq}{m}{sc}{<-> faqrc6a}{}
+\DeclareFontShape{T2A}{faq}{m}{sl}{<-> faqro6a}{}
+\DeclareFontShape{T2A}{faq}{bx}{n}{<-> faqb6a}{}
+\DeclareFontShape{T2A}{faq}{bx}{it}{<-> faqbi6a}{}
+\DeclareFontShape{T2A}{faq}{bx}{sl}{<-> faqbo6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{faq}{b}{n}{<->sub * faq/bx/n}{}
+\DeclareFontShape{T2A}{faq}{b}{it}{<->sub * faq/bx/it}{}
+\DeclareFontShape{T2A}{faq}{b}{sl}{<->sub * faq/bx/sl}{}
+
+\endinput
+

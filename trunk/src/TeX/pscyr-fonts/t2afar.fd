@@ -1,0 +1,28 @@
+%%
+%% This is file `t2afar.fd'
+%% [ ArialMT/PSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afar.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/ArialMT/PSCyr]
+
+\DeclareFontFamily{T2A}{far}{}
+
+\DeclareFontShape{T2A}{far}{m}{n}{<-> farr6a}{}
+\DeclareFontShape{T2A}{far}{m}{it}{<-> farri6a}{}
+\DeclareFontShape{T2A}{far}{m}{sl}{<-> farro6a}{}
+\DeclareFontShape{T2A}{far}{m}{sc}{<-> farrc6a}{}
+\DeclareFontShape{T2A}{far}{bx}{n}{<-> farb6a}{}
+\DeclareFontShape{T2A}{far}{bx}{it}{<-> farbi6a}{}
+\DeclareFontShape{T2A}{far}{bx}{sl}{<-> farbo6a}{}
+
+% extra bold (black)
+\DeclareFontShape{T2A}{far}{eb}{n}{<-> farbe6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{far}{b}{n}{<->sub * far/bx/n}{}
+\DeclareFontShape{T2A}{far}{b}{it}{<->sub * far/bx/it}{}
+\DeclareFontShape{T2A}{far}{b}{sl}{<->sub * far/bx/sl}{}
+
+\endinput

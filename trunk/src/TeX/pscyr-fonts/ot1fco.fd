@@ -1,0 +1,37 @@
+%Filename: ot1fco.fd
+%Created by: tex fontinst
+%Created using fontinst v1.801
+
+%THIS FILE SHOULD BE PUT IN A TEX INPUTS DIRECTORY
+
+\ProvidesFile{ot1fco.fd}
+   [2001/03/03 Fontinst v1.801 font definitions for OT1/fco.]
+
+\DeclareFontFamily{OT1}{fco}{}
+
+\DeclareFontShape{OT1}{fco}{m}{n}{
+   <-> fcor7t
+}{}
+
+\DeclareFontShape{OT1}{fco}{m}{sl}{
+   <-> fcoro7t
+}{}
+
+\DeclareFontShape{OT1}{fco}{bx}{n}{
+   <-> fcob7t
+}{}
+
+\DeclareFontShape{OT1}{fco}{bx}{sl}{
+   <-> fcobo7t
+}{}
+
+\DeclareFontShape{OT1}{fco}{m}{it}{
+   <-> fcori7t
+}{}
+
+\DeclareFontShape{OT1}{fco}{b}{n}{<->ssub * fco/bx/n}{}
+\DeclareFontShape{OT1}{fco}{b}{sl}{<->ssub * fco/bx/sl}{}
+\DeclareFontShape{OT1}{fco}{bx}{it}{<->ssub * fco/bx/sl}{}
+\DeclareFontShape{OT1}{fco}{b}{it}{<->ssub * fco/bx/it}{}
+
+\endinput

@@ -1,0 +1,17 @@
+%Filename: ot1fad.fd
+%Created by: tex fontinst
+%Created using fontinst v1.801
+
+%THIS FILE SHOULD BE PUT IN A TEX INPUTS DIRECTORY
+
+\ProvidesFile{ot1fad.fd}
+   [2001/03/03 Fontinst v1.801 font definitions for OT1/fad.]
+
+\DeclareFontFamily{OT1}{fad}{}
+
+\DeclareFontShape{OT1}{fad}{m}{n}{
+   <-> fadr7t
+}{}
+
+
+\endinput

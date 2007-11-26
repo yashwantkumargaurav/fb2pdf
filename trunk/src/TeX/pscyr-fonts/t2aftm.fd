@@ -1,0 +1,26 @@
+%%
+%% This is file `t2aftm.fd'
+%% [ TimesNewRomanPSMT/PSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2aftm.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/TimesNewRomanPSMT/PSCyr]
+
+\DeclareFontFamily{T2A}{ftm}{}
+
+\DeclareFontShape{T2A}{ftm}{m}{n}{<-> ftmr6a}{}
+\DeclareFontShape{T2A}{ftm}{m}{it}{<-> ftmri6a}{}
+\DeclareFontShape{T2A}{ftm}{m}{sl}{<-> ftmro6a}{}
+\DeclareFontShape{T2A}{ftm}{m}{sc}{<-> ftmrc6a}{}
+
+\DeclareFontShape{T2A}{ftm}{bx}{n}{<-> ftmb6a}{}
+\DeclareFontShape{T2A}{ftm}{bx}{it}{<-> ftmbi6a}{}
+\DeclareFontShape{T2A}{ftm}{bx}{sl}{<-> ftmbo6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{ftm}{b}{n}{<->sub * ftm/bx/n}{}
+\DeclareFontShape{T2A}{ftm}{b}{it}{<->sub * ftm/bx/it}{}
+\DeclareFontShape{T2A}{ftm}{b}{sl}{<->sub * ftm/bx/sl}{}
+
+\endinput

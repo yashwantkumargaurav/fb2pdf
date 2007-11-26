@@ -1,0 +1,25 @@
+%%
+%% This is file `t2afac.fd'
+%% [ AcademyPSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afac.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/AcademyPSCyr]
+
+\DeclareFontFamily{T2A}{fac}{}
+
+\DeclareFontShape{T2A}{fac}{m}{n}{<-> facr6a}{}
+\DeclareFontShape{T2A}{fac}{m}{it}{<-> facri6a}{}
+\DeclareFontShape{T2A}{fac}{m}{sl}{<-> facro6a}{}
+\DeclareFontShape{T2A}{fac}{m}{sc}{<-> facrc6a}{}
+\DeclareFontShape{T2A}{fac}{bx}{n}{<-> facb6a}{}
+\DeclareFontShape{T2A}{fac}{bx}{it}{<-> facbo6a}{}
+\DeclareFontShape{T2A}{fac}{bx}{sl}{<-> facbo6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fac}{b}{n}{<->sub * fac/bx/n}{}
+\DeclareFontShape{T2A}{fac}{b}{it}{<->sub * fac/bx/it}{}
+\DeclareFontShape{T2A}{fac}{b}{sl}{<->sub * fac/bx/sl}{}
+
+\endinput
