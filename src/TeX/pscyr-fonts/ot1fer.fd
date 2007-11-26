@@ -1,0 +1,34 @@
+%Filename: ot1fer.fd
+%Created by: tex fontinst
+%Created using fontinst v1.801
+
+%THIS FILE SHOULD BE PUT IN A TEX INPUTS DIRECTORY
+
+\ProvidesFile{ot1fer.fd}
+   [2001/03/03 Fontinst v1.801 font definitions for OT1/fer.]
+
+\DeclareFontFamily{OT1}{fer}{}
+
+\DeclareFontShape{OT1}{fer}{m}{n}{
+   <-> ferr7t
+}{}
+
+\DeclareFontShape{OT1}{fer}{bx}{n}{
+   <-> ferb7t
+}{}
+
+\DeclareFontShape{OT1}{fer}{m}{it}{
+   <-> ferri7t
+}{}
+
+\DeclareFontShape{OT1}{fer}{bx}{it}{
+   <-> ferbi7t
+}{}
+
+\DeclareFontShape{OT1}{fer}{b}{n}{<->ssub * fer/bx/n}{}
+\DeclareFontShape{OT1}{fer}{m}{sl}{<->ssub * fer/m/it}{}
+\DeclareFontShape{OT1}{fer}{b}{it}{<->ssub * fer/bx/it}{}
+\DeclareFontShape{OT1}{fer}{bx}{sl}{<->ssub * fer/bx/it}{}
+\DeclareFontShape{OT1}{fer}{b}{sl}{<->ssub * fer/bx/sl}{}
+
+\endinput

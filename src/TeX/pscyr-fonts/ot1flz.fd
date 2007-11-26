@@ -1,0 +1,22 @@
+%Filename: ot1flz.fd
+%Created by: tex fontinst
+%Created using fontinst v1.801
+
+%THIS FILE SHOULD BE PUT IN A TEX INPUTS DIRECTORY
+
+\ProvidesFile{ot1flz.fd}
+   [2001/03/03 Fontinst v1.801 font definitions for OT1/flz.]
+
+\DeclareFontFamily{OT1}{flz}{}
+
+\DeclareFontShape{OT1}{flz}{m}{n}{
+   <-> flzr7t
+}{}
+
+\DeclareFontShape{OT1}{flz}{m}{sl}{
+   <-> flzro7t
+}{}
+
+\DeclareFontShape{OT1}{flz}{m}{it}{<->ssub * flz/m/sl}{}
+
+\endinput

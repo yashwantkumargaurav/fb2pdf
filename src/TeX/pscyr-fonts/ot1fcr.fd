@@ -1,0 +1,34 @@
+%Filename: ot1fcr.fd
+%Created by: tex fontinst
+%Created using fontinst v1.801
+
+%THIS FILE SHOULD BE PUT IN A TEX INPUTS DIRECTORY
+
+\ProvidesFile{ot1fcr.fd}
+   [2001/03/03 Fontinst v1.801 font definitions for OT1/fcr.]
+
+\DeclareFontFamily{OT1}{fcr}{}
+
+\DeclareFontShape{OT1}{fcr}{m}{n}{
+   <-> fcrr7t
+}{}
+
+\DeclareFontShape{OT1}{fcr}{bx}{n}{
+   <-> fcrb7t
+}{}
+
+\DeclareFontShape{OT1}{fcr}{m}{it}{
+   <-> fcrri7t
+}{}
+
+\DeclareFontShape{OT1}{fcr}{bx}{it}{
+   <-> fcrbi7t
+}{}
+
+\DeclareFontShape{OT1}{fcr}{b}{n}{<->ssub * fcr/bx/n}{}
+\DeclareFontShape{OT1}{fcr}{m}{sl}{<->ssub * fcr/m/it}{}
+\DeclareFontShape{OT1}{fcr}{b}{it}{<->ssub * fcr/bx/it}{}
+\DeclareFontShape{OT1}{fcr}{bx}{sl}{<->ssub * fcr/bx/it}{}
+\DeclareFontShape{OT1}{fcr}{b}{sl}{<->ssub * fcr/bx/sl}{}
+
+\endinput

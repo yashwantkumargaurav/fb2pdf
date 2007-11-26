@@ -1,0 +1,25 @@
+%%
+%% This is file `t2afma.fd'
+%% [ MagazinePSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afma.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/MagazinePSCyr]
+
+\DeclareFontFamily{T2A}{fma}{}
+
+\DeclareFontShape{T2A}{fma}{m}{n}{<-> fmar6a}{}
+\DeclareFontShape{T2A}{fma}{m}{it}{<-> fmari6a}{}
+\DeclareFontShape{T2A}{fma}{m}{sl}{<-> fmaro6a}{}
+\DeclareFontShape{T2A}{fma}{m}{sc}{<-> fmarc6a}{}
+\DeclareFontShape{T2A}{fma}{bx}{n}{<-> fmab6a}{}
+\DeclareFontShape{T2A}{fma}{bx}{it}{<-> fmabo6a}{}
+\DeclareFontShape{T2A}{fma}{bx}{sl}{<-> fmabo6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fma}{b}{n}{<->sub * fma/bx/n}{}
+\DeclareFontShape{T2A}{fma}{b}{it}{<->sub * fma/bx/it}{}
+\DeclareFontShape{T2A}{fma}{b}{sl}{<->sub * fma/bx/sl}{}
+
+\endinput
