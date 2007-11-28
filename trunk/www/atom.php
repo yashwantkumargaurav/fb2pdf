@@ -42,6 +42,10 @@
 		$id      =    $list[$i]["id"];
 		$date    =    formatDateIntoAtom($list[$i]["converted"]);
 		$key     =    "getfile.php?key=" . $list[$i]["storage_key"]."";
+		if (!$author)
+			$author = "Автор неизвестен";
+		if (!$title)
+			$title = "Название неизвестно";
 		echo "
 		<entry>
 			<title>$author. $title</title>
