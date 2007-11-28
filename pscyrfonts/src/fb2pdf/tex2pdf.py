@@ -35,6 +35,8 @@ def tex2pdf(texfilename, pdffilename):
     # Style files located ${sys_prefix}/share/texmf-local/
     shutil.copy(sys.prefix + '/share/texmf-local/verse.sty', "./")
     shutil.copy(sys.prefix + '/share/texmf-local/epigraph.sty', "./")
+    for filename in os.listdir(sys.prefix + '/share/fb2pdf/pscyr-fonts'):
+        shutil.copyfile(sys.prefix + '/share/fb2pdf/pscyr-fonts/%s' % filename, "./")    
 
     logging.getLogger('fb2pdf').debug("Converting TeX to PDF")
     
