@@ -26,8 +26,46 @@ parameters = {
     'inputenc': 'utf-8',
 
     # codec to use for output - should be consistent with inputenc
-    'outcodec': 'utf-8'
-}
+    'outcodec': 'utf-8',
+
+    # Computer Modern fonts
+    # cmcr - Concrete
+    # cmbr - Bright
+    # cmdh - Dunhill
+    # cmfib - Fibonacci
+    # cmfr - Funny
+    # cmr - Roman
+    # cmss - Sans
+    # cmtl - Typewriter Light
+    # cmtt - Typewriter
+    # cmvtt - Variable Typewriter
+    # lcmss - Sans for SLiTEX
+    # lcmtt - Typewriter for SLiTEX
+    #
+    # PsCyr package fonts
+    # fac - Academy
+    # fad - Advertisement
+    # faq - AntiquaPSCyr
+    # fco - College
+    # fcp - CooperPSCyr
+    # fer - ERKurierPSCyr
+    # fha - HandbookPSCyr
+    # fjn - JournalPSCyr
+    # flz - Lazurski
+    # fma - MagazinePSCyr
+    # ftx - TextbookPSCyr
+    # far - ArialMT
+    # fcr - CourierNewPSMT
+    # ftm - TimesNewRomanPSMT
+    'main-font-code': 'cmss',
+
+    'main-font-size': '12',
+
+    'main-margin-size': '1mm',
+
+    'disable-hyphens': 'false'
+
+}   
 
 
 # -- constants --
@@ -321,7 +359,7 @@ def _getdir(f):
         dirname = "."
     return (dirname, filebase)
     
-def fb2tex(infile, outfile,flavour=None):
+def fb2tex(infile, outfile, flavour=None, fmtparams={}):
     logging.getLogger('fb2pdf').info("Converting %s" % infile)
     
     f = open(infile, 'r')
@@ -342,6 +380,8 @@ def fb2tex(infile, outfile,flavour=None):
     else:
         raise PersistentError("Unknown flavour '%s'" % flavour)
     
+    parameters.update(fmtparams.items())
+
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
     \\usepackage{verse}
@@ -357,7 +397,7 @@ def fb2tex(infile, outfile,flavour=None):
     ]{hyperref}
     \\usepackage[
         papersize={%(papersize)s},
-        margin=1mm,
+        margin=%(main-margin-size)s,
         ignoreall,
         pdftex
     ]{geometry}
@@ -388,7 +428,10 @@ def fb2tex(infile, outfile,flavour=None):
     f.write("\\subsectionfont{\\raggedright}\n")
     f.write("\\subsubsectionfont{\\raggedright}\n")
 
-    f.write("{\\fontfamily{cmss}\\selectfont\n")
+    if parameters['disable-hyphens'].upper() == 'TRUE':
+        f.write("\\hyphenpenalty=10000\n")
+
+    f.write("{\\fontfamily{%(main-font-code)s}\\fontsize{%(main-font-size)s}{%(main-font-size)s}\\selectfont\n" % parameters)
     
     fb = soup.documentElement
     if fb.nodeType!=Node.ELEMENT_NODE or fb.tagName != "FictionBook":
