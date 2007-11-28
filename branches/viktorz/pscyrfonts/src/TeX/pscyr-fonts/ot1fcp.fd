@@ -1,0 +1,17 @@
+%Filename: ot1fcp.fd
+%Created by: tex fontinst
+%Created using fontinst v1.801
+
+%THIS FILE SHOULD BE PUT IN A TEX INPUTS DIRECTORY
+
+\ProvidesFile{ot1fcp.fd}
+   [2001/03/03 Fontinst v1.801 font definitions for OT1/fcp.]
+
+\DeclareFontFamily{OT1}{fcp}{}
+
+\DeclareFontShape{OT1}{fcp}{m}{n}{
+   <-> fcpr7t
+}{}
+
+
+\endinput

@@ -1,0 +1,25 @@
+%%
+%% This is file `t2afha.fd'
+%% [ HandbookPSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afha.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/HandbookPSCyr]
+
+\DeclareFontFamily{T2A}{fha}{}
+
+\DeclareFontShape{T2A}{fha}{m}{n}{<-> fhar6a}{}
+\DeclareFontShape{T2A}{fha}{m}{it}{<-> fhari6a}{}
+\DeclareFontShape{T2A}{fha}{m}{sl}{<-> fharo6a}{}
+\DeclareFontShape{T2A}{fha}{m}{sc}{<-> fharc6a}{}
+\DeclareFontShape{T2A}{fha}{bx}{n}{<-> fhab6a}{}
+\DeclareFontShape{T2A}{fha}{bx}{it}{<-> fhabo6a}{}
+\DeclareFontShape{T2A}{fha}{bx}{sl}{<-> fhabo6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fha}{b}{n}{<->sub * fha/bx/n}{}
+\DeclareFontShape{T2A}{fha}{b}{it}{<->sub * fha/bx/it}{}
+\DeclareFontShape{T2A}{fha}{b}{sl}{<->sub * fha/bx/sl}{}
+
+\endinput

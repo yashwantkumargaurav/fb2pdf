@@ -1,0 +1,89 @@
+#!/usr/bin/env python2.4
+
+'''
+FictionBook2 -> TeX converter
+
+Author: Vadim Zaliva <lord@crocodile.org>
+'''
+
+import getopt
+import logging
+import traceback
+import os
+import sys
+import string
+
+from fb2pdf import fb2tex
+
+# --- globals --
+logfile = 'fb2tex.log'
+
+def usage():
+    sys.stderr.write("Usage: fb2tex.py [-v] [-m flavour] -f fb2file -o texfile\n")
+
+def initLog(logfilename, log_verbosity):
+    hdlr = logging.FileHandler(logfilename)
+    formatter = logging.Formatter('%(asctime)s [%(process)d.%(thread)d] %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    
+    flogger = logging.getLogger('fb2pdf')
+    flogger.addHandler(hdlr)
+    flogger.setLevel(log_verbosity)
+
+def parseCommandLine():
+    infile = None
+    outfile = None
+    flavour = None
+    
+    log_verbosity = logging.INFO
+    
+    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:m:", ["verbose", "file=", "output=", "flavour=", "use-koi8"])
+    for option, argument in optlist:
+        if option in ("-v", "--verbose"):
+            log_verbosity = logging.DEBUG
+        elif option in ("-f", "--file"):
+            if os.path.isfile(argument):
+                infile = argument
+            else:
+                raise getopt.GetoptError("input file '%s' doesn't exist" % argument)
+        elif option in ("-o", "--output"):
+            outfile = argument
+        elif option in ("-m", "--flavour"):
+            flavour = argument
+        elif option in ("--use-koi8"):
+            fb2tex.parameters['inputenc'] = 'koi8-r'
+            fb2tex.parameters['outcodec'] = 'koi8_r'
+            
+    if infile == None:
+        raise getopt.GetoptError("input file not specified")
+    if outfile == None:
+        raise getopt.GetoptError("output file not specified")
+        
+    # file log
+    initLog(logfile, log_verbosity)
+    
+    # Add console log
+    console = logging.StreamHandler()
+    formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('fb2pdf').addHandler(console)
+    
+    return (infile, outfile, flavour)
+
+def main():
+    try:
+        (infile, outfile, flavour) = parseCommandLine()
+        fb2tex.fb2tex(infile, outfile, flavour)
+    except getopt.GetoptError, msg:
+        if len(sys.argv[1:]) > 0:
+            print >>sys.stderr, "Error: %s\n" % msg
+        else:
+            usage()
+        return 2
+    except:
+        info = sys.exc_info()
+        traceback.print_exc()
+        return 3
+
+if __name__ == "__main__":
+    sys.exit(main())
