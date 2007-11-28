@@ -368,6 +368,8 @@ def fb2tex(infile, outfile,flavour=None):
     \\usepackage{ulem}
     \\usepackage[%(inputenc)s]{inputenc}
     \\usepackage[russian]{babel}
+    \\usepackage{pscyr}
+    \\pdfmapfile{+pscyr.map}
     \\usepackage{sectsty}
     \\setcounter{secnumdepth}{-2}
     """ % parameters )
