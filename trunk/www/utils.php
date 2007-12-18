@@ -34,4 +34,13 @@ function notifyUserByEmail($email, $key)
     
     mail($email, $subject, $message, $headers);
 }
+
+function httpResponseCode($httpCode, $message)
+{
+    header("HTTP/1.0 $httpCode");
+    header('Content-type: text/html');    
+    
+    if ($message)
+        echo "<html><body>$message</body></html>";
+}
 ?>

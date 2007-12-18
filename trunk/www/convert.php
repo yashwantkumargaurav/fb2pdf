@@ -4,7 +4,7 @@ if (!isset ($_GET["url"]))
 {
     header("HTTP/1.0 400 Bad Request");
     header('Content-type: text/html');    
-    echo "<html><body>Missing \"url\" paremeter</body></html>";
+    echo "<html><body>Missing \"url\" parameter</body></html>";
 }
 else
 {
