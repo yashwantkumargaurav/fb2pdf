@@ -21,6 +21,7 @@ function menu_item($name, $url, $title, $text)
 }
 ?>
 
+<div id="menu_container">
 <div id="menu"> 
     <div class="tabsC">
         <ul>
@@ -34,4 +35,5 @@ function menu_item($name, $url, $title, $text)
             ?>
         </ul>
     </div>
+</div>
 </div>

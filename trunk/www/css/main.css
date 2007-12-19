@@ -109,11 +109,18 @@ a:hover
 /*-------------------------------------------*/
 #menu
 {
-    height: 31px;
-    position: absolute;
-    top: 80px;
-    left:280px;
-    *left:300px;
+   height: 31px;
+   width:782px;
+   position: absolute;
+   z-index:100;
+   top: 2px;
+   left:0px;
+}
+
+#menu_container
+{
+    float: left;
+    position: relative;
 }
 
 /*---------- Menu Tabs ----------------------*/
