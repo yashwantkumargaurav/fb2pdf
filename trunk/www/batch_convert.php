@@ -11,22 +11,31 @@
 <script src="js/connection.js"></script>
 
 <script type="text/javascript">
+
+convTime = {};
+totalConverted = 0;
+totalTime = 0;
+
 function process()
 {
     convert();
     checkStatus();
     
+    if (!endProcess())
+        setTimeout('process()', 5000);
+}
+
+function endProcess()
+{
     // check if there are still not finished items 
-    var allDone = true;
     for (var url in toConvert)
     {
-        if (toConvert[url] == null || toConvert[url])
-            allDone = false;
+        return false;
     }
-    if (!allDone)
-        setTimeout('process()', 5000);
-    else
-        alert ("All Done");
+
+    // display text
+    document.getElementById('progress').style.display = 'none';
+    document.getElementById('done').style.display = 'block';
 }
 
 function convert()
@@ -39,6 +48,7 @@ function convert()
             var requestUrl = encodeURI('conv_process.php?url=' + url);
 
             toConvert[url] = 0;
+            convTime[url] = new Date().getTime();
             
             // callback
             var callback =
@@ -82,60 +92,90 @@ function convertSuccessHandler(o)
 {
     var url = o.argument.url;
     
-    // format and display results.
-    var root = o.responseXML.documentElement;
+    var response = eval("(" + o.responseText + ")");
     
-    var key    = root.getElementsByTagName("key")[0].firstChild.nodeValue;
-    var author = root.getElementsByTagName("author")[0].firstChild.nodeValue;
-    var title  = root.getElementsByTagName("title")[0].firstChild.nodeValue;
-
-    toConvert[url] = key;
-    displayStatus(url, "converting...");
+    toConvert[url] = response.key;
+    
+    // display book
+    document.getElementById(url).style.display = ''
+    
+    var id = url + "_title";
+    document.getElementById(id).innerHTML = response.author + ' "' + response.title + '" ';
+    
+    var id = url + "_status";
+    document.getElementById(id).innerHTML = "Конвертируется...";
 }
 
 function convertFailureHandler(o)
 {
     var url = o.argument.url;
-    toConvert[url] = 0;
-    displayStatus(url, "error: (" + o.status + " " + o.statusText + ")");
+    
+    delete toConvert[url];
+    delete convTime[url];
+    
+    // display error
+    document.getElementById(url).style.display = ''
+    
+    var id = url + "_title";
+    document.getElementById(id).innerHTML = o.statusText;
 }
 
 function statusSuccessHandler(o)
 {
     var url = o.argument.url;
     
-    // format and display results.
-    var root = o.responseXML.documentElement;
+    var response = eval("(" + o.responseText + ")");
     
-    var status = root.getElementsByTagName("status")[0].firstChild.nodeValue;
-    var source = root.getElementsByTagName("source")[0].firstChild.nodeValue;
-    if (status == 'r' || status == 'e')
+    // display status
+    if (response.status == 'r')
     {
-        toConvert[url] = 0;
+        // time of conversion
+        totalConverted++;
+        totalTime += (new Date().getTime() - convTime[url]);
         
-        var converted = root.getElementsByTagName("converted")[0].firstChild.nodeValue;
-        var log = root.getElementsByTagName("log")[0].firstChild.nodeValue;
+        delete toConvert[url];
+        delete convTime[url];
         
-        displayStatus(url, "status = " + status + " source = " + source + " converted = " + converted + " log = " + log);
+        var id = url + "_status";
+        document.getElementById(id).innerHTML = 
+            'Книга сконвертирована. ' +
+            '<b><a href="' + response.converted + '">Загрузить книгу.</a></b> ' +
+            '<a href="' + response.log + '">Посмотреть</a> возможные ошибки и предупреждения конвертации.';
+    
+        updateEstimatedTime();
+    
     }
-    else
+    else if (response.status == 'e')
     {
-        displayStatus(url, "converting...");
+        delete toConvert[url];
+        delete convTime[url];
+        
+        var id = url + "_status";
+        document.getElementById(id).innerHTML = 
+            'Ошибка конвертации. ' +
+            '<a href="' + response.log + '">Посмотреть</a> ошибки конвертации.';
     }
 }
 
 function statusFailureHandler(o)
 {
     var url = o.argument.url;
-    toConvert[url] = 0;
-    displayStatus(url, "error: (" + o.status + " " + o.statusText + ")");
+    delete toConvert[url];
+    delete convTime[url];
+    
+    // display error
+    var id = url + "_status";
+    document.getElementById(id).innerHTML = 'Ошибка конвертации. ' + o.statusText;
 }
 
-function displayStatus(url, test)
+function updateEstimatedTime()
 {
-    document.getElementById(url).innerHTML = url + " - " + test;
+    if (totalConverted > 0)
+    {
+        t = totalTime / totalConverted;
+        document.getElementById("estimated_time").innerHTML = Math.ceil(t / (1000 * 60)) + " минут."
+    }
 }
-
 </script>
 
 <?php
@@ -177,19 +217,28 @@ else
             <img src="images/green_px.gif" class="line"/>
             
             <div id="progress" class="message" style="display:block">
-                <p align="justify" class="small">Конвертация Вашего книг может занять некоторое время. Пожалуйста, не закрывайте окно Вашего браузера пока все книги не будут сконвертированны. В противном случае, часть книг может не сконвертироваться.</p>
+                <p align="justify" class="small">Конвертация Ваших книг может занять некоторое время. Пожалуйста, не закрывайте окно Вашего браузера пока все книги не будут сконвертированны. В противном случае, часть книг может не сконвертироваться.</p>
                 <p class="center"><span class="small">Приблизительное время ожидания: <span id="estimated_time">пока неизвестно</span></span></p>
                 <p class="center"><img src="images/progress_conv.gif"/></p>
             </div>
+            <div id="done" class="message" style="display:none">
+                <h3>Конвертация Ваших книг закончена.</h3>
+                <p align="justify" class="small">Теперь Вы можете загрузить сконветрированные книги и записать их в Ваш Sony Reader.
+            </div>
             
-            <div id="converted">
+            <div>
                 <?php
                 foreach ($sources as $source)
                 {
-                    $url  = $source->getAttribute('url');
-                    $name = $source->getAttribute('name');
+                    $url = $source->getAttribute('url');
+                    $bookId   = $url;
+                    $titleId  = $url . "_title";
+                    $statusId = $url . "_status";
                     
-                    echo "<div id=\"$url\">$name</div>";
+                    echo "<div id='$bookId' style='display: none'>
+                            <span id='$titleId'></span>&nbsp;&nbsp;&nbsp;
+                            <span id='$statusId'></span>
+                          </div>";
                 }
                 ?>
             </div>
