@@ -15,13 +15,13 @@ $author = "some author";
 
 // generate response xml
 header('HTTP/1.0 200 OK');
-header('Content-type: text/xml');    
+header('Content-type: application/json');    
 
-echo '<?xml version="1.0" encoding="UTF-8"?>';
-echo '<fb2pdfconv version="1.0">';
-echo "<key>$md5</key>";
-echo "<author>$author</author>";
-echo "<title>$title</title>";
-echo '</fb2pdfconv>';
-
+$response = 
+"{
+    'key'   : '$md5',
+    'author': '$author',
+    'title' : '$title'
+}";
+echo $response;
 ?>
