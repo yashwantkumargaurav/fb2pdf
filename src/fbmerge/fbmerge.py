@@ -13,13 +13,16 @@ __version__ = "0.1"
 import os, os.path, sys, traceback
 import string, re
 import binascii
-from xml.dom.minidom import parse, Node
+from xml.dom.minidom import parse, Node, getDOMImplementation
 import getopt
 from sets import Set
 
 verbose = False
+TOP_ELEMENTS=['body', 'binary']
 
 def _text(t):
+    if t==None:
+        return None
     res = ""
     for x in t.childNodes:
         if x.nodeType == Node.TEXT_NODE:
@@ -51,24 +54,10 @@ def getTitleInfo(doc):
     return ti
 
 def authorName(a):
-    fn = find(a,"first-name")
-    if fn:
-        author_name = _text(fn)
-    else:
-        author_name = ""
-    mn = find(a,"middle-name")
-    if mn:
-        if author_name:
-            author_name = author_name + " " + _text(mn)
-        else:
-            author_name = _text(mn)
-    ln = find(a,"last-name")
-    if ln:
-        if author_name:
-            author_name = author_name + " " + _text(ln)
-        else:
-            author_name = _text(ln)
-    return author_name
+    return (
+        _text(find(a,"first-name")),
+        _text(find(a,"middle-name")),
+        _text(find(a,"last-name")))
 
 def getAuthors(doc):
     ti = getTitleInfo(doc)
@@ -91,6 +80,22 @@ def prefixId(e,i):
                 x.setAttribute('href','#'+i+':'+href[1:])
             prefixId(x,i)
 
+def makeAuthor(newdoc, (af,am,al)):
+    ai = newdoc.createElement('author')
+    if af:
+        x = newdoc.createElement('first-name')
+        x.appendChild(newdoc.createTextNode(af))
+        ai.appendChild(x)
+    if am:
+        x = newdoc.createElement('middle-name')
+        x.appendChild(newdoc.createTextNode(am))
+        ai.appendChild(x)
+    if al:
+        x = newdoc.createElement('last-name')
+        x.appendChild(newdoc.createTextNode(al))
+        ai.appendChild(x)        
+    return ai
+    
 def fbmerge(infiles, outfile, author, title):
     src=[]
     for fn in infiles:
@@ -110,17 +115,43 @@ def fbmerge(infiles, outfile, author, title):
         # build composite author name
         bookauthors=map(Set,map(getAuthors,src))
         authors=reduce(lambda x,y: x.union(y),bookauthors, Set())
-        author=string.join(authors,',')
+    else:
+        authors = Set()
+        authors.add((None,author,None))    
 
     if not title:
-        title = 'Antology'
+        title = 'Anthology'
 
     i=0
     for s in src:
         prefixId(s.documentElement, str(i))
         i=i+1
 
+    impl = getDOMImplementation()
+    newdoc = impl.createDocument(None, "FictionBook", None)
+    top_element = newdoc.documentElement
+
+    # generate new description
+    desc = newdoc.createElement('description')
+    top_element.appendChild(desc)
+    ti = newdoc.createElement('title-info')    
+    desc.appendChild(ti)
+    bt = newdoc.createElement('book-title')    
+    ti.appendChild(bt)
+    bt.appendChild(newdoc.createTextNode(title))
+
+    for a in authors:
+        ti.appendChild(makeAuthor(newdoc,a))
+    
+    # Copy elements
+    for te in TOP_ELEMENTS:
+        for s in src:
+            for x in s.documentElement.childNodes:
+                if x.nodeType == Node.ELEMENT_NODE and x.tagName==te:
+                    top_element.appendChild(x.cloneNode(True))
+                
     f = open(outfile, 'w')
+    f.write(newdoc.toxml("utf-8"))
     f.close()
     return 0
 
