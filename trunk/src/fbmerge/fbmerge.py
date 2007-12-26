@@ -76,6 +76,21 @@ def getAuthors(doc):
     authors = map(authorName,aa)
     return authors
 
+
+def prefixId(e,i):
+    for x in e.childNodes:
+        if x.nodeType == Node.ELEMENT_NODE:
+            id=x.getAttribute('id')
+            if id:
+                x.setAttribute('id',i+':'+id)
+            href = x.getAttributeNS('http://www.w3.org/1999/xlink','href')
+            if href and href[0]=='#':
+                x.setAttributeNS('http://www.w3.org/1999/xlink','href','#'+i+':'+href[1:])
+            href=x.getAttribute('href')
+            if href and href[0]=='#':
+                x.setAttribute('href','#'+i+':'+href[1:])
+            prefixId(x,i)
+
 def fbmerge(infiles, outfile, author, title):
     src=[]
     for fn in infiles:
@@ -100,9 +115,15 @@ def fbmerge(infiles, outfile, author, title):
     if not title:
         title = 'Antology'
 
+    i=0
+    for s in src:
+        prefixId(s.documentElement, str(i))
+        i=i+1
+
     f = open(outfile, 'w')
-    
-    pass
+    f.close()
+    return 0
+
 
 def usage():
     sys.stderr.write("Usage: fbmegge.py [-v] -o outfile fb2file1 fb2file2 [fb2fileN...]\n")
