@@ -335,6 +335,8 @@ def fb2tex(infile, outfile,flavour=None):
 
     if flavour==None or flavour=='PRS-500':
         parameters['papersize']='90.6mm,122.4mm'
+    if flavour=='PRS-500-landscape':
+        parameters['papersize']='122.4mm,90.6mm'
     elif flavour=='iPhone' or flavour=='iPhone-portrait':
         parameters['papersize']='61mm,115mm'
     elif flavour=='iPhone-landscape':
@@ -414,6 +416,7 @@ def fb2tex(infile, outfile,flavour=None):
     logging.getLogger('fb2pdf').info("Conversion successfully finished")
 
 def processBody(b):
+    # TODO: process title via getSectionTitle()
     return processEpigraphs(b) + processSections(b, 0)
     
 def processSections(b,level):
