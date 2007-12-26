@@ -334,7 +334,10 @@ def fb2tex(infile, outfile,flavour=None):
     (outdir, outname) = _getdir(outfile)
 
     global options
-    options=string.split(flavour,",")
+    if flavour:
+        options = string.split(flavour,",")
+    else:
+        options = []
 
     if 'PRS-500' in options:
         parameters['papersize']='90.6mm,122.4mm'
