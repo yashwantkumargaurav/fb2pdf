@@ -302,13 +302,12 @@ def _pdfString(t):
         
     return u'' # empty section titles seem to be popular for some reason
 
-def _tocElement(title, t):
+def _tocElement(title):
     """
-    Takes quoted string 'title' and node 't' and returns a string
-    suitable for using in the section title or any other place which will
-    get included in the TOC of the PDF document.
+    Takes quoted string 'title' and returns a string suitable for
+    using in the section title or any other place which will get
+    included in the TOC of the PDF document.
     """
-    #res = u'\\texorpdfstring{%s}{%s}' % (_escapeSpace(title), _pdfString(t))
     res = _escapeSpace(title)
     return res
 
@@ -377,6 +376,9 @@ def fb2tex(infile, outfile,flavour=None):
     \\usepackage{sectsty}
     \\setcounter{secnumdepth}{-2}
     """ % parameters )
+
+    if 'anthology' in options:
+        f.write("\n\\setcounter{tocdepth}{-1}")
     
     #TODO: Instead of selecting font family inside of the document 
     # section, set the defaults for the entire document
@@ -402,7 +404,7 @@ def fb2tex(infile, outfile,flavour=None):
     findEnclosures(fb, outdir, outname)
     _uwrite(f, processDescription(find(fb,"description")))
 
-    if not 'notoc' in options and not 'anthology' in options:
+    if not 'notoc' in options:
         f.write("\\tableofcontents\n\\newpage\n\n")
     
     body=findAll(fb,"body")
@@ -422,7 +424,18 @@ def fb2tex(infile, outfile,flavour=None):
 
 def processBody(b):
     # TODO: process title via getSectionTitle()
-    return processEpigraphs(b) + processSections(b, 0)
+    if 'anthology' in options and b.getAttribute('name')!='notes':
+        d=1
+        t = find(b,"title")
+        if t:
+            title = getSectionTitle(t)
+        else:
+            title = ''
+        bodydata = "\n\\part{%s}" % _tocElement(title)
+    else:
+        d=0
+        bodydata = ''
+    return bodydata+ processEpigraphs(b) + processSections(b, d)
     
 def processSections(b,level):
     return string.join([processSection(s, level) for s in findAll(b,"section") if s.getAttribute('id') not in notes],'')
@@ -434,7 +447,7 @@ def processPoem(p):
     if t:
         title = getSectionTitle(t)
         if title:
-            res += "\\poemtitle{%s}\n" % _tocElement(title, t)
+            res += "\\poemtitle{%s}\n" % _tocElement(title)
     
     res+='\\begin{verse}\n\n'
     
@@ -511,7 +524,7 @@ def processCite(q):
             elif x.tagName=="empty-line":
                 res+="\\vspace{12pt}\n\n"
             elif x.tagName == "subtitle":
-                res+="\\item\n\\subsection*{%s}\n" % _tocElement(par(x, True), x)
+                res+="\\item\n\\subsection*{%s}\n" % _tocElement(par(x, True))
             elif x.tagName=="table":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % x.tagName)
                 pass # TODO
@@ -546,7 +559,7 @@ def processSection(s, level):
         else:
             cmd = section_commands[level]
 
-        res+="\n\\%s{%s}\n" % (cmd,_tocElement(title, t))
+        res+="\n\\%s{%s}\n" % (cmd,_tocElement(title))
         res+=processEpigraphs(s)
 
     for x in s.childNodes:
@@ -566,7 +579,7 @@ def processSection(s, level):
             elif x.tagName == "poem":
                 res+=processPoem(x)
             elif x.tagName == "subtitle":
-                res+="\\subsection{%s}\n" % _tocElement(par(x, True), x)
+                res+="\\subsection{%s}\n" % _tocElement(par(x, True))
             elif x.tagName == "cite":
                 res+=processCite(x)
             elif x.tagName == "table":
@@ -593,7 +606,7 @@ def processAnnotation(an):
                 elif x.tagName == "poem":
                     res+=processPoem(x)
                 elif x.tagName == "subtitle":
-                    res+="\\subsection*{%s}\n" % _tocElement(par(x, True), x)
+                    res+="\\subsection*{%s}\n" % _tocElement(par(x, True))
                 elif x.tagName == "cite":
                     res+=processCite(x)
                 elif x.tagName == "table":
@@ -738,7 +751,7 @@ def processDescription(desc):
         res+="}\n"
 
     if title:
-        res+="\\title{%s}\n" % _tocElement(_textQuote(title), t)
+        res+="\\title{%s}\n" % _tocElement(_textQuote(title))
 
     res+="\\date{}"
 
