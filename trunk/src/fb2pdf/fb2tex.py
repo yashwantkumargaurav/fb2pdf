@@ -146,6 +146,7 @@ TEXT_PATTERNS = [
 # --- globals --
 enclosures = {}
 notes = []
+options=[]
 
 def findAll(elem, what):
     res = []
@@ -333,16 +334,19 @@ def fb2tex(infile, outfile,flavour=None):
 
     (outdir, outname) = _getdir(outfile)
 
-    if flavour==None or flavour=='PRS-500':
+    global options
+    options=string.split(flavour,",")
+
+    if 'PRS-500' in options:
         parameters['papersize']='90.6mm,122.4mm'
-    if flavour=='PRS-500-landscape':
+    if 'PRS-500-landscape' in options:
         parameters['papersize']='122.4mm,90.6mm'
-    elif flavour=='iPhone' or flavour=='iPhone-portrait':
+    elif 'iPhone'  in options or 'iPhone-portrait' in options:
         parameters['papersize']='61mm,115mm'
-    elif flavour=='iPhone-landscape':
+    elif 'iPhone-landscape' in options:
         parameters['papersize']='115mm,61mm'
     else:
-        raise PersistentError("Unknown flavour '%s'" % flavour)
+        parameters['papersize']='90.6mm,122.4mm'
     
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
@@ -398,7 +402,8 @@ def fb2tex(infile, outfile,flavour=None):
     findEnclosures(fb, outdir, outname)
     _uwrite(f, processDescription(find(fb,"description")))
 
-    f.write("\\tableofcontents\n\\newpage\n\n")
+    if not 'notoc' in options and not 'anthology' in options:
+        f.write("\\tableofcontents\n\\newpage\n\n")
     
     body=findAll(fb,"body")
     if not body:
