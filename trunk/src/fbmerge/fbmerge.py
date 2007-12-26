@@ -38,6 +38,12 @@ def findAll(elem, what):
             res.append(x)
     return res
 
+def findFirst(elem, what):
+    for x in elem.childNodes:
+        if x.nodeType == Node.ELEMENT_NODE and x.tagName==what:
+            return x
+    return None
+
 def find(elem, what):
     nl=elem.getElementsByTagName(what)
     if not nl:
@@ -64,6 +70,35 @@ def getAuthors(doc):
     aa = findAll(ti,"author")
     authors = map(authorName,aa)
     return authors
+
+def getTitle(doc):
+    ti = getTitleInfo(doc)
+    return _text(find(ti,"book-title"))
+
+def getAuthorNamesString(doc):
+    ti = getTitleInfo(doc)
+    aa = findAll(ti,"author")
+    return string.join(map(getAuthorNameString, aa),", ")
+    
+def getAuthorNameString(a):
+    fn = find(a,"first-name")
+    if fn:
+        author_name = _text(fn)
+    else:
+        author_name = ""
+    mn = find(a,"middle-name")
+    if mn:
+        if author_name:
+            author_name = author_name + " " + _text(mn)
+        else:
+            author_name = _text(mn)
+    ln = find(a,"last-name")
+    if ln:
+        if author_name:
+            author_name = author_name + " " + _text(ln)
+        else:
+            author_name = _text(ln)
+    return author_name
 
 
 def prefixId(e,i):
@@ -122,11 +157,29 @@ def fbmerge(infiles, outfile, author, title):
     if not title:
         title = 'Anthology'
 
+    # pre-process source data
+    ## Prefix IDs to avoid collisions
     i=0
     for s in src:
         prefixId(s.documentElement, str(i))
         i=i+1
 
+    ## Add titles to first body if missing
+    for s in src:
+        b0 = findFirst(s.documentElement,'body')
+        if findFirst(b0,'title')==None:
+            # no title, add it
+            te = s.createElement('title')
+            b0.insertBefore(te, b0.childNodes[0])
+            tp = s.createElement('p')
+            te.appendChild(tp)
+            tp.appendChild(s.createTextNode(getTitle(s)))
+            te.appendChild(s.createElement("empty-line"))
+            tp = s.createElement('p')
+            te.appendChild(tp)
+            tp.appendChild(s.createTextNode(getAuthorNamesString(s)))
+            
+            
     impl = getDOMImplementation()
     newdoc = impl.createDocument(None, "FictionBook", None)
     top_element = newdoc.documentElement
