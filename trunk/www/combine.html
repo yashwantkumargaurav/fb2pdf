@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/main.css"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>FB Combinator (experimental)</title>
+<script src="js/combine.js"/>
+</head>
+
+<body>
+<h1>FB combinator</h1>
+
+<h3>Книги <i>(в формате fb2)</i>:</h3>
+<form id="combineform" action="combiner.php" enctype="multipart/form-data" method="POST">
+<div id="nobooks"><i>(добавьте хоть одну книгу в формате fb2)</i><br/><br/></div>
+
+<center>
+<table id="filetable" border="1" style="display:none;width:30em;">
+</table>
+<input type="button" onclick="addFile();" value="+файл"/>
+<input type="button" onclick="addURL();" value="+URL"/>
+
+</center>
+
+
+<br>                            
+<input id="ConvertBtnUpld" style="margin: 5px 0px 0px 0px;"
+       onmouseup  ="this.src='images/button.gif'" 
+       onmousedown="this.src='images/button_pressed.gif'"
+       onmouseover="this.src='images/button_active.gif'" 
+       onmouseout ="this.src='images/button.gif'"
+       onclick    ="doUpload();" 
+       type="image" src="images/button.gif" />
+
+</form>
+
+</body>
