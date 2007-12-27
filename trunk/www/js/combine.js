@@ -46,12 +46,12 @@ function showTable(x)
 {
     if(x)
     {
-        document.getElementById('filetable').style.display='block';
+        document.getElementById('filetable').style.display='';
         document.getElementById('nobooks').style.display='none';
     } else
     {
         document.getElementById('filetable').style.display='none';
-        document.getElementById('nobooks').style.display='block';
+        document.getElementById('nobooks').style.display='';
     }
 
 }
