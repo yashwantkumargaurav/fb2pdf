@@ -22,7 +22,7 @@ function addElement(file)
     if(file)
         c0.innerHTML="<input type=\"file\" name=\"fileupload"+id+"\" size=\"25\"/>";
     else
-        c0.innerHTML="<input type=\"text\" id=\"fileupload\" value=\"наберите URL здесь\" name=\"url"+id+"\" size=\"30\"/>";
+        c0.innerHTML="<input type=\"text\" id=\"fileupload"+id+"\" value=\"наберите URL здесь\" name=\"url"+id+"\" size=\"30\"/>";
     c1.innerHTML="<input type=\"button\" onclick=\"removeRow("+id+");\" value=\"-\"/>";
     id++;
     showTable(true);

@@ -4,13 +4,13 @@
 <link rel="stylesheet" type="text/css" href="css/main.css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>FB Combinator (experimental)</title>
-<script src="js/combine.js"/>
+<script src="js/combine.js"></script>
 </head>
 
 <body>
 <h1>FB combinator</h1>
 
-<h3>Книги <i>(в формате fb2)</i>:</h3>
+<h3>Скобинировать следующие книги <i>(в формате fb2)</i>:</h3>
 <form id="combineform" action="combiner.php" enctype="multipart/form-data" method="POST">
 <div id="nobooks"><i>(добавьте хоть одну книгу в формате fb2)</i><br/><br/></div>
 
@@ -22,8 +22,12 @@
 
 </center>
 
+<br/><br/>
+В сборник с названием:
+<input type="text" name="title" size="40" value="Сборник"/>
 
-<br>                            
+
+<br/><br/>
 <input id="ConvertBtnUpld" style="margin: 5px 0px 0px 0px;"
        onmouseup  ="this.src='images/button.gif'" 
        onmousedown="this.src='images/button_pressed.gif'"
@@ -31,6 +35,7 @@
        onmouseout ="this.src='images/button.gif'"
        onclick    ="doUpload();" 
        type="image" src="images/button.gif" />
+
 
 </form>
 
