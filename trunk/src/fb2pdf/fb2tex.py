@@ -35,7 +35,7 @@ image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
 
 section_commands = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 
-url = 'http://www.codeminders.com/fb2pdf'
+url = 'http://www.fb2pdf.com/'
 
 
 # Following tuples will be examined one by one and applied to the text.
