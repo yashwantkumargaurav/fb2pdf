@@ -1,4 +1,5 @@
 <?php
+require_once 'awscfg.php';
 
 // grab this with "pear install Crypt_HMAC"
 require_once 'Crypt/HMAC.php';
@@ -12,6 +13,14 @@ require_once 'HTTP/Request.php';
 //            (HTTP_REQUEST_METHOD_POST == $this->_method && empty($this->_postData) && empty($this->_postFiles))) {
 // Without this change PUTs with non-empty content-type will fail!
 
+// Helper function to create S3 object (see sqshelper.php)
+function getS3Object()
+{
+    global $awsApiKey, $awsApiSecretKey;
+    return new S3($awsApiKey, $awsApiSecretKey);
+}
+
+// Amazon S3 class
 class S3
 {
 	var $serviceUrl = "http://s3.amazonaws.com/";

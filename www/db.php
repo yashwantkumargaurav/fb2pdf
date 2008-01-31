@@ -1,5 +1,14 @@
 <?php
+require_once 'awscfg.php';
 
+// Helper function to create DB object (see db.php)
+function getDBObject()
+{
+    global $dbServer, $dbName, $dbUser, $dbPassword;
+    return new DB($dbServer, $dbName, $dbUser, $dbPassword);
+}
+
+// DB class
 class DB
 {
     var $server;
@@ -165,8 +174,28 @@ class DB
         return $list;
     }
     
+    // Get book by key
+    function getBookByKey($key)
+    {
+        if (!$this->_connect())
+            return false;
+            
+        $key = mysql_real_escape_string($key);
+        
+        $query = "SELECT * FROM Books WHERE storage_key = \"$key\" LIMIT 1";
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
+            $list = $row;
+            
+        $this->_freeQuery();
+        return $list;
+    }
+    
     // Get book by md5
-    function getBook($md5)
+    function getBookByMd5($md5)
     {
         if (!$this->_connect())
             return false;

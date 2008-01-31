@@ -1,4 +1,5 @@
 <?php
+require_once 'book_info.php';
 
 class FBParser
 {
@@ -16,29 +17,9 @@ class FBParser
     var $lastName;
     var $isbn;
     
-    // Returns title
-    function getTitle()
-    {
-        return $this->title;
-    }
-    
-    // Returns author
-    function getAuthor()
-    {
-        if ($this->lastName and $this->firstName)
-            return $this->lastName . ", " . $this->firstName;
-        else
-            return ($this->lastName) ?  $this->lastName : $this->firstName;
-    }
-    
-    // Returns title
-    function getIsbn()
-    {
-        return $this->isbn;
-    }
     
     // Parse fb2 file. 
-    // Return true if this is fb2 format or false.
+    // Return BookInfo object if this is fb2 format or false.
     function parse($fbfile)
     {
         // Read the data from file
@@ -69,7 +50,11 @@ class FBParser
         }
     
         xml_parser_free($parser);
-        return $this->rootElement == $this->ROOT;
+        
+        if ($this->rootElement != $this->ROOT)
+            return false;
+            
+        return $this->getBookInfo();
     }
 
     function tagStart($parser, $tagName, $attributes)
@@ -77,7 +62,6 @@ class FBParser
         array_push($this->stack, strtolower($tagName));
         if (count($this->stack) == 1)
             $this->rootElement = $this->stack[0];
-        
     }
 
     function tagEnd($parser, $tagName)
@@ -96,6 +80,17 @@ class FBParser
         else if ($this->stack == $this->PATH_ISBN)
             $this->isbn = $content;
     }
+    
+    function getBookInfo()
+    {
+        if ($this->lastName and $this->firstName)
+            $author = $this->lastName . ", " . $this->firstName;
+        else
+            $author = ($this->lastName) ?  $this->lastName : $this->firstName;
+        
+        return new BookInfo($this->title, $author, $this->isbn); 
+    }
+    
 }
 
 ?>
