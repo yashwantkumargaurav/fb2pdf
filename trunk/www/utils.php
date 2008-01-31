@@ -12,30 +12,7 @@ function getFullUrl($page)
     return "http://$host$uri/$page";
 }
 
-function notifyUserByEmail($email, $key)
-{
-    $statusUrl = getFullUrl("status.php?id=$key");
-    
-    $subject = "Your book";
-    
-    $message = "<html><body>";
-    
-    if ($status == "r")
-        $message .= "Ваша книга была успешно сконвертированна.";
-    else if ($status == "e")
-        $message .= "При конвертации Вашей книги произошла ошибка.";
-    
-    $message .= "<br><a href=\"$statusUrl\">Посмотреть результат конвертации</a>";
-    $message .= "</body></html>";
-
-    $headers  = 'MIME-Version: 1.0' . "\r\n";
-    $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n"; 
-    $headers .= 'From: FB2PDF <noreply@codeminders.com>' . "\r\n";
-    
-    mail($email, $subject, $message, $headers);
-}
-
-function httpResponseCode($httpCode, $message)
+function httpResponseCode($httpCode, $message=null)
 {
     header("HTTP/1.0 $httpCode");
     header('Content-type: text/html');    
@@ -43,4 +20,11 @@ function httpResponseCode($httpCode, $message)
     if ($message)
         echo "<html><body>$message</body></html>";
 }
+
+function httpRedirect($url)
+{
+    header("HTTP/1.0 302 Found");
+    header("Location: $url");
+}
+
 ?>

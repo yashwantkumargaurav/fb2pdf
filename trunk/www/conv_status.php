@@ -1,36 +1,34 @@
 <?php
+require_once 'process.php';
 require_once 'utils.php';
 
 if (!isset ($_GET["key"]))
 {
-    httpResponseCode("400 Bad Request", "Missing paremeter \"key\"");
+    httpResponseCode("400 Bad Request", "Missing parameter \"key\"");
     die;
 }
 
-$key = $_GET["key"];
-
-//TODO. check book status
-$rand = rand(0,2);
-if ($rand == 0)
-    $status = 'p';
-else if ($rand == 1)
-    $status = 'r';
-else
-    $status = 'e';
-
-$source    = "$key.fb2";
-$converted = "$key.pdf";
-$log       = "$key.txt";
+$bs = new BookStatus();
+try
+{
+    $status = $bs->checkStatus($_GET["key"]);
     
-// generate response xml
-header('Content-type: application/json');    
+    // generate response json
+    header('Content-type: application/json');    
 
-$response = 
-"{
-    'status'    : '$status',
-    'source'    : '$source',
-    'converted' : '$converted',
-    'log'       : '$log'
-}";
-echo $response;
+    $response = 
+    "{
+        'status'    : '$status',
+        'source'    : '$bs->fbFile',
+        'converted' : '$bs->pdfFile',
+        'log'       : '$bs->logFile'
+    }";
+    echo $response;
+}
+catch(Exception $e)
+{
+    error_log("FB2PDF ERROR. Status: " . $e->getMessage()); 
+    httpResponseCode("400 Bad Request", $e->getMessage());
+}
+
 ?>

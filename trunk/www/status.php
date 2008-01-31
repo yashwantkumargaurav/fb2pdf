@@ -1,65 +1,25 @@
 <?php
-require_once 'awscfg.php';
-require_once 's3.php';
+require_once 'db.php';
+require_once 'utils.php';
 
-define('STATUS_PROGRESS',  0);
-define('STATUS_DONE',      1);
-define('STATUS_ERROR',     2);
-
-if (!isset ($_GET['id']))
+if (!isset ($_GET['key']))
 {
-    header("HTTP/1.0 400 Bad Request");
-    header('Content-type: text/html');    
-    echo "<html><body>Missing \"id\" paremeter</body></html>";
+    httpResponseCode("400 Bad Request", "Missing parameter \"key\"");
     die;
 }
-$id = $_GET['id'];
+$key = $_GET['key'];
 
-global $awsS3Bucket;
+// get book info
+$db = getDBObject();
+$bookInfo = $db->getBookByKey($key);
 
-
-// remove "extension" part from the key
-$pos = strrpos($id, ".");
-if ($pos !== false) 
-    $id = substr($id, 0, $pos);
-
-$res = getStatus($id);
-
-$originalFile  = "getfile.php?key=$id.fb2";
-
-$convertedFile = "getfile.php?key=" . $res["convertedFile"];
-$logFile       = "getfile.php?key=" . $res["logFile"];
-$status        = $res["status"];
-
-function getStatus($id)
+$book = "";
+if ($bookInfo)
 {
-    global $awsApiKey, $awsApiSecretKey, $awsS3Bucket;
-    
-    $s3 = new S3($awsApiKey, $awsApiSecretKey);
-    $pdffile = $s3->objectExists($awsS3Bucket, $id . ".pdf");
-    $zipfile = $s3->objectExists($awsS3Bucket, $id . ".zip");
-    $logfile = $s3->objectExists($awsS3Bucket, $id . ".txt");
-    
-    $res = array();
-    if (($pdffile or $zipfile) and $logfile)
-    {
-        $res["status"] = STATUS_DONE;
-        $res["convertedFile"] = ($pdffile) ? "$id.pdf" : "$id.zip";
-        $res["logFile"] = "$id.txt";
-    }
-    else if ($logfile)
-    {
-        $res["status"] = STATUS_ERROR;
-        $res["convertedFile"] = NULL;
-        $res["logFile"] = "$id.txt";
-    }        
-    else
-    {
-        $res["status"] = STATUS_PROGRESS;
-        $res["convertedFile"] = NULL;
-        $res["logFile"] = NULL;
-    }
-    return $res;
+    $title  = $bookInfo["title"];
+    $author = $bookInfo["author"];
+    if ($title and $author)
+        $book = "($author&nbsp;&nbsp;\"$title\")";
 }
 ?>
 
@@ -72,10 +32,6 @@ function getStatus($id)
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'analytics.inc.php'; ?>
 
-<?php
-if ($status == STATUS_PROGRESS)
-    echo "<meta http-equiv=\"refresh\" content=\"30\">";
-?>
 
 </head>
 <body>
@@ -92,41 +48,14 @@ if ($status == STATUS_PROGRESS)
         <b class="xtop"><b class="xb1"></b><b class="xb2"></b><b class="xb3"></b><b class="xb4"></b></b>
         <div class="tab_box_content">
             <img src="images/lg_px.gif" class="line"/>
-            <div class="message">
-                
-                <?php
-                if ($status == STATUS_DONE)
-                {
-                    echo "<h3>Ваш файл был успешно сконвертирован.</h3>
-                    <p>Теперь Вы можете <b><a href=\"$convertedFile\">загрузить сконветрированный файл</a></b> и записать его в Ваш Sony Reader.
-                    (Возможные ошибки и предупреждения, возникшие в результате конвертации Вы можете посмотреть <a href=<a href=\"$logFile\">здесь</a>.)</p>
-                    <p>
-                    <a href=\"$originalFile\">Посмотреть исходный файл.</a><br/>
-                    <a href=\"index.php\">Сконвертировать ещё один файл.</a><br/>
-                    </p>";
-                }
-                else if ($status == STATUS_ERROR)
-                {
-                    echo "<h3>При конвертации произошла ошибка.<br/> Вы можете посмотреть её <a href=\"$logFile\">здесь</a>.</h3>
-                    <p>Хотите нам сообщить об ошибке? Это можно сделать <a href=\"http://groups.google.com/group/fb2pdf-users/about?hl=ru\">здесь</a><br/>
-                    Не забудьте скопировать <a href=\"$logFile\">информацию об ошибке</a> в текст Вашего сообщения.</p>
-                    <p>
-                    <a href=\"$originalFile\">Посмотреть исходный файл.</a><br/>
-                    <a href=\"index.php\">Сконвертировать ещё один файл.</a><br/>
-                    </p>";
-                }
-                else
-                {
-                    echo "<h3 class=\"center\">Конвертация Вашего файла может занять несколько минут.<br/> Пожалуйста, подождите...</h3>
-                    <p class=\"center\"><img src=\"images/progress_conv.gif\"/></p>
-                    <p>Эта страница обновится автоматически, когда процесс конвертации будет закончен. 
-                    Вы можете также сохранить URL этой страницы и вернуться к ней в любое удобное для Вас время, 
-                    чтобы забрать готовый сконвертированный файл.</p>
-                    <p><a href=\"index.php\">Сконвертировать ещё один файл.</a><br/></p>";
-                }
-                ?>
-            
-            </div>
+            <div id="status" class="message">
+                <h3 class="left">Конвертация книги <?php echo $book; ?> может занять несколько минут. Пожалуйста, подождите...</h3>
+                <p class="center"><img src="images/progress_conv.gif"/></p>
+                <p>Эта страница обновится автоматически, когда процесс конвертации будет закончен. 
+                Вы можете также сохранить URL этой страницы и вернуться к ней в любое удобное для Вас время, 
+                чтобы забрать готовый сконвертированный файл.</p>
+                <p><a href="index.php">Сконвертировать ещё одну книгу.</a><br/></p>
+            </div>    
             <img src="images/lg_px.gif" class="line"/>
             <?php include 'footer.inc.php'; ?>
         </div>  <!--end of tab box content-->	
@@ -136,5 +65,72 @@ if ($status == STATUS_PROGRESS)
 <br/>
 </div> <!--end of container-->
 </center>
+
+<script src="js/yahoo.js"></script>
+<script src="js/connection.js"></script>
+
+<script type="text/javascript">
+
+<?php
+echo "var key = '$key';";
+echo "var book = '$book';";
+?>
+
+checkStatus();
+
+function checkStatus()
+{
+    var requestUrl = encodeURI('conv_status.php?key=' + key);
+
+    // callback
+    var callback =
+    {
+        success: successHandler,
+        failure: failureHandler
+    };
+    
+    // Initiate the HTTP GET request.
+    YAHOO.util.Connect.asyncRequest('GET', requestUrl, callback);
+}
+
+function successHandler(o)
+{
+    var response = eval("(" + o.responseText + ")");
+    
+    // display status
+    if (response.status == 'r')
+    {
+        document.getElementById("status").innerHTML = 
+            '<h3 class="left">Книга ' + book + ' успешно сконвертированна.</h3>' +
+            '<p>Теперь Вы можете <b><a href="' + response.converted + '">загрузить сконветрированную книгу</a></b> и записать её в Ваш Sony Reader. ' +
+            '(Возможные ошибки и предупреждения, возникшие в результате конвертации Вы можете посмотреть ' +
+            '<a href="' + response.log + '">здесь</a>.)</p>' +
+            '<p><a href="' + response.source + '">Посмотреть исходный файл.</a><br/>' +
+            '<a href="index.php">Сконвертировать ещё одну книгу.</a><br/></p>';
+    }
+    else if (response.status == 'e')
+    {
+        document.getElementById("status").innerHTML = 
+            '<h3 class="left">При конвертации книги ' + book + ' произошла ошибка. ' +
+            'Вы можете посмотреть её <a href="' + response.log + '">здесь</a>.</h3>' +
+            '<p>Хотите нам сообщить об ошибке? Это можно сделать <a href="http://groups.google.com/group/fb2pdf-users/about?hl=ru">здесь</a>. ' +
+            'Не забудьте скопировать <a href="' + response.log +'">информацию об ошибке</a> в текст Вашего сообщения.</p>' +
+            '<p><a href="' + response.source + '">Посмотреть исходный файл.</a><br/>' +
+            '<a href="index.php">Сконвертировать ещё одну книгу.</a><br/></p>';
+    }
+    else
+    {
+        setTimeout('checkStatus()', 20000);
+    }
+}
+
+function failureHandler(o)
+{
+    // display error
+    document.getElementById("status").innerHTML = 'Ошибка конвертации. ' + o.statusText;
+}
+
+</script>
+
 </body>
 </html>
