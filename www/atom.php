@@ -8,7 +8,7 @@
 	$limit        =    (isset($_GET["limit"]))  ? $_GET["limit"] : 15;
 	$list         =    (isset($_GET["author"])) ? $db->getBooksByParcialAuthor($_GET["author"], $limit)  :   $db->getBooks($limit);
 	
-	$last_modified = date(DATE_RFC822, $list[0]["converted"]);
+    $last_modified = date(DATE_RFC822, strtotime($list[0]["converted"]));
     
     header("Content-Type: application/atom+xml; charset=utf-8"); 
 	header("Last-Modified: ". $last_modified);
