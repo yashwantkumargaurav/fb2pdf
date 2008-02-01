@@ -32,7 +32,7 @@ class ConvertBook
     const DB_BOOK_RECONVERT = 2; // book is converted but with previous conveter's version
     
     // test mode (no amazon, no db)
-    const TEST_MODE = true; // set false on prod.
+    const TEST_MODE = false; // set false on prod.
     
     // Process book from file uploaded via POST
     public function convertFromFile($filePath, $fileName, $email = null)
@@ -123,7 +123,7 @@ class ConvertBook
                 error_log("FB2PDF ERROR. Unable to update book status. Key=$key"); 
 
             // send email to user
-            notifyUserByEmail($email, $key, $status);
+            $this->notifyUserByEmail($email, $key, $status);
         }
     }
     
@@ -154,7 +154,7 @@ class ConvertBook
             throw new Exception("$fileName is not a fb2 or zip file", self::ERR_FORMAT);
         
         // genarate unique book key
-        $this->bookKey = md5(uniqid(""));
+        $this->bookKey = md5(uniqid("")) . ".zip";
         
         // get md5 of the file content (
         // NOTE! Here is a BUG. We should calculate md5 based on full book content (md5file), but we can do it only after reconverting all books.
@@ -256,19 +256,21 @@ class ConvertBook
     {
         global $awsS3Bucket;
         
+        $key = removeExt($this->bookKey);
+        
         // save fb2 file
         $s3 = getS3Object();
         
         $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$this->fileName.fb2\"");
-        if (!$s3->writeFile($awsS3Bucket, $this->bookKey . ".fb2", $this->fbFile, "application/fb2+xml", "public-read", "", $httpHeaders))
-            throw new Exception("Unable to store file $this->bookKey.fb2 in the Amazon S3 storage.", self::ERR_CONVERT);
+        if (!$s3->writeFile($awsS3Bucket, $key . ".fb2", $this->fbFile, "application/fb2+xml", "public-read", "", $httpHeaders))
+            throw new Exception("Unable to store file $key.fb2 in the Amazon S3 storage.", self::ERR_CONVERT);
             
         // save to DB
         $db = getDBObject();
         
-        if (!$db->insertBook($this->bookKey . ".zip", $this->book->author, $this->book->title, $this->book->isbn, $md5, "p"))
+        if (!$db->insertBook($key . ".zip", $this->book->author, $this->book->title, $this->book->isbn, $md5, "p"))
         {
-            error_log("FB2PDF ERROR. Unable to insert book with key $this->bookKey into DB."); 
+            error_log("FB2PDF ERROR. Unable to insert book with key $key.zip into DB."); 
             // do not stop if DB is failed!
         }
     }
@@ -281,28 +283,26 @@ class ConvertBook
         // update book status in the DB
         $db = getDBObject();
         
-        if (!$db->updateBookStatus($bookKey, "p", 0))
+        if (!$db->updateBookStatus($this->bookKey, "p", 0))
         {
-            error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$bookKey"); 
+            error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$$this->bookKey"); 
             // do not stop if DB is failed!
         }
         
         // remove result/log file
-        $pos = strrpos($bookKey, ".");
-        if ($pos !== false) 
-            $bookKey = substr($bookKey, 0, $pos);
+        $key = removeExt($this->bookKey);
             
         $s3 = getS3Object();
         
-        if (!$s3->deleteObject($awsS3Bucket, $bookKey . ".zip"))
+        if (!$s3->deleteObject($awsS3Bucket, $key . ".zip"))
         {
-            error_log("FB2PDF ERROR. Unable to delete converted file $bookKey.zip from the Amazon S3 storage."); 
+            error_log("FB2PDF ERROR. Unable to delete converted file $key.zip from the Amazon S3 storage."); 
             // do not stop if failed!
         }
         
-        if (!$s3->deleteObject($awsS3Bucket, $bookKey . ".txt"))
+        if (!$s3->deleteObject($awsS3Bucket, $key . ".txt"))
         {
-            error_log("FB2PDF ERROR. Unable to delete log file $bookKey.txt from the Amazon S3 storage."); 
+            error_log("FB2PDF ERROR. Unable to delete log file $key.txt from the Amazon S3 storage."); 
             // do not stop if failed!
         }
     }
@@ -312,10 +312,12 @@ class ConvertBook
     {
         global $awsS3Bucket, $secret;
         
+        $key = removeExt($this->bookKey);
+        
         // send SQS message
         $callbackUrl = getFullUrl("conv_callback.php");
-        if(!sqsPutMessage($bookKey, "http://s3.amazonaws.com/$awsS3Bucket/$bookKey.fb2", $this->fileName, $callbackUrl, md5($secret . $bookKey . ".zip"), $this->email))
-            throw new Exception("Unable to send Amazon  SQS message for key $bookKey.", self::ERR_CONVERT);
+        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $this->fileName, $callbackUrl, md5($secret . $key . ".zip"), $this->email))
+            throw new Exception("Unable to send Amazon SQS message for key $key.", self::ERR_CONVERT);
     }
 
     // Send notification email to user
@@ -363,11 +365,7 @@ class ConvertBook
     private function getBaseFileName($fileName)
     {
         $pathParts = pathinfo($fileName);
-        $name = $pathParts["basename"];
-        $pos = strrpos($name, ".");
-        if ($pos !== false) 
-            $name = substr($name, 0, $pos);
-            
+        $name = removeExt($pathParts["basename"]);
         return $name;
     }
 }
@@ -390,9 +388,7 @@ class BookStatus
         global $awsS3Bucket;
     
         // remove "extension" part from the key
-        $pos = strrpos($key, ".");
-        if ($pos !== false) 
-            $key = substr($key, 0, $pos);
+        $key = removeExt($key);
 
         // check existance
         $s3 = getS3Object();
