@@ -27,4 +27,12 @@ function httpRedirect($url)
     header("Location: $url");
 }
 
+function removeExt($name)
+{
+    $pos = strrpos($name, ".");
+    if ($pos !== false) 
+        $name = substr($name, 0, $pos);
+
+    return $name;
+}
 ?>
