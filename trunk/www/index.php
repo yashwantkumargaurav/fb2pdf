@@ -80,7 +80,7 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
         <b class="xtop"><b class="xb1"></b><b class="xb2"></b><b class="xb3"></b><b class="xb4"></b></b>
         <div class="tab_box_content">
             <div id="convert_box">
-            <div id="more_news"><a href="news.php"><u>Все новости</u></a></div>
+            <div id="more_news"><a href="http://blog.fb2pdf.com/"><u>Все новости</u></a></div>
             <p class="news"><span class="light_green">Новость:</span>&nbsp;&nbsp;<span class="green">07.08.2007</span>&nbsp;&nbsp;--&nbsp;&nbsp;
             Новый дизайн сайта. Добавлена библиотека.</p>
                 <b class="ctop"><b class="cb1"></b><b class="cb2"></b><b class="cb3"></b><b class="cb4"></b></b>
