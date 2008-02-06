@@ -31,7 +31,7 @@ parameters = {
 
 
 # -- constants --
-image_exts = {'image/jpeg':'jpg', 'image/png':'png'}
+image_exts = {'image/jpeg':'jpg', 'image/jpg':'jpg', 'image/png':'png'}
 
 section_commands = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 
