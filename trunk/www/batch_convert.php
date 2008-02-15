@@ -12,10 +12,6 @@
 
 <script type="text/javascript">
 
-convTime = {};
-totalConverted = 0;
-totalTime = 0;
-
 function process()
 {
     convert();
@@ -29,9 +25,7 @@ function endProcess()
 {
     // check if there are still not finished items 
     for (var url in toConvert)
-    {
         return false;
-    }
 
     // display text
     document.getElementById('progress').style.display = 'none';
@@ -48,7 +42,6 @@ function convert()
             var requestUrl = encodeURI('conv_process.php?url=' + url);
 
             toConvert[url] = 0;
-            convTime[url] = new Date().getTime();
             
             // callback
             var callback =
@@ -67,7 +60,6 @@ function convert()
 
 function checkStatus()
 {
-    var convList = new Array();
     for (var url in toConvert)
     {
         if (toConvert[url])
@@ -97,13 +89,13 @@ function convertSuccessHandler(o)
     toConvert[url] = response.key;
     
     // display book
-    document.getElementById(url).style.display = ''
-    
     var id = url + "_title";
-    document.getElementById(id).innerHTML = response.author + ' "' + response.title + '" ';
+    document.getElementById(id).innerHTML = response.author + ' "' + response.title + '"<br/><br/>';
+    document.getElementById(id).style.display = ''
     
     var id = url + "_status";
-    document.getElementById(id).innerHTML = "Конвертируется...";
+    document.getElementById(id).innerHTML = "Конвертируется...<br/><br/>";
+    document.getElementById(id).style.display = ''
 }
 
 function convertFailureHandler(o)
@@ -111,13 +103,17 @@ function convertFailureHandler(o)
     var url = o.argument.url;
     
     delete toConvert[url];
-    delete convTime[url];
+    totalConverted++;
+    updateProgress();
     
     // display error
-    document.getElementById(url).style.display = ''
-    
     var id = url + "_title";
-    document.getElementById(id).innerHTML = o.statusText;
+    if (o.status == 404)
+        msg = "<a href='" + url + "' target='_blank'>Файл</a> не существует или не является файлом в формате ZIP или FB2.";
+    else
+        msg = "Невозможно загрузить <a href='" + url + "' target='_blank'>файл</a>";
+    document.getElementById(id).innerHTML = msg + "<br/><br/>";
+    document.getElementById(id).style.display = ''
 }
 
 function statusSuccessHandler(o)
@@ -129,52 +125,46 @@ function statusSuccessHandler(o)
     // display status
     if (response.status == 'r')
     {
-        // time of conversion
-        totalConverted++;
-        totalTime += (new Date().getTime() - convTime[url]);
-        
         delete toConvert[url];
-        delete convTime[url];
+        totalConverted++;
+        updateProgress();
         
         var id = url + "_status";
         document.getElementById(id).innerHTML = 
-            'Книга сконвертирована. ' +
-            '<b><a href="' + response.converted + '">Загрузить книгу.</a></b> ' +
-            '<a href="' + response.log + '">Посмотреть</a> возможные ошибки и предупреждения конвертации.';
-    
-        updateEstimatedTime();
-    
+            "Книга сконвертирована. " +
+            "<b><a href='" + response.converted + "'>Загрузить книгу.</a></b> " +
+            "<a href='" + response.log + "' target='_blank'>Посмотреть</a> возможные ошибки и предупреждения конвертации.<br/><br/>";
     }
     else if (response.status == 'e')
     {
         delete toConvert[url];
-        delete convTime[url];
+        totalConverted++;
+        updateProgress();
         
         var id = url + "_status";
         document.getElementById(id).innerHTML = 
-            'Ошибка конвертации. ' +
-            '<a href="' + response.log + '">Посмотреть</a> ошибки конвертации.';
+            "Ошибка конвертации. " +
+            "<a href='" + response.log + "' target='_blank'>Посмотреть</a> ошибки конвертации.<br/><br/>";
     }
 }
 
 function statusFailureHandler(o)
 {
     var url = o.argument.url;
+    
     delete toConvert[url];
-    delete convTime[url];
+    totalConverted++;
+    updateProgress();
     
     // display error
     var id = url + "_status";
-    document.getElementById(id).innerHTML = 'Ошибка конвертации. ' + o.statusText;
+    document.getElementById(id).innerHTML = "Ошибка конвертации.<br/><br/>";
 }
 
-function updateEstimatedTime()
+function updateProgress()
 {
-    if (totalConverted > 0)
-    {
-        t = totalTime / totalConverted;
-        document.getElementById("estimated_time").innerHTML = Math.ceil(t / (1000 * 60)) + " минут."
-    }
+    if (totalConverted > 0 && totalFiles > 0)
+        document.getElementById("percentage").innerHTML = Math.ceil(totalConverted * 100 / totalFiles) + "%"
 }
 </script>
 
@@ -182,21 +172,13 @@ function updateEstimatedTime()
 require_once 'utils.php';
 
 // Parse POSTED data
-$dom = null;
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
+$MAX_BOOKS = 20;
+$sources = array();
+for ($i = 0; $i < $MAX_BOOKS; $i++)
 {
-    $postText = trim(file_get_contents('php://input'));
-    $dom = DOMDocument::loadXML($postText);
-}
-
-if ($dom)
-{
-    $sources = $dom->getElementsByTagName('source');
-}
-else
-{
-    httpResponseCode("400 Bad Request", "Wrong or missing XML has been posted");
-    die;
+    $name = 'book' . $i;
+    if (isset($_POST[$name]))
+        $sources[] = $_POST[$name];
 }
 ?>
 
@@ -218,27 +200,29 @@ else
             
             <div id="progress" class="message" style="display:block">
                 <p align="justify" class="small">Конвертация Ваших книг может занять некоторое время. Пожалуйста, не закрывайте окно Вашего браузера пока все книги не будут сконвертированны. В противном случае, часть книг может не сконвертироваться.</p>
-                <p class="center"><span class="small">Приблизительное время ожидания: <span id="estimated_time">пока неизвестно</span></span></p>
-                <p class="center"><img src="images/progress_conv.gif"/></p>
+                <p class="center"><img src="images/progress_conv.gif"/>&nbsp;&nbsp;<span id="percentage">0%</span></p>
             </div>
             <div id="done" class="message" style="display:none">
                 <h3>Конвертация Ваших книг закончена.</h3>
                 <p align="justify" class="small">Теперь Вы можете загрузить сконветрированные книги и записать их в Ваш Sony Reader.
             </div>
             
-            <div>
+            <div class="right_book">
                 <?php
-                foreach ($sources as $source)
+                foreach ($sources as $url)
                 {
-                    $url = $source->getAttribute('url');
-                    $bookId   = $url;
-                    $titleId  = $url . "_title";
                     $statusId = $url . "_status";
-                    
-                    echo "<div id='$bookId' style='display: none'>
-                            <span id='$titleId'></span>&nbsp;&nbsp;&nbsp;
-                            <span id='$statusId'></span>
-                          </div>";
+                    echo "<span id='$statusId' style='display: none'></span>";
+                }
+                ?>
+            </div>
+            
+            <div class="left_book">
+                <?php
+                foreach ($sources as $url)
+                {
+                    $titleId  = $url . "_title";
+                    echo "<span id='$titleId' style='display: none'></span>";
                 }
                 ?>
             </div>
@@ -255,14 +239,16 @@ else
             
             
 <script type="text/javascript">
-var toConvert = {};
+var toConvert      = {};
+var totalFiles     = 0;
+var totalConverted = 0;
 
 <?php
-foreach ($sources as $source)
-{
-    $url  = $source->getAttribute('url');
+$count = count($sources);    
+echo "totalFiles = $count;";
+
+foreach ($sources as $url)
     echo "toConvert[\"$url\"] = null;";
-}
 ?>
 
 process();
