@@ -53,6 +53,11 @@ function convert()
             
             // Initiate the HTTP GET request.
             var request = YAHOO.util.Connect.asyncRequest('GET', requestUrl, callback);
+            
+            // display status
+            var id = url + "_status";
+            document.getElementById(id).innerHTML = "Загружается...";
+            
             break;
         }
     }
@@ -89,13 +94,14 @@ function convertSuccessHandler(o)
     toConvert[url] = response.key;
     
     // display book
+    var id = url + "_author";
+    document.getElementById(id).innerHTML = response.author;
+    
     var id = url + "_title";
-    document.getElementById(id).innerHTML = response.author + ' "' + response.title + '"<br/><br/>';
-    document.getElementById(id).style.display = ''
+    document.getElementById(id).innerHTML = '"' + response.title + '"';
     
     var id = url + "_status";
-    document.getElementById(id).innerHTML = "Конвертируется...<br/><br/>";
-    document.getElementById(id).style.display = ''
+    document.getElementById(id).innerHTML = "Конвертируется...";
 }
 
 function convertFailureHandler(o)
@@ -107,13 +113,8 @@ function convertFailureHandler(o)
     updateProgress();
     
     // display error
-    var id = url + "_title";
-    if (o.status == 404)
-        msg = "<a href='" + url + "' target='_blank'>Файл</a> не существует или не является файлом в формате ZIP или FB2.";
-    else
-        msg = "Невозможно загрузить <a href='" + url + "' target='_blank'>файл</a>";
-    document.getElementById(id).innerHTML = msg + "<br/><br/>";
-    document.getElementById(id).style.display = ''
+    var id = url + "_status";
+    document.getElementById(id).innerHTML = "Ошибка загрузки <a href='" + url + "' target='_blank'>файлa</a>.";
 }
 
 function statusSuccessHandler(o)
@@ -129,11 +130,13 @@ function statusSuccessHandler(o)
         totalConverted++;
         updateProgress();
         
+        var id = url + "_title";
+        var title = document.getElementById(id).innerHTML;
+        document.getElementById(id).innerHTML = "<a href='" + response.converted + "'>" + title + "</a>";
+
         var id = url + "_status";
-        document.getElementById(id).innerHTML = 
-            "Книга сконвертирована. " +
-            "<b><a href='" + response.converted + "'>Загрузить книгу.</a></b> " +
-            "<a href='" + response.log + "' target='_blank'>Посмотреть</a> возможные ошибки и предупреждения конвертации.<br/><br/>";
+        document.getElementById(id).innerHTML = "Книга сконвертирована. " +
+            "<b><a href='" + response.converted + "'>Загрузить.</a></b>";
     }
     else if (response.status == 'e')
     {
@@ -142,9 +145,8 @@ function statusSuccessHandler(o)
         updateProgress();
         
         var id = url + "_status";
-        document.getElementById(id).innerHTML = 
-            "Ошибка конвертации. " +
-            "<a href='" + response.log + "' target='_blank'>Посмотреть</a> ошибки конвертации.<br/><br/>";
+        document.getElementById(id).innerHTML = "Ошибка конвертации. " +
+            "<a href='" + response.log + "' target='_blank'>Посмотреть.</a>";
     }
 }
 
@@ -158,13 +160,18 @@ function statusFailureHandler(o)
     
     // display error
     var id = url + "_status";
-    document.getElementById(id).innerHTML = "Ошибка конвертации.<br/><br/>";
+    document.getElementById(id).innerHTML = "Ошибка конвертации.";
 }
 
 function updateProgress()
 {
     if (totalConverted > 0 && totalFiles > 0)
-        document.getElementById("percentage").innerHTML = Math.ceil(totalConverted * 100 / totalFiles) + "%"
+    {
+        document.getElementById("percentage").innerHTML = Math.ceil(totalConverted * 100 / totalFiles) + "%";
+        
+        document.getElementById("converted_books").innerHTML = totalConverted;
+        document.getElementById("total_books").innerHTML = totalFiles;
+    }
 }
 </script>
 
@@ -200,6 +207,7 @@ for ($i = 0; $i < $MAX_BOOKS; $i++)
             
             <div id="progress" class="message" style="display:block">
                 <p align="justify" class="small">Конвертация Ваших книг может занять некоторое время. Пожалуйста, не закрывайте окно Вашего браузера пока все книги не будут сконвертированны. В противном случае, часть книг может не сконвертироваться.</p>
+                <p align="center" class="small">Сконвертировано книг: <span id="converted_books">0</span> из <span id="total_books">0</span>.</p>
                 <p class="center"><img src="images/progress_conv.gif"/>&nbsp;&nbsp;<span id="percentage">0%</span></p>
             </div>
             <div id="done" class="message" style="display:none">
@@ -212,7 +220,7 @@ for ($i = 0; $i < $MAX_BOOKS; $i++)
                 foreach ($sources as $url)
                 {
                     $statusId = $url . "_status";
-                    echo "<span id='$statusId' style='display: none'></span>";
+                    echo "<span id='$statusId'></span><br/><br/>";
                 }
                 ?>
             </div>
@@ -221,8 +229,9 @@ for ($i = 0; $i < $MAX_BOOKS; $i++)
                 <?php
                 foreach ($sources as $url)
                 {
+                    $authorId = $url . "_author";
                     $titleId  = $url . "_title";
-                    echo "<span id='$titleId' style='display: none'></span>";
+                    echo "<span id='$authorId'>Книга</span>&nbsp;&nbsp;<span id='$titleId'></span><br/><br/>";
                 }
                 ?>
             </div>
