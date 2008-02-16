@@ -227,11 +227,13 @@ for ($i = 0; $i < $MAX_BOOKS; $i++)
             
             <div class="left_book">
                 <?php
+                $n = 1;
                 foreach ($sources as $url)
                 {
                     $authorId = $url . "_author";
                     $titleId  = $url . "_title";
-                    echo "<span id='$authorId'>Книга</span>&nbsp;&nbsp;<span id='$titleId'></span><br/><br/>";
+                    echo "<span id='$authorId'>Книга $n</span>&nbsp;&nbsp;<span id='$titleId'></span><br/><br/>";
+                    $n++;
                 }
                 ?>
             </div>
