@@ -32,7 +32,7 @@ class ConvertBook
     const DB_BOOK_RECONVERT = 2; // book is converted but with previous conveter's version
     
     // test mode (no amazon, no db)
-    const TEST_MODE = true; // set false on prod.
+    const TEST_MODE = false; // set false on prod.
     
     // Process book from file uploaded via POST
     public function convertFromFile($filePath, $fileName, $email = null)
