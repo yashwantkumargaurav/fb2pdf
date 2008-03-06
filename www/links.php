@@ -27,11 +27,13 @@
             
             <div style="width: 640px; text-align: left;">
                 <p>
+                    <a href="http://lib.aldebaran.ru/">Библиотека Альдебаран</a><br/>
+                    <a href="http://www.fictionbook.ru/">Библиотека FictionBook</a><br/>
+                    <a href="http://lib.rus.ec/">Либрусек - библиотека в Эквадоре</a><br/>
                     <a href="http://fanlib.ru/">Библиотека FanLib</a><br/>
-                    <a href="http://fenzin.org/">"Фензин" - сайт о фантастике и фэнтези</a><br/>
-                    <a href="http://lib.rus.ec/">Либрусек - библиотека в Эквадоре</a><br/
-                    <a href="http://lib.aldebaran.ru/">Библиотека Альдебаран</a>(платная библиотека)<br/>
-                    <a href="http://www.fictionbook.ru/">Библиотека FictionBook</a>(платная библиотека)<br/>
+                    <a href="http://fenzin.org/">Фензин - сайт о фантастике и фэнтези</a><br/>
+                    <a href="http://www.litportal.ru/">Литературный портал</a><br/>
+                    <a href="http://www.bookz.ru/">Электронная библиотека bookZ.ru</a><br/>
                 </p>
             </div>
 
