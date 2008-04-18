@@ -110,7 +110,9 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
                         </div><!--roundedcornr_left_line_fr-->
                         </div><!--end roundedcornr_box_fr-->
                         
-                        <div id="arrow"><img src="images/arrow.gif" alt="arrow"/></div>
+                        <div id="arrow">
+                            <input id="ConvertArrowUpld" type="image" src="images/arrow.gif" onclick ="doUpload();" />
+                        </div>
                         </div> <!-- width480-->	
                         
                         <div id="email_div">
