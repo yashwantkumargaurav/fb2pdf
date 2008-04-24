@@ -8,7 +8,10 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
 
     $sqs = new SQS($awsApiKey, $awsApiSecretKey);
     if (!$sqs->createQueue($awsSQSQueue))
+    {
+        error_log("FB2PDF ERROR. sqshelper: " . $sqs->responseString); 
         return false;
+    }
 
     $queueUrl = parseCreateQueueResponse($sqs->responseString);
     $queueUrl = str_replace("http://queue.amazonaws.com/","",$queueUrl);
@@ -21,7 +24,10 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
         "</fb2pdfjob>";
 
     if (!$sqs->putMessage(base64_encode($message), $queueUrl, $awsSQSTimeout))
+    {
+        error_log("FB2PDF ERROR. sqshelper: " . $sqs->responseString); 
         return false;
+    }
 
     return true;
 }
