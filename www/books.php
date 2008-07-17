@@ -74,7 +74,7 @@ $author = $_GET["author"];
                             if (!$title)
                                 $title = "Название неизвестно";
                             
-                            echo "<a href=\"getfile.php?key=$key\">\"$title\"</a><br/>";
+                            echo "<a href=\"book.php?key=$key\">\"$title\"</a><br/>";
                         }
                         echo "</p>";
                     }

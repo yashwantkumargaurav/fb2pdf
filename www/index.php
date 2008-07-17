@@ -181,15 +181,13 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
                             $author = $list[$i]["author"];
                             $title  = $list[$i]["title"];
                             $key    = $list[$i]["storage_key"];
-                            if (strrpos($key, ".") === false) // old style key (no extension)
-                                $key = $key . ".pdf";
 
                             if (!$author)
                                 $author = "Автор неизвестен";
                             if (!$title)
                                 $title = "Название неизвестно";
                             
-                            echo "<a href=\"books.php?author=$author\" style=\"color:black\">$author</a>&nbsp;&nbsp;<a href=\"getfile.php?key=$key\">\"$title\"</a><br/>";
+                            echo "<a href=\"books.php?author=$author\" style=\"color:black\">$author</a>&nbsp;&nbsp;<a href=\"book.php?key=$key\">\"$title\"</a><br/>";
                         }
                     }
                     echo '</div>';
