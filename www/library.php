@@ -188,7 +188,7 @@ function rollOver(imgName)
                             echo " onclick=\"bookTitles('$author', $number, '$author_md5', 'bt$author_md5');\"";
                             echo " onmouseover=\"rollOver('bt$author_md5');\"";
                             echo " onmouseout=\"rollOver('bt$author_md5');\"/>";
-                            echo "&nbsp;&nbsp;$author&nbsp;&nbsp;<br/>"; 
+                            echo "&nbsp;&nbsp;<a href=\"books.php?author=$author\" style=\"color:black\">$author</a>&nbsp;&nbsp;<br/>"; 
                             echo "<div id=\"$author_md5\" style=\"display:none;\">";
                             echo "</div>";
                         }
