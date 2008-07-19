@@ -1,6 +1,4 @@
 <?php
-require_once 'awscfg.php';
-
 // Helper function to create DB object (see db.php)
 function getDBObject()
 {
@@ -174,6 +172,34 @@ class DB
         return $list;
     }
     
+    // Get list of books by author.
+    // if number == 0, no limit
+    function getBooksByAuthorRSS($author, $number)
+    {
+        if (!is_numeric($number))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $author = mysql_real_escape_string($author);
+        
+        $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY id DESC";
+        if ($number > 0)
+            $query = $query . " LIMIT $number";
+            
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
+            $list[$count++] = $row;
+        
+        $this->_freeQuery();
+        return $list;
+    }
+
     // Get book by key
     function getBookByKey($key)
     {

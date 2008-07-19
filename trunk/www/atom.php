@@ -1,23 +1,23 @@
 <?php
-	require_once "awscfg.php";
-	require_once "db.php";
-	require_once "utils.php";
-	
-	$current_url  =     getFullUrl("atom.php");
-	$db           =     new DB($dbServer, $dbName, $dbUser, $dbPassword);
-	$limit        =    (isset($_GET["limit"]))  ? $_GET["limit"] : 15;
-	$list         =    (isset($_GET["author"])) ? $db->getBooksByParcialAuthor($_GET["author"], $limit)  :   $db->getBooks($limit);
+    require_once "awscfg.php";
+    require_once "db.php";
+    require_once "utils.php";
+
+    $current_url  =     getFullUrl("atom.php");
+    $db           =     new DB($dbServer, $dbName, $dbUser, $dbPassword);
+    $limit        =     (isset($_GET["limit"]))  ? $_GET["limit"] : 15;
+    $list         =     (isset($_GET["author"])) ? $db->getBooksByAuthorRSS($_GET["author"], $limit) : $db->getBooks($limit);
 	
     $last_modified = date(DATE_RFC822, strtotime($list[0]["converted"]));
     
     header("Content-Type: application/atom+xml; charset=utf-8"); 
-	header("Last-Modified: ". $last_modified);
+    header("Last-Modified: ". $last_modified);
 	
 	
-	echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-	<feed xmlns=\"http://www.w3.org/2005/Atom\">
-	<link rel=\"self\" href=\"$current_url\"/> 
-	";
+   echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+   <feed xmlns=\"http://www.w3.org/2005/Atom\">
+   <link rel=\"self\" href=\"$current_url\"/> 
+   ";
 
     if (isset($_GET["author"]))
     {

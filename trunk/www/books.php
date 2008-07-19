@@ -7,6 +7,8 @@ if (!isset ($_GET["author"]))
     die;
 }
 $author = $_GET["author"];
+$base    =  "atom.php";
+$link    =  (isset($author)) ? "$base?author=$author" : $base;
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -14,7 +16,7 @@ $author = $_GET["author"];
 <head>
 <link rel="stylesheet" type="text/css" href="css/main.css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="alternate" type="application/atom+xml" title="Atom" href="atom.php" />
+<link rel="alternate" type="application/atom+xml" title="Atom" href="<?php echo $link; ?>" />
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'analytics.inc.php'; ?>
 </head>

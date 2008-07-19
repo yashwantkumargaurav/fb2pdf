@@ -1,10 +1,7 @@
 <?php
-	/*
 	$author  =  $_GET["author"];
 	$base    =  "atom.php";
 	$link    =  (isset($author)) ? "$base?author=$author" : $base;
-	*/
-	$link = "atom.php";
 ?>
 <p class="end_line">Обнаружили ошибку? У Вас есть предложения по улучшению сервиса? Хотите оставить комментарий?
 <br/>Это можно сделать <a href="http://groups.google.com/group/fb2pdf-users/about?hl=ru">здесь</a>

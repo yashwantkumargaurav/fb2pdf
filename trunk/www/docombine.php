@@ -70,7 +70,7 @@ if($rc!=0)
     return;
 }
 
-header ("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 header("Content-Type: application/fb2+xml");
 header('Content-Disposition: attachment; filename=' . basename($destfile) . ".fb2");
 
