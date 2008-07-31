@@ -102,7 +102,7 @@ function successHandler(o)
     {
         document.getElementById("status").innerHTML = 
             '<h3 class="left">Книга ' + book + ' успешно сконвертированна.</h3>' +
-            '<p>Теперь Вы можете <b><a href="' + response.converted + '">загрузить сконветрированную книгу</a></b> и записать её в Ваш Sony Reader. ' +
+            '<p>Теперь Вы можете <b><a href="' + response.converted + '">загрузить сконвертированную книгу</a></b> и записать её в Ваш Sony Reader. ' +
             '(Возможные ошибки и предупреждения, возникшие в результате конвертации Вы можете посмотреть ' +
             '<a href="' + response.log + '">здесь</a>.)</p>' +
             '<p><a href="' + response.source + '">Посмотреть исходный файл.</a><br/>' +

@@ -212,7 +212,7 @@ for ($i = 0; $i < $MAX_BOOKS; $i++)
             </div>
             <div id="done" class="message" style="display:none">
                 <h3>Конвертация Ваших книг закончена.</h3>
-                <p align="justify" class="small">Теперь Вы можете загрузить сконветрированные книги и записать их в Ваш Sony Reader.
+                <p align="justify" class="small">Теперь Вы можете загрузить сконвертированные книги и записать их в Ваш Sony Reader.
             </div>
             
             <div class="right_book">
