@@ -11,7 +11,7 @@ import getopt,sys,string,time
 from ConfigParser import ConfigParser
 from xml.dom.minidom import parse, parseString
 
-from boto.connection import SQSConnection
+from boto.sqs import Connection
 from boto.sqs.message import Message
 from boto.exception import SQSError
 
@@ -42,7 +42,7 @@ def main():
     cfg = ConfigParser()
     cfg.read(cfgfile)
 
-    c = SQSConnection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
+    c = Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
       
     qname = cfg.get('queue','name')
     qtimeout = 10 #int(cfg.get('queue','timeout'))
