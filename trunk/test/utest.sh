@@ -2,8 +2,10 @@
 
 FB2FILES="*.fb2"
 PDFLATEXFLAGS="-halt-on-error -interaction batchmode -no-shell-escape"
-
+FB2TEX=python ../scripts/fb2tex
 rm -f *.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex *.fblog
+
+export PYTHONPATH=../src
 
 TEXFAILED=""
 PDFFAILED=""
@@ -12,7 +14,7 @@ for i in ${FB2FILES}; do
     N=`basename $i .fb2`
     t=${N}.tex
     echo $N
-    python2.4 `which fb2tex` -v -f $i -o $t > $N.fblog 2>&1
+    python $FB2TEX -v -f $i -o $t > $N.fblog 2>&1
     if [ $? -ne 0 ]; then
         TEXFAILED="${TEXFAILED} $i"
     else
