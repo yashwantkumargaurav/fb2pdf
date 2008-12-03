@@ -177,7 +177,7 @@ def par(p, intitle=False):
                 res += u'{\\it '+ par(s,intitle) + u'}'
             elif s.tagName == "style":
                 logging.getLogger('fb2pdf').warning("Unsupported element: %s" % s.tagName)
-                res += "" #TODO
+                res += par(s,intitle);
             elif s.tagName == "a":
                 if not intitle:
                     href = s.getAttributeNS('http://www.w3.org/1999/xlink','href') or s.getAttribute('href') 
