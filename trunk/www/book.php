@@ -67,10 +67,12 @@ catch(Exception $e)
                 echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
                 ?>
 		<p>
-		<div class="js-kit-comments" permalink="" label="Оставить комментарий"></div>
-		<script src="http://js-kit.com/comments.js"></script>
+        <div class="js-kit-rating"></div>
+        <div class="js-kit-comments"></div>
+        <script src="http://js-kit.com/reviews.js"></script>
+                
             </div>    
-            <img src="images/lg_px.gif" class="line"/>
+     <img src="images/lg_px.gif" class="line"/>
             <?php include 'footer.inc.php'; ?>
         </div>  <!--end of tab box content-->	
         <b class="xbottom"><b class="xb4"></b><b class="xb3"></b><b class="xb2"></b><b class="xb1"></b></b>
