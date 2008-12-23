@@ -66,6 +66,9 @@ catch(Exception $e)
                 echo "[<a href='$bs->pdfFile'>Sony Reader (pdf)</a>]&nbsp;&nbsp;[<a href='$bs->fbFile'>оригинал (fb2)</a>]</p>";
                 echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
                 ?>
+		<p>
+		<div class="js-kit-comments" permalink="" label="Оставить комментарий"></div>
+		<script src="http://js-kit.com/comments.js"></script>
             </div>    
             <img src="images/lg_px.gif" class="line"/>
             <?php include 'footer.inc.php'; ?>
