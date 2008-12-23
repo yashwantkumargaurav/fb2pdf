@@ -65,11 +65,12 @@ catch(Exception $e)
                 echo "<p>Загрузить книгу в формате:<br/>";
                 echo "[<a href='$bs->pdfFile'>Sony Reader (pdf)</a>]&nbsp;&nbsp;[<a href='$bs->fbFile'>оригинал (fb2)</a>]</p>";
                 echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
+                echo "<p>";
+                $book_link="http://fb2pdf.com/book/".$key;
+                echo "<div class=\"js-kit-rating\" permalink=\"$book_link\" path=\"$book_link\"></div>";
+                echo "<div class=\"js-kit-comments\" permalink=\"$book_link\" path=\"$book_link\"></div>";
+                echo "<script src=\"http://js-kit.com/reviews.js\" permalink=\"$book_key\" path=\"$book_link\"></script>";
                 ?>
-		<p>
-        <div class="js-kit-rating"></div>
-        <div class="js-kit-comments"></div>
-        <script src="http://js-kit.com/reviews.js"></script>
                 
             </div>    
      <img src="images/lg_px.gif" class="line"/>
