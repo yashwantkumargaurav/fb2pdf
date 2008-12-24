@@ -25,6 +25,7 @@ class ConvertBook
     const ERR_LOAD          = 2; // unable to load file 
     const ERR_FORMAT        = 3; // unrecognized format
     const ERR_CONVERT       = 4; // conversion error
+    const ERR_SIZE          = 5; // file is too big
     
     // db book status constants (private)
     const DB_BOOK_NOT_FOUND = 0; // book not found in the DB
