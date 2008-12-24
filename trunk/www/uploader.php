@@ -17,11 +17,23 @@ try
     }
     else if ($_POST['uploadtype'] == 'file')
     {
-        // check uploaded file
-        $path = $_FILES['fileupload']['tmp_name'];
-        $file = $_FILES['fileupload']['name'];
-        
-        $conv->convertFromFile($path, $file, $email);
+        $err_upload = $_FILES['fileupload']['error'];
+        if ($err_upload == UPLOAD_ERR_OK)
+        {
+            // check uploaded file
+            $path = $_FILES['fileupload']['tmp_name'];
+            $file = $_FILES['fileupload']['name'];
+            
+            $conv->convertFromFile($path, $file, $email);
+        }
+        else
+        {
+            // deal with errors
+            if ($err_upload == UPLOAD_ERR_INI_SIZE || $err_upload == UPLOAD_ERR_FORM_SIZE)
+                throw new Exception("The uploaded file exceeds the maximum allowed size.", ConvertBook::ERR_SIZE);
+            else
+                throw new Exception("Unable to upload file. PHP error - " . $err_upload, ConvertBook::ERR_LOAD);
+        }
     }
     
     $key = $conv->bookKey;
@@ -52,6 +64,11 @@ catch(Exception $e)
     {
         $errCode = "500 Internal Server Error";
         $errMessage = "Невозможно сохранить файл <b>$file</b> для дальнейшей конвертации. Пожалуйста, попробуйте ешё раз.";
+    }
+    else if ($e->getCode() == ConvertBook::ERR_SIZE)
+    {
+        $errCode = "400 Bad Request";
+        $errMessage = "Размер файла <b>$file</b> превышает максимально допустимый.";
     }
     
     httpResponseCode($errCode, $errMessage);
