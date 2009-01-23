@@ -66,7 +66,7 @@ catch(Exception $e)
                 echo "[<a href='$bs->pdfFile'>Sony Reader (pdf)</a>]&nbsp;&nbsp;[<a href='$bs->fbFile'>оригинал (fb2)</a>]</p>";
                 echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
                 echo "<p>";
-                $book_link  = "/book.php?key=".urlencode($key);
+                $book_link  = getFullUrl("book.php") . "?key=".urlencode($key);
                 $book_path  = "/book/".$key;
                 $book_title = $author."  ".$title;
                 echo "<div class=\"js-kit-rating\" title=\"$book_title\" permalink=\"$book_link\" path=\"$book_path\"></div>";
