@@ -68,7 +68,7 @@ catch(Exception $e)
                 echo "<p>";
                 $book_link  = getFullUrl("book.php") . "?key=".urlencode($key);
                 $book_path  = "/book/".$key;
-                $book_title = $author."  ".$title;
+                $book_title = $author."  \"".$title."\"";
                 echo "<div class=\"js-kit-rating\" title=\"$book_title\" permalink=\"$book_link\" path=\"$book_path\"></div>";
                 echo "<div class=\"js-kit-comments\" permalink=\"$book_link\" path=\"$book_path\"></div>";
                 echo "<script src=\"http://js-kit.com/reviews.js\" permalink=\"$book_link\" path=\"$book_path\"></script>";
