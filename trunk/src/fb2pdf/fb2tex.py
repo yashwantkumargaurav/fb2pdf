@@ -21,12 +21,14 @@ import Image
 
 from exceptions import TemporaryError, PersistentError
 
-parameters = {
+default_parameters = {
     # inputenc option for TeX - should be consistent with output codec
     'inputenc': 'utf-8',
 
     # codec to use for output - should be consistent with inputenc
-    'outcodec': 'utf-8'
+    'outcodec': 'utf-8',
+
+    'margin': '1mm'
 }
 
 
@@ -36,6 +38,17 @@ image_exts = {'image/jpeg':'jpg', 'image/jpg':'jpg', 'image/png':'png'}
 section_commands = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 
 url = 'http://www.fb2pdf.com/'
+
+device_paper_sizes = {
+    'PRS-500' : '90.6mm,122.4mm',
+    'PRS-500-landscape' : '122.4mm,90.6mm',
+    'JetBook' : '79mm,105mm',
+    'JetBook-landscape' : '105mm,79mm'
+    'iPhone' : '61mm,115mm',
+    'iPhone-landscape' : '115mm,61mm',
+}
+
+default_papersize='90.6mm,122.4mm'
 
 
 # Following tuples will be examined one by one and applied to the text.
@@ -146,7 +159,8 @@ TEXT_PATTERNS = [
 # --- globals --
 enclosures = {}
 notes = []
-options=[]
+parameters = {}
+
 
 def findAll(elem, what):
     res = []
@@ -321,7 +335,12 @@ def _getdir(f):
         dirname = "."
     return (dirname, filebase)
     
-def fb2tex(infile, outfile,flavour=None):
+def fb2tex(infile, outfile, conv_parameters={}):
+    ''' Converts given file to Tex
+    infile - input file name
+    outfile - output file name
+    conv_parameters - dictionary contains conversion parameters, controlling output layout.
+    '''
     logging.getLogger('fb2pdf').info("Converting %s" % infile)
     
     f = open(infile, 'r')
@@ -333,27 +352,20 @@ def fb2tex(infile, outfile,flavour=None):
 
     (outdir, outname) = _getdir(outfile)
 
-    global options
-    if flavour:
-        options = string.split(flavour,",")
-    else:
-        options = []
+    global parameters
+    parameters.update(default_parameters)
+    if conv_parameters:
+        parameters.update(conv_parameters)
 
-    if 'PRS-500' in options:
-        parameters['papersize']='90.6mm,122.4mm'
-    if 'PRS-500-landscape' in options:
-        parameters['papersize']='122.4mm,90.6mm'
-    if 'JetBook' in options:
-        parameters['papersize']='79mm,105mm'
-    if 'JetBook-landscape' in options:
-        parameters['papersize']='105mm,79mm'
-    elif 'iPhone'  in options or 'iPhone-portrait' in options:
-        parameters['papersize']='61mm,115mm'
-    elif 'iPhone-landscape' in options:
-        parameters['papersize']='115mm,61mm'
-    else:
-        parameters['papersize']='90.6mm,122.4mm'
-    
+    # if device type is specified, but paper size is not
+    # we set up default paper size per defice
+    if 'papersize' not in parameters:
+        if 'devicetype' in parameters:
+            devicetype = parameters['devicetype']
+            parameters['papersize'] = device_paper_sizes.get(devicetype,default_papersize)
+        else:
+            parameters['papersize']=default_papersize
+            
     # laTeX-document header
     f.write("""\\documentclass[12pt,openany]{book}
     \\usepackage{verse}
@@ -369,7 +381,7 @@ def fb2tex(infile, outfile,flavour=None):
     ]{hyperref}
     \\usepackage[
         papersize={%(papersize)s},
-        margin=1mm,
+        margin=%(margin),
         ignoreall,
         pdftex
     ]{geometry}
@@ -384,7 +396,7 @@ def fb2tex(infile, outfile,flavour=None):
     \\setcounter{secnumdepth}{-2}
     """ % parameters )
 
-    if 'anthology' in options:
+    if 'anthology' in parameters:
         f.write("\n\\setcounter{tocdepth}{-1}")
     
     #TODO: Instead of selecting font family inside of the document 
@@ -411,7 +423,7 @@ def fb2tex(infile, outfile,flavour=None):
     findEnclosures(fb, outdir, outname)
     _uwrite(f, processDescription(find(fb,"description")))
 
-    if not 'notoc' in options:
+    if not 'notoc' in parameters:
         f.write("\\tableofcontents\n\\newpage\n\n")
     
     body=findAll(fb,"body")
@@ -431,7 +443,7 @@ def fb2tex(infile, outfile,flavour=None):
 
 def processBody(b):
     # TODO: process title via getSectionTitle()
-    if 'anthology' in options and b.getAttribute('name')!='notes':
+    if 'anthology' in parameters and b.getAttribute('name')!='notes':
         d=1
         t = find(b,"title")
         if t:
