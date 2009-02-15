@@ -43,7 +43,7 @@ device_paper_sizes = {
     'PRS-500' : '90.6mm,122.4mm',
     'PRS-500-landscape' : '122.4mm,90.6mm',
     'JetBook' : '79mm,105mm',
-    'JetBook-landscape' : '105mm,79mm'
+    'JetBook-landscape' : '105mm,79mm',
     'iPhone' : '61mm,115mm',
     'iPhone-landscape' : '115mm,61mm',
 }
@@ -381,7 +381,7 @@ def fb2tex(infile, outfile, conv_parameters={}):
     ]{hyperref}
     \\usepackage[
         papersize={%(papersize)s},
-        margin=%(margin),
+        margin=%(margin)s,
         ignoreall,
         pdftex
     ]{geometry}
