@@ -1,0 +1,25 @@
+%%
+%% This is file `t2afco.fd'
+%% [ CollegePSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afco.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/CollegePSCyr]
+
+\DeclareFontFamily{T2A}{fco}{}
+
+\DeclareFontShape{T2A}{fco}{m}{n}{<-> fcor6a}{}
+\DeclareFontShape{T2A}{fco}{m}{it}{<-> fcori6a}{}
+\DeclareFontShape{T2A}{fco}{m}{sl}{<-> fcoro6a}{}
+\DeclareFontShape{T2A}{fco}{m}{sc}{<-> fcorc6a}{}
+\DeclareFontShape{T2A}{fco}{bx}{n}{<-> fcob6a}{}
+\DeclareFontShape{T2A}{fco}{bx}{it}{<-> fcobo6a}{}
+\DeclareFontShape{T2A}{fco}{bx}{sl}{<-> fcobo6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fco}{b}{n}{<->sub * fco/bx/n}{}
+\DeclareFontShape{T2A}{fco}{b}{it}{<->sub * fco/bx/it}{}
+\DeclareFontShape{T2A}{fco}{b}{sl}{<->sub * fco/bx/sl}{}
+
+\endinput

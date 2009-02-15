@@ -1,0 +1,18 @@
+%%
+%% This is file `t2afad.fd'
+%% [ AdvertisementPSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afad.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/AdvertisementPSCyr]
+
+\DeclareFontFamily{T2A}{fad}{}
+
+\DeclareFontShape{T2A}{fad}{m}{n}{<-> fadr6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fad}{bx}{n}{<->sub * fad/m/n}{}
+\DeclareFontShape{T2A}{fad}{b}{n}{<->sub * fad/m/n}{}
+
+\endinput

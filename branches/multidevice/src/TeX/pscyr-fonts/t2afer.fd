@@ -1,0 +1,24 @@
+%%
+%% This is file `t2afer.fd'
+%% [ ERKurierPSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afer.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/ERKurierPSCyr]
+
+\DeclareFontFamily{T2A}{fer}{}
+
+\DeclareFontShape{T2A}{fer}{m}{n}{<-> ferr6a}{}
+\DeclareFontShape{T2A}{fer}{m}{it}{<-> ferri6a}{}
+\DeclareFontShape{T2A}{fer}{m}{sl}{<-> ferri6a}{}
+\DeclareFontShape{T2A}{fer}{bx}{n}{<-> ferb6a}{}
+\DeclareFontShape{T2A}{fer}{bx}{it}{<-> ferbi6a}{}
+\DeclareFontShape{T2A}{fer}{bx}{sl}{<-> ferbi6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fer}{b}{n}{<->sub * fer/bx/n}{}
+\DeclareFontShape{T2A}{fer}{b}{it}{<->sub * fer/bx/it}{}
+\DeclareFontShape{T2A}{fer}{b}{sl}{<->sub * fer/bx/sl}{}
+
+\endinput

@@ -1,0 +1,450 @@
+#!/usr/bin/env python
+
+'''
+FictionBook2 -> TeX converter daemon
+
+Author: Vadim Zaliva <lord@crocodile.org>
+'''
+
+import getopt
+import logging, logging.handlers
+import sys, os, os.path, shutil
+import string, time
+import urllib2, tempfile, cgi, urllib
+import traceback
+import zipfile
+import pytils.translit
+
+from xml.dom.minidom import parse, parseString
+from ConfigParser import ConfigParser
+
+from boto.sqs import Connection
+from boto.sqs.message import Message
+from boto.exception import SQSError
+
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+
+from fb2pdf.daemon import createDaemon
+
+from fb2pdf import TemporaryError, PersistentError, tex2pdf, fb2tex
+
+# --- Constants --- 
+
+SUPPORTED_MSG_FORMAT_VER=[2,3]
+
+# --- Defaults ---
+
+pidfile='/var/run/fbdaemon.pid'
+logfile = '/var/log/fbdaemon.log'
+log_verbosity = logging.INFO
+
+# --- Code ---
+
+def _translify(s):
+    for symb_in, symb_out in pytils.translit.TRANSTABLE:
+        s = s.replace(symb_in, symb_out)
+    return s
+
+def _makefname(s):
+    s = _translify(s)
+    res = ""
+    for c in s:
+        if not ((c>='a' and c<='z') or (c>='A' and c<='Z') or (c>='0' and c<='9')):
+            c='_'
+        res+=c
+    return str(res)
+
+def usage():
+    sys.stderr.write("Usage: fbdaemon.py -c cfgfile [-p pidfile] [-l logfile] [-v] [-d]\n")
+
+def parseCommandLineAndReadConfiguration():
+    global logfile
+    global log_verbosity
+    
+    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vdc:p:l:", ["verbose", "daemon", "cfgfile=", "pidfile=","logfile="])
+
+    cfgfile = None
+    do_daemon = False
+    
+    for option, argument in optlist:
+        if option in ("-d", "--daemon"):
+            do_daemon = True
+        if option in ("-v", "--verbose"):
+            log_verbosity = logging.DEBUG
+        elif option in ("-c", "--cfgfile"):
+            if os.path.isfile(argument):
+                cfgfile = argument
+            else:
+                raise getopt.GetoptError("config file '%s' doesn't exist" % argument)
+        elif option in ("-p", "--pidfile"):
+            global pidfile
+            pidfile = argument
+        elif option in ("-l", "--logfile"):
+            global logfile
+            logfile = argument
+                
+    if not cfgfile:
+        raise getopt.GetoptError("configuration file not specified")
+
+    if do_daemon:
+        # Detach
+        createDaemon()
+
+        os.umask(022) # S_IWGRP|S_IWOTH (022, write access for the owner only).  
+
+        # change process name, important for init.d script on Linux
+        if os.path.exists('/lib/libc.so.6'):
+            import dl
+            libc = dl.open('/lib/libc.so.6')
+            libc.call('prctl', 15, 'fbdaemon', 0, 0, 0)
+        
+        # write PID file
+        p = open(pidfile, "w")
+        p.write("%s\n" % os.getpid())
+        p.close()
+
+    global cfg
+    cfg = ConfigParser()
+    cfg.read(cfgfile)
+    
+    rotatingLog = logging.FileHandler(logfile)
+    log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+    rotatingLog.setFormatter(log_formatter)
+    logger=logging.getLogger('fbdaemon')
+    logger.addHandler(rotatingLog)
+
+    if not do_daemon:
+        console = logging.StreamHandler()
+        formatter = logging.Formatter('[%(levelname)s] %(message)s')
+        console.setFormatter(formatter)
+        logger.addHandler(console)
+
+    logger.setLevel(log_verbosity)
+
+def processMessage(m):
+    logging.getLogger('fbdaemon').debug("Received new task")
+    msg = None
+    try:
+        msg = parseString(m.get_body())
+    except:
+        logging.getLogger('fbdaemon').exception("Error parsing message body")
+        logging.getLogger('fbdaemon').debug(m.get_body())
+        raise PersistentError("Could not parse the message.")
+        
+    root = msg.childNodes[0]
+    if root.nodeName != 'fb2pdfjob':
+        raise PersistentError("Unknown XML root element '%s'." % root.nodeName)
+    v=root.getAttribute('version')
+    if v:
+        ver = int(v)
+    else:
+        ver = 0
+    if ver not in SUPPORTED_MSG_FORMAT_VER: 
+        raise TemporaryError("Unsupported message format version '%s'." % v)
+
+    srcs = root.getElementsByTagName('source')
+    if len(srcs)!=1:
+        raise PersistentError("Too many sources in the message.")
+    src = srcs[0]
+    src_url  = src.getAttribute('url')
+    src_type = src.getAttribute('type')
+    src_name = src.getAttribute('name')
+    src_encoding = src.getAttribute('encoding')
+
+    results = root.getElementsByTagName('result')
+    if len(results)!=1:
+        raise PersistentError("Message must contain exactly one 'result' element")
+    res_key = results[0].getAttribute('key')
+    res_encoding = results[0].getAttribute('encoding')
+
+    conv_options = {}
+    parameters = results.getElementsByTagName('parameter')
+    for p in parameters:
+        p_name  = src.getAttribute('name')
+        p_value = src.getAttribute('value')
+        conv_options[p_name]=p_value
+        
+    logs=root.getElementsByTagName('log')
+    if len(logs)!=1:
+        raise PersistentError("Message must contain exactly one 'result' element")
+    log_key = logs[0].getAttribute('key')
+
+    cb=root.getElementsByTagName('callback')
+    callbacks=[]
+    for c in cb:
+        x = {}
+        x['url']    = c.getAttribute('url')
+        if not x['url']:
+            logging.getLogger('fbdaemon').warning("Missing callback 'url' attribute. Skipping")
+        x['method'] = c.getAttribute('method')
+        if not x['method']:
+            x['method']='POST'
+            logging.getLogger('fbdaemon').warning("Missing callback 'method' attribute. Assuming POST")
+        p = c.getAttribute('params')        
+        if p:
+            try:
+                h = {}
+                for (n,v) in cgi.parse_qsl(p, True, True):
+                    h[n]=v
+                x['params']=h
+            except ValueError:
+                raise PersistentError("Error parsing param string '%s'" % p)
+        else:
+            x['params']={}
+        callbacks.append(x)
+
+    processDocument(str(src_url), str(src_type), src_name, str(src_encoding),
+                    str(res_key), str(res_encoding),
+                    str(log_key),
+                    callbacks)
+
+def upload_file(bucket, key, filename, disp='attachment'):
+    global cfg
+    retries = int(cfg.get('storage','retries'))
+
+    if filename == None:
+        raise PersistentError("Invalid None filename")
+    if disp == None:
+        raise PersistentError("Invalid None disposition")
+    
+    for i in range(retries):
+        try:
+            c = S3Connection(aws_access_key_id=cfg.get('aws','public'),
+                             aws_secret_access_key=cfg.get('aws','private'))
+            b = c.create_bucket(bucket)
+            k = Key(b)
+            k.key = key
+            k.set_contents_from_filename(filename,{'Content-Disposition':'%s; filename=\"%s\"' % (disp,filename)})
+            k.set_acl('public-read')
+            return
+        except Exception, e:
+            if i==(retries-1):
+                raise TemporaryError("Error uploading file '%s' to S3" % filename, e)
+            else:
+                logging.getLogger('fbdaemon').exception("S3 upload error for file %s'. Retrying" % filename)
+
+def processCallbacks(res_key, status, callbacks):
+    if not callbacks:
+        return
+    logging.getLogger('fbdaemon').debug("Processing callbacks")
+    for c in callbacks:
+        try:
+            u = c['url']
+            p = c['params']
+            logging.getLogger('fbdaemon').debug("Calling callback %s" % u)
+            p['key'] = res_key
+            p['status'] = status
+            p['ver'] = fb2tex.__version__
+            pe = urllib.urlencode(p)
+            logging.getLogger('fbdaemon').debug("Calling '%s' with '%s'" % (u,pe))
+            if c['method']=='POST':
+                csock = urllib2.urlopen(u, pe)
+            else:
+                csock = urllib2.urlopen(u + '?' + pe)
+            csock.close()
+        except:
+            logging.getLogger('fbdaemon').exception("Error calling callback %s" % c['url'])
+
+def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_encoding, log_key, callbacks):
+
+    global cfg
+    bucket = cfg.get('storage','bucket')
+
+    src_fname = _makefname(src_name)
+    
+    logfilename = src_fname + '.txt'
+    
+    try: # on err, call err. callbacks
+
+        basedir = os.getcwd()
+
+        logging.getLogger('fbdaemon').info("Processing '%s'." % src_fname)
+        tmpdirname = tempfile.gettempdir() + '/' + str(int(time.time()))
+        logging.getLogger('fbdaemon').debug("Creating temporary directory '%s'." % tmpdirname)
+        os.mkdir(tmpdirname)
+
+        try: # finally remove temp dir
+            os.chdir(tmpdirname)
+            
+            # Create individual log file
+            lh = logging.FileHandler(logfilename)
+            lf = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+            lh.setFormatter(lf)
+            logging.getLogger('fb2pdf').addHandler(lh)
+            logging.getLogger('fb2pdf').setLevel(logging.DEBUG)
+
+            try: # on PersistentError error, upload log
+                try: # finally, close logger
+        
+                    fbfilename = src_fname + '.fb2'
+                    zipfilename = src_fname + '.zip'
+
+                    if src_encoding=="application/zip":
+                        srcfilename = zipfilename
+                    else:
+                        srcfilename = fbfilename
+
+                    logging.getLogger('fbdaemon').debug("Downloading '%s' to file '%s'." % (src_url, srcfilename))
+
+                    try:
+                        fsock = open(srcfilename,'wb')
+                        try:
+                            asock = urllib2.urlopen(src_url)
+                            shutil.copyfileobj(asock, fsock)
+                        finally:
+                            fsock.close()
+                    except urllib2.HTTPError, e:
+                        if e.code==404 or e.code==403:
+                            logging.getLogger('fb2pdf').error("Error downloading FB2 or ZIP file.")
+                            raise PersistentError("Error downloading FB2 or ZIP file", e)
+                        else:
+                            raise TemporaryError("Error downloadingFB2 or ZIP file", e)
+                    except:
+                        raise TemporaryError("Error downloading FB2 or ZIP file")
+
+                    if src_encoding == "application/zip":
+                        try:
+                            logging.getLogger('fbdaemon').debug("Unpacking ZIP '%s'" % zipfilename)
+                            z = zipfile.ZipFile(zipfilename,'r')
+                            data = None
+                            try:
+                                flist = z.namelist()
+                                if len(flist)!=1:
+                                    logging.getLogger('fb2pdf').error("ZIP file must contain 1 file. %d found." % len(flist))
+                                    raise PersistentError("ZIP file must contain 1 file. %d found." % len(flist))
+                                else:
+                                    logging.getLogger('fb2pdf').info("Extracting '%s' from ZIP." % flist[0])
+                                data = z.read(flist[0])
+                            finally:
+                                z.close()
+                            fbf = open(fbfilename, 'wb')
+                            try:
+                                fbf.write(data)
+                            finally:
+                                fbf.close()
+                        except:
+                            logging.getLogger('fb2pdf').exception("Error extracting content from ZIP file")
+                            raise PersistentError("Error extracting content from ZIP file")
+
+                    texfilename = src_fname + '.tex'
+                    pdffilename = src_fname + '.pdf'
+
+                    logging.getLogger('fbdaemon').debug("Converting to TeX")
+                    fb2tex.fb2tex(fbfilename, texfilename, conv_options)
+
+                    logging.getLogger('fbdaemon').debug("Converting to PDF")
+                    tex2pdf.tex2pdf(texfilename, pdffilename)
+
+                    resfilename = pdffilename
+                    
+                    if res_encoding:
+                        if res_encoding=='application/zip':
+                            try:
+                                zipfilename = pdffilename + '.zip'
+                                logging.getLogger('fbdaemon').debug("Creating ZIP '%s'" % zipfilename)
+                                z=zipfile.ZipFile(zipfilename,'w',compression=zipfile.ZIP_DEFLATED)
+                                try:
+                                    z.write(pdffilename)
+                                finally:
+                                    z.close()
+                                resfilename = zipfilename
+                            except:
+                                logging.getLogger('fb2pdf').exception("Error creating resulting ZIP")
+                                raise PersistentError("Error creating resulting ZIP")
+                        else:
+                            logging.getLogger('fb2pdf').error("Unsupporeted encoding '%s'" % res_encoding)
+                            raise PersistentError("Unsupporeted encoding '%s'" % res_encoding)
+
+                    # all OK
+                    # upload PDF 
+                    logging.getLogger('fb2pdf').debug("Uploading resulting file to S3")
+                    logging.getLogger('fbdaemon').debug("Uploading resulting file to S3")
+                    upload_file(bucket, res_key, resfilename)
+
+                finally:
+                    # close logger
+                    logging.getLogger('fb2pdf').removeHandler(lh)
+                    lh.flush()
+                    lh.close()
+            except PersistentError:
+                # Conversion error, upload log
+                logging.getLogger('fb2pdf').error("Sorry we could not convert your file. If you feel this is a bug, please report it to us.")
+                logging.getLogger('fbdaemon').exception("Conversion Failed")
+                upload_file(bucket, log_key, logfilename, 'inline')
+                raise
+
+            # upoad log (log should be uploaded AFTER PDF)
+            logging.getLogger('fbdaemon').debug("Uploading log to S3")
+            upload_file(bucket, log_key, logfilename, 'inline')
+
+            processCallbacks(res_key, 'r', callbacks)
+        finally:
+            logging.getLogger('fbdaemon').debug("Removing temp files")
+            os.chdir(basedir)
+            # remove temp files
+            for f in os.listdir(tmpdirname):
+                os.remove("%s/%s" % (tmpdirname,f))
+            os.rmdir(tmpdirname)
+    except:
+        # invoke callbacks
+        processCallbacks(res_key, 'e', callbacks)
+        raise
+
+def main():
+    try:
+        global cfg
+        parseCommandLineAndReadConfiguration()
+
+        logging.getLogger('fbdaemon').info("Starting")
+            
+        c = Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
+        
+        qname = cfg.get('queue','name')
+        qtimeout = int(cfg.get('queue','timeout'))
+        pdelay = int(cfg.get('queue','polling_delay'))
+
+        q = c.create_queue(qname)
+
+        while True:
+            m = None
+            try:
+                m = q.read(qtimeout)
+            except:
+                logging.getLogger('fbdaemon').exception("Error reading queue")
+            if m==None:
+                time.sleep(pdelay)
+            else:
+                try:
+                    processMessage(m)
+                    q.delete_message(m)
+                except TemporaryError, ex:
+                    logging.getLogger('fbdaemon').exception(ex)
+                    if ex.nested:
+                        pass #TODO Log msg.nested
+                except PersistentError, ex:
+                    logging.getLogger('fbdaemon').exception(ex)
+                    if ex.nested:
+                        pass #TODO Log msg nested
+                    logging.getLogger('fbdaemon').debug("removing message due to persistent error")
+                    q.delete_message(m)
+                except:
+                    logging.getLogger('fbdaemon').exception('Unknown Processing Error - treating as Persistent')
+                    q.delete_message(m)
+                    
+    except getopt.GetoptError, msg:
+        if len(sys.argv[1:]) > 0:
+            print >>sys.stderr, "Error: %s\n" % msg
+        else:
+            usage()
+        return 2
+        
+    except:
+        info = sys.exc_info()
+        traceback.print_exc()
+        logging.getLogger('fbdaemon').exception('Fatal error')
+        return 3
+
+    
+if __name__ == "__main__":
+    sys.exit(main())

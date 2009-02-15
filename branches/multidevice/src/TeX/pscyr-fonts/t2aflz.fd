@@ -1,0 +1,17 @@
+%%
+%% This is file `t2aflz.fd'
+%% [ Lazurski/PSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2aflz.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/Lazurski]
+
+\DeclareFontFamily{T2A}{flz}{}
+
+\DeclareFontShape{T2A}{flz}{m}{n}{<-> flzr6a}{}
+\DeclareFontShape{T2A}{flz}{m}{it}{<-> flzro6a}{}
+\DeclareFontShape{T2A}{flz}{m}{sl}{<-> flzro6a}{}
+\DeclareFontShape{T2A}{flz}{m}{sc}{<-> flzrc6a}{}
+
+\endinput

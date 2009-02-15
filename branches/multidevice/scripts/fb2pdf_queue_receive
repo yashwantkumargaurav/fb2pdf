@@ -1,0 +1,67 @@
+#!/usr/bin/env python2.4
+
+'''
+Simple Tool to test message receipting and parsing.
+
+Author: Vadim Zaliva <lord@crocodile.org>
+'''
+
+import getopt,sys,string,time
+
+from ConfigParser import ConfigParser
+from xml.dom.minidom import parse, parseString
+
+from boto.sqs import Connection
+from boto.sqs.message import Message
+from boto.exception import SQSError
+
+# --- Code ---
+
+def usage():
+    sys.stderr.write("Usage: queue_receive.py [-v] -c cfgfile\n")
+
+def main():
+    cfgfile = None
+    verbose = False
+      
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "vc:", ["verbose", "cfgfile"])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for o, a in opts:
+        if o in ("-c", "--cfgfile"):
+            cfgfile = a
+        if o in ("-v", "--verbose"):
+            verbose = True
+
+    if len(args) != 0 or cfgfile is None:
+        usage()
+        sys.exit(2)
+
+    cfg = ConfigParser()
+    cfg.read(cfgfile)
+
+    c = Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
+      
+    qname = cfg.get('queue','name')
+    qtimeout = 10 #int(cfg.get('queue','timeout'))
+    pdelay = int(cfg.get('queue','polling_delay'))
+
+    q = c.create_queue(qname)
+    print "Queue created"
+    
+    while True:
+        print "Waiting for message"
+        m = q.read(qtimeout)
+        if m==None:
+            time.sleep(pdelay)
+        else:
+            print "Message received:\n%s\n" % m.get_body()
+            msg = parseString(m.get_body())
+            print "Message parsed:\n%s\n" % str(msg)
+            q.delete_message(m)
+
+if __name__ == "__main__":
+    main()
+

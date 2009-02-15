@@ -1,0 +1,37 @@
+%Filename: ot1fma.fd
+%Created by: tex fontinst
+%Created using fontinst v1.801
+
+%THIS FILE SHOULD BE PUT IN A TEX INPUTS DIRECTORY
+
+\ProvidesFile{ot1fma.fd}
+   [2001/03/03 Fontinst v1.801 font definitions for OT1/fma.]
+
+\DeclareFontFamily{OT1}{fma}{}
+
+\DeclareFontShape{OT1}{fma}{m}{n}{
+   <-> fmar7t
+}{}
+
+\DeclareFontShape{OT1}{fma}{m}{sl}{
+   <-> fmaro7t
+}{}
+
+\DeclareFontShape{OT1}{fma}{bx}{n}{
+   <-> fmab7t
+}{}
+
+\DeclareFontShape{OT1}{fma}{bx}{sl}{
+   <-> fmabo7t
+}{}
+
+\DeclareFontShape{OT1}{fma}{m}{it}{
+   <-> fmari7t
+}{}
+
+\DeclareFontShape{OT1}{fma}{b}{n}{<->ssub * fma/bx/n}{}
+\DeclareFontShape{OT1}{fma}{b}{sl}{<->ssub * fma/bx/sl}{}
+\DeclareFontShape{OT1}{fma}{bx}{it}{<->ssub * fma/bx/sl}{}
+\DeclareFontShape{OT1}{fma}{b}{it}{<->ssub * fma/bx/it}{}
+
+\endinput

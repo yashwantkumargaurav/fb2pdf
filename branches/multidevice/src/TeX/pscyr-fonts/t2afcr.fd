@@ -1,0 +1,24 @@
+%%
+%% This is file `t2afcr.fd'
+%% [ CourierNewPSMT/PSCyr font family ]
+%% Cyrillic postscript package by K.Chumachenko
+%% Changes by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afcr.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/CourierNewPSMT/PSCyr]
+
+\DeclareFontFamily{T2A}{fcr}{}
+
+\DeclareFontShape{T2A}{fcr}{m}{n}{<-> fcrr6a}{}
+\DeclareFontShape{T2A}{fcr}{m}{it}{<-> fcrri6a}{}
+\DeclareFontShape{T2A}{fcr}{m}{sl}{<-> fcrri6a}{}
+\DeclareFontShape{T2A}{fcr}{bx}{n}{<-> fcrb6a}{}
+\DeclareFontShape{T2A}{fcr}{bx}{it}{<-> fcrbi6a}{}
+\DeclareFontShape{T2A}{fcr}{bx}{sl}{<-> fcrbi6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fcr}{b}{n}{<->sub * fcr/bx/n}{}
+\DeclareFontShape{T2A}{fcr}{b}{it}{<->sub * fcr/bx/it}{}
+\DeclareFontShape{T2A}{fcr}{b}{sl}{<->sub * fcr/bx/sl}{}
+
+\endinput

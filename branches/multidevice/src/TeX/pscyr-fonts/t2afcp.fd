@@ -1,0 +1,17 @@
+%%
+%% This is file `t2afcp.fd'
+%% [ CooperPSCyr font family ]
+%% Cyrillic PS package by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afcp.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/CooperPSCyr]
+
+\DeclareFontFamily{T2A}{fcp}{}
+
+\DeclareFontShape{T2A}{fcp}{m}{n}{<-> fcpr6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fcp}{bx}{n}{<->sub * fcp/m/n}{}
+\DeclareFontShape{T2A}{fcp}{b}{n}{<->sub * fcp/m/n}{}
+
+\endinput

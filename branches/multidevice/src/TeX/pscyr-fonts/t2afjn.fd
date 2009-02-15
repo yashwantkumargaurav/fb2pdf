@@ -1,0 +1,24 @@
+%%
+%% This is file `t2afjn.fd'
+%% [ JournalPSCyr font family ]
+%% Cyrillic PS package by Alexander Lebedev, 2000-2001
+%%
+\ProvidesFile{t2afjn.fd}
+  [2001/03/03 v0.4c PS font definitions for T2A/JournalPSCyr]
+
+\DeclareFontFamily{T2A}{fjn}{}
+
+\DeclareFontShape{T2A}{fjn}{m}{n}{<-> fjnr6a}{}
+\DeclareFontShape{T2A}{fjn}{m}{it}{<-> fjnri6a}{}
+\DeclareFontShape{T2A}{fjn}{m}{sl}{<-> fjnro6a}{}
+\DeclareFontShape{T2A}{fjn}{m}{sc}{<-> fjnrc6a}{}
+\DeclareFontShape{T2A}{fjn}{bx}{n}{<-> fjnb6a}{}
+\DeclareFontShape{T2A}{fjn}{bx}{it}{<-> fjnbo6a}{}
+\DeclareFontShape{T2A}{fjn}{bx}{sl}{<-> fjnbo6a}{}
+
+% Substitutions
+\DeclareFontShape{T2A}{fjn}{b}{n}{<->sub * fjn/bx/n}{}
+\DeclareFontShape{T2A}{fjn}{b}{it}{<->sub * fjn/bx/it}{}
+\DeclareFontShape{T2A}{fjn}{b}{sl}{<->sub * fjn/bx/sl}{}
+
+\endinput
