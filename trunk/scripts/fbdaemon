@@ -158,6 +158,11 @@ def processMessage(m):
     res_key = results[0].getAttribute('key')
     res_encoding = results[0].getAttribute('encoding')
 
+    if results[0].getAttribute('flavour'):
+        res_flavour = results[0].getAttribute('flavour')
+    else:
+        res_flavour = None
+
     logs=root.getElementsByTagName('log')
     if len(logs)!=1:
         raise PersistentError("Message must contain exactly one 'result' element")
@@ -324,7 +329,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
                     pdffilename = src_fname + '.pdf'
 
                     logging.getLogger('fbdaemon').debug("Converting to TeX")
-                    fb2tex.fb2tex(fbfilename, texfilename)
+                    fb2tex.fb2tex(fbfilename, texfilename, res_flavour)
 
                     logging.getLogger('fbdaemon').debug("Converting to PDF")
                     tex2pdf.tex2pdf(texfilename, pdffilename)
