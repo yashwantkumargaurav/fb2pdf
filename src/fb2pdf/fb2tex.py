@@ -343,6 +343,10 @@ def fb2tex(infile, outfile,flavour=None):
         parameters['papersize']='90.6mm,122.4mm'
     if 'PRS-500-landscape' in options:
         parameters['papersize']='122.4mm,90.6mm'
+    if 'JetBook' in options:
+        parameters['papersize']='79mm,105mm'
+    if 'JetBook-landscape' in options:
+        parameters['papersize']='105mm,79mm'
     elif 'iPhone'  in options or 'iPhone-portrait' in options:
         parameters['papersize']='61mm,115mm'
     elif 'iPhone-landscape' in options:
