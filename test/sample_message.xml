@@ -1,7 +1,10 @@
 <?xml version = "1.0" encoding = "UTF-8" ?>
 <fb2pdfjob version="3">
   <source url="http://fictionbook.ru/author/bunin_ivan_alekseevich/okayanniye_dni/bunin_okayanniye_dni.fb2" type="application/fb2+xml" name="bunin_okayanniye_dni"/>
-  <result key="1111111.zip" encoding="application/zip"/>
+  <result key="1111111.zip" encoding="application/zip">
+    <parameter name="devicetype" value="iPhone"/>
+    <parameter name="margin" value="0mm"/>
+  </result>
   <log key="1111111.txt"/>
   <callback url="http://www.codeminders.com/fb2pdf/conv_callback.php" method="POST" params="pass=123&email=vb@codeminders.com"/>
 </fb2pdfjob>
