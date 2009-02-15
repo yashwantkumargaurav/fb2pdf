@@ -19,7 +19,7 @@ from fb2pdf import fb2tex
 logfile = 'fb2tex.log'
 
 def usage():
-    sys.stderr.write("Usage: fb2tex.py [-v] [-m flavour] -f fb2file -o texfile\n")
+    sys.stderr.write("Usage: fb2tex.py [-v] [-o oname:ovalue] -f fb2file -o texfile\n")
 
 def initLog(logfilename, log_verbosity):
     hdlr = logging.FileHandler(logfilename)
@@ -33,11 +33,11 @@ def initLog(logfilename, log_verbosity):
 def parseCommandLine():
     infile = None
     outfile = None
-    flavour = None
+    params = {}
     
     log_verbosity = logging.INFO
     
-    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:m:", ["verbose", "file=", "output=", "flavour=", "use-koi8"])
+    (optlist, arglist) = getopt.getopt(sys.argv[1:], "vf:o:p:", ["verbose", "file=", "output=", "param=", "use-koi8"])
     for option, argument in optlist:
         if option in ("-v", "--verbose"):
             log_verbosity = logging.DEBUG
@@ -48,8 +48,12 @@ def parseCommandLine():
                 raise getopt.GetoptError("input file '%s' doesn't exist" % argument)
         elif option in ("-o", "--output"):
             outfile = argument
-        elif option in ("-m", "--flavour"):
-            flavour = argument
+        elif option in ("-p", "--param"):
+            p=argument.split(":")
+            if len(p)==2:
+                params[p[0]]=p[1]
+            else:
+                print "Skipping invalid parameter '%s'" % argument
         elif option in ("--use-koi8"):
             fb2tex.parameters['inputenc'] = 'koi8-r'
             fb2tex.parameters['outcodec'] = 'koi8_r'
@@ -68,12 +72,12 @@ def parseCommandLine():
     console.setFormatter(formatter)
     logging.getLogger('fb2pdf').addHandler(console)
     
-    return (infile, outfile, flavour)
+    return (infile, outfile, params)
 
 def main():
     try:
-        (infile, outfile, flavour) = parseCommandLine()
-        fb2tex.fb2tex(infile, outfile, flavour)
+        (infile, outfile, params) = parseCommandLine()
+        fb2tex.fb2tex(infile, outfile, params)
     except getopt.GetoptError, msg:
         if len(sys.argv[1:]) > 0:
             print >>sys.stderr, "Error: %s\n" % msg

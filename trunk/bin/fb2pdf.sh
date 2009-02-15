@@ -55,7 +55,11 @@ rsync -aqz --exclude=".svn"  ../src/TeX/ $WORKDIR
 TEXFILE=$WORKDIR/`basename $FB2FILE .fb2`.tex
 TMPPDFFILE=$WORKDIR/`basename $FB2FILE .fb2`.pdf
 
-python ${FB2TEX} -v -f $FB2FILE -o $TEXFILE
+if [ -z $DEVTYPE ]; then
+    python ${FB2TEX} -v -f $FB2FILE -o $TEXFILE
+else
+    python ${FB2TEX} -v -f $FB2FILE -o $TEXFILE -p devicetype:$DEVTYPE
+fi
 if [ $? -ne 0 ]; then
     echo "Generating TEX file failed"
     rm -rf $WORKDIR
