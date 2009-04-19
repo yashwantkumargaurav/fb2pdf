@@ -1,4 +1,7 @@
 {
+    generalSettings: {
+        transliterateMetaInfo:	"true"
+    },
     fontFamilies: [
         {
             name:         "sansSerif",
@@ -22,6 +25,11 @@
         marginRight:  "2.0mm",
         marginTop:    "2.0mm",
         marginBottom: "2.0mm"
+    },
+    hyphenationSettings: {
+        defaultLanguage:	"ru",
+        hyphenate: 	  		"true",
+        overrideLanguage:	"false"
     },
     paragraphStyles: [
         {

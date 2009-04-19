@@ -6,9 +6,9 @@
 FB2FILES="*.fb2"
 PDFLATEXFLAGS="-halt-on-error -interaction batchmode -no-shell-escape"
 FB2TEX=../scripts/fb2tex
-rm -f *.pdf enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex *.fblog
+rm -f  enc* *.out *.dvi *.ps *.log *.toc *.aux *.tex 
 
-PYTHONPATH=../src/
+PYTHONPATH=../src/:/opt/local/lib/python2.5/site-packages
 export PYTHONPATH
 
 rsync -avz --exclude=".svn"  ../src/TeX/ ./
@@ -18,7 +18,7 @@ echo "Processing $i"
 N=`basename $i .fb2`
 t=${N}.tex
 echo $N
-python ${FB2TEX} -v -f $i -o $t > $N.fblog 2>&1
+python ${FB2TEX} -p devicetype:JetBook -v -f $i -o $t > $N.fblog 2>&1
 if [ $? -ne 0 ]; then
     echo "TeX file generation failed";
 else
