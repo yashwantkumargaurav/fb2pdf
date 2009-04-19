@@ -3,9 +3,9 @@ package org.trivee.fb2pdf;
 import java.io.*;
 import java.util.Vector;
 import java.util.StringTokenizer;
-import java.util.Properties;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -20,14 +20,14 @@ import com.lowagie.text.Anchor;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Paragraph;
-import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 
-import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.HyphenationAuto;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.PdfAction;
 
+import com.lowagie.text.pdf.PdfDestination;
+import com.lowagie.text.pdf.PdfOutline;
 import org.apache.commons.codec.binary.Base64;
 
 public class FB2toPDF
@@ -43,18 +43,36 @@ public class FB2toPDF
         this.toName   = toName;
     }
 
-    private HyphenationAuto hyphen_ru;
+    private HyphenationAuto hyphenation;
 
     private Stylesheet stylesheet;
 
-    private void loadData()
+    private String getSequenceSubtitle(Element seq)
+    {
+        String seqname = seq.getAttribute("name");
+        String seqnumber = seq.getAttribute("number");
+        String subtitle = "";
+        if (!isNullOrEmpty(seqname))
+            subtitle += seqname;
+        if (!isNullOrEmpty(seqnumber))
+            subtitle += " #" + seqnumber;
+        if (!isNullOrEmpty(subtitle))
+            subtitle = "(" + subtitle + ")";
+        return subtitle;
+    }
+
+    private boolean isNullOrEmpty(String str)
+    {
+        return str == null || str.trim().length() == 0;
+    }
+
+    private void loadData(InputStream stylesheetInputStream)
         throws DocumentException, IOException, FB2toPDFException
     {
-        com.lowagie.text.pdf.hyphenation.Hyphenator.setHyphenDir(BASE_PATH + "/data");
-
-        hyphen_ru = new HyphenationAuto("ru", "none", 2, 2);
-
-        stylesheet = Stylesheet.readStylesheet(BASE_PATH + "/data/stylesheet.json");
+        if (stylesheetInputStream == null)
+            stylesheet = Stylesheet.readStylesheet(BASE_PATH + "/data/stylesheet.json");
+        else
+            stylesheet = Stylesheet.readStylesheet(stylesheetInputStream);
     }
 
     private org.w3c.dom.Document fb2;
@@ -207,11 +225,11 @@ public class FB2toPDF
         return getTextContentByTagName(element, tagName, null, null);
     }
 
-    private void run()
+    private void run(InputStream stylesheetInputStream)
         throws IOException, DocumentException, FB2toPDFException, ParserConfigurationException, SAXException
     {
-        loadData();
-
+        loadData(stylesheetInputStream);
+ 
         readFB2();
         createPDFDoc();
 
@@ -226,6 +244,7 @@ public class FB2toPDF
         org.w3c.dom.Element description = getOptionalChildByTagName(root, "description");
         if (description != null)
         {
+            setupHyphenation(description);
             addMetaInfo(description);
             doc.open();
             processDescription(description);
@@ -268,7 +287,7 @@ public class FB2toPDF
             this.contentType = binary.getAttribute("content-type");
             this.data        = Base64.decodeBase64(binary.getTextContent().getBytes());
 
-            System.err.println("Loaded binary " + this.href + " (" + this.contentType + ")");
+            System.out.println("Loaded binary " + this.href + " (" + this.contentType + ")");
         }
 
         public String getHREF()
@@ -300,6 +319,7 @@ public class FB2toPDF
     }
 
     private ParagraphStyle currentStyle;
+    private PdfOutline currentOutline;
 
     private void processDescription(org.w3c.dom.Element description)
         throws FB2toPDFException, DocumentException
@@ -360,7 +380,7 @@ public class FB2toPDF
         String firstName = getTextContentByTagName(author, "first-name");
         String middleName = getTextContentByTagName(author, "middle-name");
         String lastName = getTextContentByTagName(author, "last-name");
-        return String.format("%s %s %s", firstName, middleName, lastName);
+        return String.format("%s %s %s", firstName, middleName, lastName).trim();
     }
     
     private void addMetaInfo(org.w3c.dom.Element description)
@@ -370,31 +390,43 @@ public class FB2toPDF
         if (titleInfo != null)
         {
             ElementCollection authors = ElementCollection.childrenByTagName(titleInfo, "author");
+            StringBuilder allAuthors = new StringBuilder();
             for (int i = 0; i < authors.getLength(); ++i)
             {
                 org.w3c.dom.Element author = authors.item(i);
                 String authorName = getAuthorFullName(author);
                 System.out.println("Adding author: " + transliterate(authorName));
                 doc.addAuthor(transliterate(authorName));
+
+                if(allAuthors.length() > 0)
+                    allAuthors.append(", ");
+                allAuthors.append(transliterate(authorName));
             }
+
+            if (allAuthors.length() > 0)
+                doc.addAuthor(allAuthors.toString());
 
             org.w3c.dom.Element bookTitle = getOptionalChildByTagName(titleInfo, "book-title");
-            org.w3c.dom.Element sequence = getOptionalChildByTagName(titleInfo, "sequence");
+            ElementCollection sequences = ElementCollection.childrenByTagName(titleInfo, "sequence");
 
-            if (bookTitle != null && sequence == null)
+            if (bookTitle != null && sequences.getLength() == 0)
             {
                 String titleString = bookTitle.getTextContent();
                 doc.addTitle(transliterate(titleString));
                 System.out.println("Adding title: " + transliterate(titleString));
             }
-            else if (bookTitle != null && sequence != null)
+            else if (bookTitle != null && sequences.getLength() != 0)
             {
-                String titleString = bookTitle.getTextContent();
-                String subtitle = "(" + sequence.getAttribute("name") + " #" + sequence.getAttribute("number") + ")";
+                for(int i = 0; i < sequences.getLength(); i++)
+                {
+                    String subtitle = getSequenceSubtitle(sequences.item(i));
+                    doc.addTitle(transliterate(subtitle));
+                    System.out.println("Adding subtitle: " + transliterate(subtitle));
+                }
 
+                String titleString = bookTitle.getTextContent();
                 doc.addTitle(transliterate(titleString));
                 System.out.println("Adding title: " + transliterate(titleString));
-                doc.addTitle(transliterate(subtitle));
             }
         }
     }
@@ -465,22 +497,24 @@ public class FB2toPDF
             }
 
             org.w3c.dom.Element bookTitle = getOptionalChildByTagName(titleInfo, "book-title");
-            org.w3c.dom.Element sequence = getOptionalChildByTagName(titleInfo, "sequence");
+            ElementCollection sequences = ElementCollection.childrenByTagName(titleInfo, "sequence");
 
-            if (bookTitle != null && sequence == null)
+            if (bookTitle != null && sequences.getLength() == 0)
             {
                 addLine(" ", titleStyle);
                 addLine(bookTitle.getTextContent(), titleStyle);
                 addLine(" ", titleStyle);
             }
-            else if (bookTitle != null && sequence != null)
+            else if (bookTitle != null && sequences.getLength() != 0)
             {
-                String subtitle = "(" + sequence.getAttribute("name") + " #" + sequence.getAttribute("number") + ")";
-
                 addLine(" ", titleStyle);
                 addLine(bookTitle.getTextContent(), titleStyle);
-                addLine(subtitle,                   subtitleStyle);
-                addLine(" ", titleStyle);
+                for(int i = 0; i < sequences.getLength(); i++)
+                {
+                    String subtitle = getSequenceSubtitle(sequences.item(i));
+                    addLine(subtitle, subtitleStyle);
+                    addLine(" ", titleStyle);
+                }
             }
 
             org.w3c.dom.Element annotation = getOptionalChildByTagName(titleInfo, "annotation");
@@ -498,7 +532,7 @@ public class FB2toPDF
 
     private Image getImage(String href)
     {
-        System.err.println("Loading image at " + href);
+        System.out.println("Loading image at " + href);
         for (int i = 0; i < attachments.size(); ++i)
         {
             BinaryAttachment attachment = attachments.elementAt(i);
@@ -534,7 +568,8 @@ public class FB2toPDF
         // XXX TODO processEpigraphs(body);
 
         currentStyle = stylesheet.getParagraphStyle("body");
-        processSections(body);
+        //processSections(body);
+        processSectionContent(body, -1);
         currentStyle = null;
     }
 
@@ -564,10 +599,10 @@ public class FB2toPDF
             Anchor anchor = tocItemStyle.createAnchor();
             anchor.add(chunk);
             String ref = section.getAttribute("id");
-            if(ref.isEmpty())
+            if(isNullOrEmpty(ref))
                 ref = "section" + i;
             anchor.setReference("#" + ref);
-            System.err.println("Adding A HREF=#" + ref);
+            System.out.println("Adding A HREF=#" + ref);
 
             Paragraph para = tocItemStyle.createParagraph();
             para.add(anchor);
@@ -578,6 +613,7 @@ public class FB2toPDF
         doc.newPage();
     }
 
+    /*
     private void processSections(org.w3c.dom.Element body)
         throws DocumentException, FB2toPDFException
     {
@@ -590,16 +626,35 @@ public class FB2toPDF
         }
 
     }
+     */
+
+    private PdfOutline addBookmark(String title)
+    {
+        System.out.println("Adding bookmark: " + transliterate(title));
+        PdfDestination destination = new PdfDestination(PdfDestination.FITH);
+        return new PdfOutline(currentOutline, destination, transliterate(title));
+    }
 
     private void processSection(org.w3c.dom.Element section, int level, int index)
         throws DocumentException, FB2toPDFException
     {
+        PdfOutline previousOutline = currentOutline;
+
         if (level == 0)
+        {
             doc.newPage();
+            if (bodyIndex == 0)
+            {
+                currentOutline = writer.getDirectContent().getRootOutline();
+                currentOutline = addBookmark(getTextContentByTagName(section, "title"));
+            }
+        }
         else if (level == 1)
         {
             if (writer.getVerticalPosition(false) < doc.getPageSize().getHeight() * 0.5f)
                 doc.newPage();
+            if (bodyIndex == 0)
+                addBookmark(getTextContentByTagName(section, "title"));
         }
 
         String id = section.getAttribute("id");
@@ -612,7 +667,7 @@ public class FB2toPDF
             Anchor anchor = currentStyle.createInvisibleAnchor();
             anchor.setName(id);
             doc.add(anchor);
-            System.err.println("Adding A NAME=" + id);
+            System.out.println("Adding A NAME=" + id);
         }
 
 /* XXX TODO
@@ -638,6 +693,8 @@ public class FB2toPDF
 */
 
         processSectionContent(section, level);
+
+        currentOutline = previousOutline;
     }
 
     private void addEmptyLine()
@@ -905,14 +962,14 @@ public class FB2toPDF
     {
         if (currentChunk != null)
         {
-            if (currentReference != null && !currentReference.isEmpty())
+            if (!isNullOrEmpty(currentReference))
             {
                 if (currentReference.charAt(0) == '#')
                 {
                     //Unlike Anchor, Action won't fail even when local destination does not exist
                     String refname = currentReference.substring(1); //getting rid of "#" at the begin of the reference
                     PdfAction action = PdfAction.gotoLocalPage(refname, false);
-                    System.err.println("Adding Action LocalGoTo " + refname);
+                    System.out.println("Adding Action LocalGoTo " + refname);
                     currentChunk.setAction(action);
                     currentParagraph.add(currentChunk);
                 }
@@ -921,7 +978,7 @@ public class FB2toPDF
                     Anchor anchor = currentStyle.createAnchor();
                     anchor.add(currentChunk);
                     anchor.setReference(currentReference);
-                    System.err.println("Adding A HREF=" + currentReference);
+                    System.out.println("Adding A HREF=" + currentReference);
                     currentParagraph.add(anchor);
                 }
             }
@@ -977,7 +1034,7 @@ public class FB2toPDF
                         Anchor anchor = currentStyle.createInvisibleAnchor();
                         anchor.setName(citeId);
                         currentParagraph.add(anchor);
-                        System.err.println("Adding A NAME=" + citeId);
+                        System.out.println("Adding A NAME=" + citeId);
                     }
                     processParagraphContent(child);
                     flushCurrentChunk();
@@ -1021,7 +1078,7 @@ public class FB2toPDF
                 if (currentChunk == null)
                 {
                     currentChunk = currentStyle.createChunk();
-                    currentChunk.setHyphenation(hyphen_ru);
+                    currentChunk.setHyphenation(hyphenation);
                 }
 
                 String text = node.getTextContent();
@@ -1116,8 +1173,11 @@ public class FB2toPDF
         {"\u0490", "G"},
     };
 
-    private static String transliterate(String text)
+    private String transliterate(String text)
     {
+        if (!stylesheet.getGeneralSettings().transliterateMetaInfo)
+            return text;
+
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < text.length(); ++i)
         {
@@ -1139,7 +1199,13 @@ public class FB2toPDF
     public static void translate(String fromName, String toName)
          throws DocumentException, IOException, FB2toPDFException, ParserConfigurationException, SAXException
     {
-        new FB2toPDF(fromName, toName).run();
+        translate(fromName, toName, null);
+    }
+
+    public static void translate(String fromName, String toName, InputStream stylesheet)
+         throws DocumentException, IOException, FB2toPDFException, ParserConfigurationException, SAXException
+    {
+        new FB2toPDF(fromName, toName).run(stylesheet);
     }
 
     public static void main(String [] args) 
@@ -1148,7 +1214,7 @@ public class FB2toPDF
         {
             if(args.length < 2)
             {
-                System.err.println("Usage: java " + FB2toPDF.class.getName() + " <input.fb2> <output.pdf>");
+                System.out.println("Usage: java " + FB2toPDF.class.getName() + " <input.fb2> <output.pdf>");
                 return;
             }
             translate(args[0], args[1]);
@@ -1157,5 +1223,37 @@ public class FB2toPDF
         {
             e.printStackTrace();
         }
+    }
+
+
+    private String getLang(org.w3c.dom.Element description) throws FB2toPDFException
+    {
+        org.w3c.dom.Element titleInfo = getOptionalChildByTagName(description, "title-info");
+        if (titleInfo != null)
+        {
+            org.w3c.dom.Element lang = getOptionalChildByTagName(titleInfo, "lang");
+            if (lang != null)
+            {
+                String langString = lang.getTextContent();
+                System.out.println("Language of the FB2: " + langString);
+                return langString;
+            }
+        }
+       System.out.println("Language of the FB2 not found");
+       return null; 
+    }
+
+    private void setupHyphenation(org.w3c.dom.Element description) throws FB2toPDFException {
+        HyphenationSettings hyphSettings = stylesheet.getHyphenationSettings();
+        if (hyphSettings.hyphenate) {
+            System.out.println("Hyphenation is on");
+            String bookLang = getLang(description);
+            if (isNullOrEmpty(bookLang) || hyphSettings.overrideLanguage)
+                bookLang = hyphSettings.defaultLanguage;
+            hyphenation = new HyphenationAuto(bookLang, "none", 2, 2);
+            System.out.println("Hyphenation language is: " + bookLang);
+        }
+        else
+            System.out.println("Hyphenation is off");
     }
 }

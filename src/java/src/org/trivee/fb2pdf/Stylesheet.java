@@ -7,11 +7,16 @@ import java.util.LinkedList;
 import com.lowagie.text.DocumentException;
 
 import com.google.gson.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 public class Stylesheet
 {
     private LinkedList<FontFamily> fontFamilies = new LinkedList<FontFamily>();
     private PageStyle pageStyle = new PageStyle();
+    private HyphenationSettings hyphenationSettings = new HyphenationSettings();
+    private GeneralSettings generalSettings = new GeneralSettings();
     private LinkedList<ParagraphStyle> paragraphStyles = new LinkedList<ParagraphStyle>();
 
     public Stylesheet()
@@ -38,6 +43,16 @@ public class Stylesheet
         return pageStyle;
     }
 
+    public HyphenationSettings getHyphenationSettings()
+    {
+        return hyphenationSettings;
+    }
+
+    public GeneralSettings getGeneralSettings()
+    {
+        return generalSettings;
+    }
+
     public ParagraphStyle getParagraphStyle(String name)
         throws FB2toPDFException
     {
@@ -59,6 +74,18 @@ public class Stylesheet
     public static Stylesheet readStylesheet(String filename)
         throws DocumentException, IOException, FB2toPDFException
     {
+        return readStylesheet(new FileReader(filename));
+    }
+
+    public static Stylesheet readStylesheet(InputStream stream)
+        throws DocumentException, IOException, FB2toPDFException
+    {
+        return readStylesheet(new InputStreamReader(stream));
+    }
+
+    public static Stylesheet readStylesheet(Reader reader)
+        throws DocumentException, IOException, FB2toPDFException
+    {
         Gson gson =
             Dimension.prepare(
             FontFamily.prepare(
@@ -68,10 +95,11 @@ public class Stylesheet
             .setPrettyPrinting()
             .create();
 
-        Stylesheet stylesheet = gson.fromJson(new FileReader(filename), Stylesheet.class);
+        Stylesheet stylesheet = gson.fromJson(reader, Stylesheet.class);
         return stylesheet;
     }
 
+    @Override
     public String toString()
     {
         Gson gson =
