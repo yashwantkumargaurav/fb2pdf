@@ -2,7 +2,7 @@
 -- Catalog of all  books
 -- This table refers to FB2 originals, which might be converted
 -- into multiple formats.
-CREATE TABLE IF NOT EXISTS Books
+CREATE TABLE IF NOT EXISTS OriginalBooks
 (
         id          INT NOT NULL AUTO_INCREMENT,
         
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS ConvertedBooks
         INDEX   converted_idx (converted),
         INDEX   counter_idx (counter),
         FOREIGN KEY(format) REFERENCES  Formats(id) ON UPDATE CASCADE ON DELETE CASCADE,
-        FOREIGN KEY(book_id) REFERENCES Books(id)   ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(book_id) REFERENCES OriginalBooks(id)   ON UPDATE CASCADE ON DELETE CASCADE,
         PRIMARY KEY(id)
 
 ) TYPE=INNODB;
