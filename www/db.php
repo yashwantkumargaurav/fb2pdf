@@ -29,6 +29,7 @@ class DB
     }
     
     // Insert a new book
+    //TODO: need to pass FORMAT parameter
     function insertBook($storageKey, $author, $title, $isbn, $md5, $status)
     {
         if (!$this->_connect())
@@ -40,7 +41,8 @@ class DB
         $isbn       = mysql_real_escape_string($isbn);
         $status     = mysql_real_escape_string($status);
         $md5        = mysql_real_escape_string($md5);
-        
+
+        //TODO: change
         $query = "INSERT INTO Books (storage_key, author, title, isbn, md5hash, status, converted) 
             VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", \"$status\",  UTC_TIMESTAMP())";
         if (!$this->_execQuery($query))
@@ -51,6 +53,7 @@ class DB
     }
     
     // Updade status
+    //TODO: need to pass FORMAT parameter
     function updateBookStatus($storageKey, $status, $ver)
     {
         if (!$this->_connect())
@@ -60,6 +63,7 @@ class DB
         $status     = mysql_real_escape_string($status);
         $ver        = mysql_real_escape_string($ver);
         
+        //TODO: change
         $query = "UPDATE Books SET status = \"$status\",  conv_ver = $ver, converted = UTC_TIMESTAMP() WHERE storage_key = \"$storageKey\"";
         if (!$this->_execQuery($query))
             return false;
@@ -69,6 +73,7 @@ class DB
     }
     
     // Updade status
+    //TODO: need to pass FORMAT parameter
     function updateBookCounter($storageKey)
     {
         if (!$this->_connect())
@@ -76,6 +81,7 @@ class DB
             
         $storageKey = mysql_real_escape_string($storageKey);
         
+        //TODO: change
         $query = "UPDATE Books SET counter = counter + 1 WHERE storage_key = \"$storageKey\"";
         if (!$this->_execQuery($query))
             return false;
@@ -92,7 +98,7 @@ class DB
             
         $storageKey = mysql_real_escape_string($storageKey);
         
-        $query = "DELETE FROM Books WHERE storage_key = \"$storageKey\"";
+        $query = "DELETE FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
         if (!$this->_execQuery($query))
             return false;
         
@@ -105,8 +111,11 @@ class DB
     {
         if (!$this->_connect())
             return false;
-            
-        $query = "SELECT * FROM Books WHERE status = \"r\" ORDER BY id DESC LIMIT $number";
+
+        //TODO: this query does not use indices! Needs to be optimized
+        $query = "SELECT DISTINCT author, title, storage_key" . 
+        " FROM OriginalBooks b JOIN ConvertedBooks c ON b.id=c.book_id AND status = \"r\"" .
+        " ORDER BY b.id DESC LIMIT $number"
         if (!$this->_execQuery($query))
             return false;
         
@@ -118,32 +127,7 @@ class DB
         $this->_freeQuery();
         return $list;
     }
-    //Get books by parcial author
-    function getBooksByParcialAuthor($author, $number)
-    {
-        if (!is_numeric($number))
-            return false;
-            
-        if (!$this->_connect())
-            return false;
-            
-        $author = mysql_real_escape_string($author);
-        
-        $query = "SELECT * FROM Books WHERE author LIKE \"%$author%\" AND status = \"r\" ORDER BY title DESC";
-        if ($number > 0)
-            $query = $query . " LIMIT $number";
-            
-        if (!$this->_execQuery($query))
-            return false;
-        
-        $list = array();
-        $count = 0;
-        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
-            $list[$count++] = $row;
-        
-        $this->_freeQuery();
-        return $list;
-    }
+    
     // Get list of books by author.
     // if number == 0, no limit
     function getBooksByAuthor($author, $number)
@@ -155,8 +139,11 @@ class DB
             return false;
             
         $author = mysql_real_escape_string($author);
-        
-        $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY title DESC";
+
+        //TODO: this query does not use indices! Needs to be optimized
+        $query = "SELECT DISTINCT title, storage_key FROM OriginalBooks b".
+        " JOIN ConvertedBooks c ON b.id=c.book_id AND status = \"r\"" .
+        " WHERE author=\"$author\" ORDER BY title DESC"
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
