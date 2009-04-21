@@ -1,11 +1,7 @@
 #summary Project TODO list
+#labels Phase-Requirements
 
-== Not yet implemented ==
-
-  * 'table'
-  * Web Design
+  * Support for multiple output devices: iPhone, JetBook, etc.
+  * Allow users to customize PDF generation (fonts, margins, spacing, etc.)
   * 'image' elemnt support for external images referenced by URL
-
-== Ideas ==
-
-  * Convert images in unsupported formats using imagemagic
+  * Convert images in unsupported formats using ImageMagick
