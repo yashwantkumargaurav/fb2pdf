@@ -16,7 +16,16 @@ CREATE TABLE IF NOT EXISTS OriginalBooks
         
         -- md5 of the book's content
         md5hash     VARCHAR(32)  NOT NULL,
-        
+
+        -- When book was submitted
+        submitted   DATETIME NULL,
+
+        -- whenever this books is valid
+        -- The book is marked valid if it have been processed
+        -- by backend at least once.
+        valid      BOOLEAN DEFAULT FALSE,
+
+               
         INDEX   storage_key_idx (storage_key),
         INDEX   author_idx (author),
         
