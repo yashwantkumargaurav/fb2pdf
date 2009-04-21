@@ -25,9 +25,8 @@ CREATE TABLE IF NOT EXISTS OriginalBooks
         -- by backend at least once.
         valid      BOOLEAN DEFAULT FALSE,
 
-               
         INDEX   storage_key_idx (storage_key),
-        INDEX   author_idx (author),
+        INDEX   author_idx (valid, author),
         
         UNIQUE  storage_key_uniq (storage_key),
         UNIQUE  md5hash_uniq (md5hash),
