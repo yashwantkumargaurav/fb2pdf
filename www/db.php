@@ -63,7 +63,7 @@ class DB
         $status     = mysql_real_escape_string($status);
         $ver        = mysql_real_escape_string($ver);
         
-        //TODO: change
+        //TODO: change to update ConvertedBooks. Also change 'valid' in OriginalBooks
         $query = "UPDATE Books SET status = \"$status\",  conv_ver = $ver, converted = UTC_TIMESTAMP() WHERE storage_key = \"$storageKey\"";
         if (!$this->_execQuery($query))
             return false;
@@ -112,10 +112,9 @@ class DB
         if (!$this->_connect())
             return false;
 
-        //TODO: this query does not use indices! Needs to be optimized
-        $query = "SELECT DISTINCT author, title, storage_key" . 
-        " FROM OriginalBooks b JOIN ConvertedBooks c ON b.id=c.book_id AND status = \"r\"" .
-        " ORDER BY b.id DESC LIMIT $number"
+        $query = "SELECT author, title, storage_key" . 
+        " FROM OriginalBooks WHERE valid=TRUE" .
+        " ORDER BY id DESC LIMIT $number"
         if (!$this->_execQuery($query))
             return false;
         
@@ -140,10 +139,11 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-        //TODO: this query does not use indices! Needs to be optimized
-        $query = "SELECT DISTINCT title, storage_key FROM OriginalBooks b".
-        " JOIN ConvertedBooks c ON b.id=c.book_id AND status = \"r\"" .
-        " WHERE author=\"$author\" ORDER BY title DESC"
+        //TODO: see if we can get rid of filesort in this query
+        // (see mysql EXPLAIN on it)
+        $query = "SELECT title, storage_key FROM OriginalBooks ".
+        " WHERE valid=TRUE" .
+        " AND author=\"$author\" ORDER BY title DESC"
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -170,8 +170,14 @@ class DB
             return false;
             
         $author = mysql_real_escape_string($author);
+
+		$title   =    $list[$i]["title"];
+		$author  =    $list[$i]["author"];
+		$id      =    $list[$i]["id"];
+		$date    =    formatDateIntoAtom($list[$i]["submitted"]);
+		$key     =    "getfile.php?key=" . $list[$i]["storage_key"]."";
         
-        $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY id DESC";
+        $query = "SELECT id,title,author,storage_key,submitted FROM OriginalBooks WHERE author = \"$author\" AND valid=TRUE ORDER BY id DESC";
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -195,7 +201,7 @@ class DB
             
         $key = mysql_real_escape_string($key);
         
-        $query = "SELECT * FROM Books WHERE storage_key = \"$key\" LIMIT 1";
+        $query = "SELECT title,author FROM OriginalBooks WHERE storage_key = \"$key\" LIMIT 1";
         if (!$this->_execQuery($query))
             return false;
         
@@ -208,6 +214,8 @@ class DB
     }
     
     // Get book by md5
+    // TODO: this actually returns status info of converted book,
+    // so format needs to be passed as param
     function getBookByMd5($md5)
     {
         if (!$this->_connect())
@@ -233,8 +241,10 @@ class DB
     {
         if (!$this->_connect())
             return false;
-            
-        $query = "SELECT DISTINCT UPPER(LEFT(author,1)) as letter FROM Books WHERE status = \"r\"";
+
+        //TODO: see if we can get rid of 'using temporary' here.
+        // see mysql EXPLAIN
+        $query = "SELECT DISTINCT UPPER(LEFT(author,1)) as letter FROM OriginalBooks WHERE valid=TRUE";
         if (!$this->_execQuery($query))
             return false;
         
@@ -259,7 +269,7 @@ class DB
             
         $letter = mysql_real_escape_string($letter);
         
-        $query = "SELECT author, count(id) AS number FROM Books WHERE author LIKE \"$letter%\" AND status=\"r\" GROUP BY author ORDER BY author ASC";
+        $query = "SELECT author, count(id) AS number FROM OriginalBooks WHERE author LIKE \"$letter%\" AND valid=TRUE GROUP BY author ORDER BY author ASC";
         if (!$this->_execQuery($query))
             return false;
         
