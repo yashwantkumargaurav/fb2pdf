@@ -51,14 +51,20 @@ class DB
             VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
         
         $res1 = mysql_query($query);
+        if (!res1)
+        {
+            mysql_query("ROLLBACK");
+            $this->_disconnect();
+            return false;
+        }
+        
         $bookId = mysql_insert_id();
         
         // insert into ConvertedBooks
         $query = "INSERT INTO ConvertedBooks (book_id, format, status, converted)" . 
                  " VALUES($bookId, $format, \"$status\", NULL)";
         $res2 = mysql_query($query);
-        
-        if (!res1 || !res2)
+        if (!res2)
         {
             mysql_query("ROLLBACK");
             $this->_disconnect();
