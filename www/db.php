@@ -50,8 +50,7 @@ class DB
         $query = "INSERT INTO OriginalBooks (storage_key, author, title, isbn, md5hash, submitted) 
             VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
         
-        $res1 = mysql_query($query);
-        if (!res1)
+        if (!mysql_query($query))
         {
             mysql_query("ROLLBACK");
             $this->_disconnect();
@@ -63,8 +62,7 @@ class DB
         // insert into ConvertedBooks
         $query = "INSERT INTO ConvertedBooks (book_id, format, status, converted)" . 
                  " VALUES($bookId, $format, \"$status\", NULL)";
-        $res2 = mysql_query($query);
-        if (!res2)
+        if (!mysql_query($query))
         {
             mysql_query("ROLLBACK");
             $this->_disconnect();
@@ -96,22 +94,25 @@ class DB
         $query = "UPDATE ConvertedBooks SET status = \"$status\", conv_ver = $ver, converted = UTC_TIMESTAMP()" .
                  " WHERE format = $format AND book_id = IN" . 
                  " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
-        $res1 = mysql_query($query);
-
-        // update OrginalBooks if converted successfully
-        $res2 = true;
-        if (status == 'r')
-        {
-            $query = "UPDATE OriginalBooks SET valid = TRUE WHERE storage_key = \"$storageKey\"";
-            $res2 = mysql_query($query);
-        }
-        
-        if (!res1 || !res2)
+        if (!mysql_query($query))
         {
             mysql_query("ROLLBACK");
             $this->_disconnect();
             return false;
         }
+
+        // update OrginalBooks if converted successfully
+        if (status == 'r')
+        {
+            $query = "UPDATE OriginalBooks SET valid = TRUE WHERE storage_key = \"$storageKey\"";
+            if (!mysql_query($query))
+            {
+                mysql_query("ROLLBACK");
+                $this->_disconnect();
+                return false;
+            }
+        }
+        
         
         mysql_query("COMMIT");
 
