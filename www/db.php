@@ -271,7 +271,9 @@ class DB
             return false;
             
         $md5 = mysql_real_escape_string($md5);
-        
+
+        //TODO: this query does not use indices. Add indices to approriate tables.
+        // see mysql EXPLAIN
         $query = "SELECT OriginalBooks.storage_key AS storage_key, ConvertedBooks.status AS status, ConvertedBooks.conv_ver AS conv_ver" .                 " FROM OriginalBooks" . 
                  " INNER JOIN ConvertedBooks ON OriginalBooks.id = ConvertedBooks.book_id" . 
                  " WHERE OriginalBooks.md5hash = \"$md5\" AND ConvertedBooks.format = $format" . 
