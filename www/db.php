@@ -54,8 +54,8 @@ class DB
         $bookId = mysql_insert_id();
         
         // insert into ConvertedBooks
-        $query = "INSERT INTO ConvertedBooks (book_id, format, status, converted) 
-            VALUES(\"$bookId\", \"$format\", \"$status\", NULL)";
+        $query = "INSERT INTO ConvertedBooks (book_id, format, status, converted)" . 
+                 " VALUES($bookId, $format, \"$status\", NULL)";
         $res2 = mysql_query($query);
         
         if (!res1 || !res2)
@@ -88,7 +88,8 @@ class DB
         
         // update ConvertedBooks status
         $query = "UPDATE ConvertedBooks SET status = \"$status\", conv_ver = $ver, converted = UTC_TIMESTAMP()" .
-            " WHERE book_id = IN (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
+                 " WHERE format = $format AND book_id = IN" . 
+                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
         $res1 = mysql_query($query);
 
         // update OrginalBooks if converted successfully
@@ -123,8 +124,9 @@ class DB
             
         $storageKey = mysql_real_escape_string($storageKey);
         
-        $query = "UPDATE ConvertedBooks SET counter = counter + 1 WHERE book_id IN (".
-            " SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
+        $query = "UPDATE ConvertedBooks SET counter = counter + 1" . 
+                 " WHERE format = $format AND book_id IN" .
+                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
         if (!$this->_execQuery($query))
             return false;
         
@@ -253,16 +255,20 @@ class DB
     }
     
     // Get book by md5
-    // TODO: this actually returns status info of converted book,
-    // so format needs to be passed as param
-    function getBookByMd5($md5)
+    function getBookByMd5($md5, $format = 1)
     {
+        if (!is_numeric($format))
+            return false;
+            
         if (!$this->_connect())
             return false;
             
         $md5 = mysql_real_escape_string($md5);
         
-        $query = "SELECT * FROM Books WHERE md5hash = \"$md5\" LIMIT 1";
+        $query = "SELECT OriginalBooks.storage_key AS storage_key, ConvertedBooks.status AS status, ConvertedBooks.conv_ver AS conv_ver" .                 " FROM OriginalBooks" . 
+                 " INNER JOIN ConvertedBooks ON OriginalBooks.id = ConvertedBooks.book_id" . 
+                 " WHERE OriginalBooks.md5hash = \"$md5\" AND ConvertedBooks.format = $format" . 
+                 " LIMIT 1";
         if (!$this->_execQuery($query))
             return false;
         
