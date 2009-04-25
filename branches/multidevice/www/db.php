@@ -29,9 +29,11 @@ class DB
     }
     
     // Insert a new book
-    //TODO: need to pass FORMAT parameter
-    function insertBook($storageKey, $author, $title, $isbn, $md5, $status)
+    function insertBook($storageKey, $author, $title, $isbn, $md5, $status, $format = 1)
     {
+        if (!is_numeric($format))
+            return false;
+            
         if (!$this->_connect())
             return false;
             
@@ -42,20 +44,39 @@ class DB
         $status     = mysql_real_escape_string($status);
         $md5        = mysql_real_escape_string($md5);
 
-        //TODO: change
-        $query = "INSERT INTO Books (storage_key, author, title, isbn, md5hash, status, converted) 
-            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", \"$status\",  UTC_TIMESTAMP())";
-        if (!$this->_execQuery($query))
-            return false;
+        mysql_query("BEGIN");
         
-        $this->_freeQuery();
+        // insert into OriginalBooks
+        $query = "INSERT INTO OriginalBooks (storage_key, author, title, isbn, md5hash, submitted) 
+            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
+        
+        $res1 = mysql_query($query);
+        $bookId = mysql_insert_id();
+        
+        // insert into ConvertedBooks
+        $query = "INSERT INTO ConvertedBooks (book_id, format, status, converted) 
+            VALUES(\"$bookId\", \"$format\", \"$status\", NULL)";
+        $res2 = mysql_query($query);
+        
+        if (!res1 || !res2)
+        {
+            mysql_query("ROLLBACK");
+            $this->_disconnect();
+            return false;
+        }
+        
+        mysql_query("COMMIT");
+        
+        $this->_disconnect();
         return true;
     }
     
     // Updade status
-    //TODO: need to pass FORMAT parameter
-    function updateBookStatus($storageKey, $status, $ver)
+    function updateBookStatus($storageKey, $status, $ver, $format = 1)
     {
+        if (!is_numeric($format))
+            return false;
+            
         if (!$this->_connect())
             return false;
             
@@ -63,30 +84,51 @@ class DB
         $status     = mysql_real_escape_string($status);
         $ver        = mysql_real_escape_string($ver);
         
-        //TODO: change to update ConvertedBooks. Also change 'valid' in OriginalBooks
-        $query = "UPDATE Books SET status = \"$status\",  conv_ver = $ver, converted = UTC_TIMESTAMP() WHERE storage_key = \"$storageKey\"";
-        if (!$this->_execQuery($query))
-            return false;
+        mysql_query("BEGIN");
         
-        $this->_freeQuery();
+        // update ConvertedBooks status
+        $query = "UPDATE ConvertedBooks SET status = \"$status\", conv_ver = $ver, converted = UTC_TIMESTAMP()" .
+            " WHERE book_id = IN (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
+        $res1 = mysql_query($query);
+
+        // update OrginalBooks if converted successfully
+        $res2 = true;
+        if (status == 'r')
+        {
+            $query = "UPDATE OriginalBooks SET valid = TRUE WHERE storage_key = \"$storageKey\"";
+            $res2 = mysql_query($query);
+        }
+        
+        if (!res1 || !res2)
+        {
+            mysql_query("ROLLBACK");
+            $this->_disconnect();
+            return false;
+        }
+        
+        mysql_query("COMMIT");
+
+        $this->_disconnect();
         return true;
     }
     
     // Updade status
-    //TODO: need to pass FORMAT parameter
-    function updateBookCounter($storageKey)
+    function updateBookCounter($storageKey, $format = 1)
     {
+        if (!is_numeric($format))
+            return false;
+            
         if (!$this->_connect())
             return false;
             
         $storageKey = mysql_real_escape_string($storageKey);
         
-        //TODO: change
-        $query = "UPDATE Books SET counter = counter + 1 WHERE storage_key = \"$storageKey\"";
+        $query = "UPDATE ConvertedBooks SET counter = counter + 1 WHERE book_id IN (".
+            " SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
         if (!$this->_execQuery($query))
             return false;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return true;
     }
     
@@ -102,19 +144,22 @@ class DB
         if (!$this->_execQuery($query))
             return false;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return true;
     }
     
     // Get list of books
     function getBooks($number)
     {
+        if (!is_numeric($number))
+            return false;
+            
         if (!$this->_connect())
             return false;
 
         $query = "SELECT author, title, storage_key" . 
         " FROM OriginalBooks WHERE valid=TRUE" .
-        " ORDER BY id DESC LIMIT $number"
+        " ORDER BY id DESC LIMIT $number";
         if (!$this->_execQuery($query))
             return false;
         
@@ -123,7 +168,7 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list[$count++] = $row;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -143,7 +188,7 @@ class DB
         // (see mysql EXPLAIN on it)
         $query = "SELECT title, storage_key FROM OriginalBooks ".
         " WHERE valid=TRUE" .
-        " AND author=\"$author\" ORDER BY title DESC"
+        " AND author=\"$author\" ORDER BY title DESC";
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -155,7 +200,7 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list[$count++] = $row;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -171,12 +216,6 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-		$title   =    $list[$i]["title"];
-		$author  =    $list[$i]["author"];
-		$id      =    $list[$i]["id"];
-		$date    =    formatDateIntoAtom($list[$i]["submitted"]);
-		$key     =    "getfile.php?key=" . $list[$i]["storage_key"]."";
-        
         $query = "SELECT id,title,author,storage_key,submitted FROM OriginalBooks WHERE author = \"$author\" AND valid=TRUE ORDER BY id DESC";
         if ($number > 0)
             $query = $query . " LIMIT $number";
@@ -189,7 +228,7 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list[$count++] = $row;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
 
@@ -209,7 +248,7 @@ class DB
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list = $row;
             
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -231,7 +270,7 @@ class DB
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list = $row;
             
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -255,7 +294,7 @@ class DB
             $list[$letter] = $letter;
         }
             
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -278,7 +317,7 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
             $list[$count++] = $row;
             
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -318,7 +357,7 @@ class DB
         return true;
     }
     
-    function _freeQuery()
+    function _disconnect()
     {
         if (($this->result !== true) and ($this->result !== false))
             mysql_free_result($this->result);
