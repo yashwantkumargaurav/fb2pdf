@@ -133,7 +133,7 @@ class DB
         
         $query = "UPDATE ConvertedBooks SET counter = counter + 1" . 
                  " WHERE format = $format AND book_id IN" .
-                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
+                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
         if (!$this->_execQuery($query))
             return false;
         
@@ -374,7 +374,8 @@ class DB
     
     function _disconnect()
     {
-        if (($this->result !== true) and ($this->result !== false))
+        if (($this->result !== true) and ($this->result !== false)
+            and ($this->result !== NULL))
             mysql_free_result($this->result);
             
         mysql_close($this->link);
