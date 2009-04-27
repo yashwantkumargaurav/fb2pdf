@@ -92,28 +92,29 @@ class DB
         
         // update ConvertedBooks status
         $query = "UPDATE ConvertedBooks SET status = \"$status\", conv_ver = $ver, converted = UTC_TIMESTAMP()" .
-                 " WHERE format = $format AND book_id = IN" . 
-                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\" LIMIT 1)";
+                 " WHERE format = $format AND book_id IN" . 
+                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
         if (!mysql_query($query))
         {
+            error_log("Query '$query' failed. Rolling back");
             mysql_query("ROLLBACK");
             $this->_disconnect();
             return false;
         }
 
         // update OrginalBooks if converted successfully
-        if (status == 'r')
+        if ($status == 'r')
         {
             $query = "UPDATE OriginalBooks SET valid = TRUE WHERE storage_key = \"$storageKey\"";
             if (!mysql_query($query))
             {
+                error_log("Query '$query' failed. Rolling back");
                 mysql_query("ROLLBACK");
                 $this->_disconnect();
                 return false;
             }
         }
-        
-        
+
         mysql_query("COMMIT");
 
         $this->_disconnect();

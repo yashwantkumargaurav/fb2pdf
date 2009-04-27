@@ -36,7 +36,9 @@ if ($test_add)
         $status = ($i % 2 == 0) ? "r" : "e";
         $db->updateBookStatus("stkey$i", $status, 3.14);
         if ($status == "r")
+        {
             $db->updateBookCounter("stkey$i");
+        }
     }
     $db->updateBookCounter("nonexistingkey");
 
@@ -47,10 +49,7 @@ if ($test_add)
         print("No books!\n");
     } else
     {
-        foreach($arr as $a)
-        {
-            print(">>> $a\n");
-        }
+        print_r($arr);
     }
     print("<br>");
 }
@@ -62,10 +61,7 @@ if(count($letters)==0)
     print("No letters!\n");
 } else
 {
-    foreach($letters as $a)
-    {
-        print(">>> $a\n");
-    }
+    print_r($letters);
 
     print("<br><b>Authors:</b><br>");
     foreach ($letters as $l)
@@ -76,16 +72,12 @@ if(count($letters)==0)
             print("No authors for '%l'!\n");
         } else
         {
-            foreach($authors as $a)
-            {
-                print(">>> $a\n");
-            }
+            print_r($authors);
         }
         print ("<br>");
     }
 }
 print("<br>");
-
 
 for ($i = 0; $i < $COUNT; $i++)
     $db->deleteBook("stkey$i");
