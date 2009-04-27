@@ -4,8 +4,8 @@
 </head>
 <body>
 <?php
-require_once 'awscfg.php';
-require_once 'db.php';
+require_once 'awscfg_test.inc';
+require_once '../db.php';
 
 global $dbServer, $dbName, $dbUser, $dbPassword;
 
@@ -42,26 +42,50 @@ if ($test_add)
 
     $arr = $db->getBooks($COUNT);
     print("<br><b>Books:</b><br>");
-    print_r($arr);
+    if(count($arr)==0)
+    {
+        print("No books!\n");
+    } else
+    {
+        foreach($arr as $a)
+        {
+            print(">>> $a\n");
+        }
+    }
     print("<br>");
 }
 
 $letters = $db->getAuthorsFirstLetters();
 print("<br><b>Authors First Letter:</b><br>");
-print_r($letters);
+if(count($letters)==0)
+{
+    print("No letters!\n");
+} else
+{
+    foreach($letters as $a)
+    {
+        print(">>> $a\n");
+    }
+
+    print("<br><b>Authors:</b><br>");
+    foreach ($letters as $l)
+    {
+        $authors = $db->getAuthorsByFirstLetter($l);
+        if(count($authors)==0)
+        {
+            print("No authors for '%l'!\n");
+        } else
+        {
+            foreach($authors as $a)
+            {
+                print(">>> $a\n");
+            }
+        }
+        print ("<br>");
+    }
+}
 print("<br>");
 
-print("<br><b>Authors:</b><br>");
-foreach ($letters as $l)
-{
-    $authors = $db->getAuthorsByFirstLetter($l);
-    print_r($authors);
-    print ("<br>");
-}
-
-
-
-die;
 
 for ($i = 0; $i < $COUNT; $i++)
     $db->deleteBook("stkey$i");
