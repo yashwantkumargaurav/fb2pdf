@@ -36,7 +36,29 @@ if ($bookInfo)
 </head>
 <body>
 
-<center>
+
+<div id="survey-prompt" style="background-color:white;z-index:99999;padding:2;position:absolute;top:20px;left:5px;width:275px">
+
+
+Мы проводим небольшой опрос пользователей, чтобы
+решить как мы можем улучшить сайт. Мы будем
+благодарны если вы потратите пару минут вашего
+времени чтобы ответить на несколько вопросов.
+<br><br>
+<b><a href="http://www.surveymonkey.com/s.aspx?sm=TNNb2tslWSrdK6TvgPa_2fsA_3d_3d" target="_blank">[Принять участие в опросе]</a></b>
+<i>(опрос отроется в новом окне броузера)</i>.
+<br>
+<script type="text/javascript">
+function hideSurveyPrompt()
+{
+    document.getElementById("survey-prompt").style.display="none";
+}
+
+</script>
+<a href="javascript:hideSurveyPrompt()">[спрятать]</a>
+</div>
+
+<center>  
 <div id="container" class="WidthPage">
     <?php 
     include 'header.inc.php'; 
