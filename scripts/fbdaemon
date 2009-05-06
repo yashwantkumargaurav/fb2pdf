@@ -197,6 +197,7 @@ def processMessage(m):
     processDocument(str(src_url), str(src_type), src_name, str(src_encoding),
                     str(res_key), str(res_encoding),
                     str(log_key),
+                    conv_options,
                     callbacks)
 
 def upload_file(bucket, key, filename, disp='attachment'):
@@ -246,7 +247,7 @@ def processCallbacks(res_key, status, callbacks):
         except:
             logging.getLogger('fbdaemon').exception("Error calling callback %s" % c['url'])
 
-def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_encoding, log_key, callbacks):
+def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_encoding, log_key, conv_options, callbacks):
 
     global cfg
     bucket = cfg.get('storage','bucket')
