@@ -159,7 +159,7 @@ def processMessage(m):
     res_encoding = results[0].getAttribute('encoding')
 
     conv_options = {}
-    parameters = results.getElementsByTagName('parameter')
+    parameters = root.getElementsByTagName('parameter')
     for p in parameters:
         p_name  = src.getAttribute('name')
         p_value = src.getAttribute('value')
