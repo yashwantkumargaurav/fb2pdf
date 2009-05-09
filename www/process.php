@@ -36,7 +36,7 @@ class ConvertBook
     const TEST_MODE = false; // set false on prod.
     
     // Process book from file uploaded via POST
-    public function convertFromFile($filePath, $fileName, $email = null)
+    public function convertFromFile($filePath, $fileName, $email = null, $format = null)
     {
         $this->email = $email;
         
@@ -55,7 +55,7 @@ class ConvertBook
         $exc = null;
         try
         {
-            $this->convert($tempFile, $fileName);
+  	    $this->convert($tempFile, $fileName, $format);
         }
         catch (Exception $e)
         {
@@ -71,7 +71,7 @@ class ConvertBook
     }
     
     // Process book from url
-    public function convertFromUrl($url, $email = null)
+    public function convertFromUrl($url, $email = null, $format = null)
     {
         $this->email = $email;
         
@@ -87,7 +87,7 @@ class ConvertBook
         $exc = null;
         try
         {
-            $this->convert($tempFile, $url);
+	  $this->convert($tempFile, $url, $format);
         }
         catch (Exception $e)
         {
@@ -129,7 +129,7 @@ class ConvertBook
     }
     
     // Convert file
-    private function convert($filePath, $fileName)
+    private function convert($filePath, $fileName, $format)
     {
         $this->zipFile  = null;
         $this->fbFile   = null;
