@@ -336,7 +336,27 @@ class DB
         $this->_disconnect();
         return $list;
     }
-    
+
+    // Get list of formats
+    function getFormats() 
+    {
+        if (!$this->_connect())
+            return false;
+
+	$query = "SELECT id,title FROM Formats ORDER BY id";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+    }
+      
     // Internal methods
     function _connect()
     {
