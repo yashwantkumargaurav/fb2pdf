@@ -14,7 +14,7 @@ try
     {
         $file = ($url) ? $url : $_POST['url'];
             
-        $conv->convertFromUrl($file, $email, $format);
+        $conv->convertFromUrl($file, $format, $email);
     }
     else if ($_POST['uploadtype'] == 'file')
     {
@@ -25,7 +25,7 @@ try
             $path = $_FILES['fileupload']['tmp_name'];
             $file = $_FILES['fileupload']['name'];
             
-            $conv->convertFromFile($path, $file, $email, $format);
+            $conv->convertFromFile($path, $file, $format, $email);
         }
         else
         {
