@@ -19,7 +19,7 @@ class ConvertBook
     
     public  $book     = null;
     public  $bookKey  = null;
-    
+
     // Error codes for Exception
     const ERR_ILLEGAL_ARG   = 1; // illegal agrument
     const ERR_LOAD          = 2; // unable to load file 
@@ -36,7 +36,7 @@ class ConvertBook
     const TEST_MODE = false; // set false on prod.
     
     // Process book from file uploaded via POST
-    public function convertFromFile($filePath, $fileName, $email = null, $format = null)
+    public function convertFromFile($filePath, $fileName, $format, $email = null)
     {
         $this->email = $email;
         
@@ -71,7 +71,7 @@ class ConvertBook
     }
     
     // Process book from url
-    public function convertFromUrl($url, $email = null, $format = null)
+    public function convertFromUrl($url, $format, $email = null)
     {
         $this->email = $email;
         
@@ -103,7 +103,7 @@ class ConvertBook
     }
     
     // This method should be called from callback when conversion is done
-    public function converted($email, $password, $key, $status, $ver)
+    public function converted($email, $password, $key, $status, $ver, $format)
     {
         global $secret;
         
@@ -120,7 +120,7 @@ class ConvertBook
         {
             // update status in the DB
             $db = getDBObject();
-            if (!$db->updateBookStatus($key, $status, $ver))
+            if (!$db->updateBookStatus($key, $status, $ver, $format))
                 error_log("FB2PDF ERROR. Unable to update book status. Key=$key"); 
 
             // send email to user
@@ -169,7 +169,7 @@ class ConvertBook
         // process book
         if (!self::TEST_MODE)
         {
-            $status = $this->checkBook($md5);
+	    $status = $this->checkBook($md5, $format);
             if ($status == self::DB_BOOK_CONVERTED) // book is up-to-date
             {
                 $this->notifyUserByEmail($this->email, $this->bookKey, "r");
@@ -179,16 +179,16 @@ class ConvertBook
             if ($status == self::DB_BOOK_NOT_FOUND)
             {
                 // Insert a new book
-                $this->insertBook($md5);
+  	        $this->insertBook($md5, $format);
             }
             else if ($status == self::DB_BOOK_RECONVERT)
             {
                 // Prepare book for reconverting 
-                $this->updateBook();
+                $this->updateBook($format);
             }
                 
             // Send request to convert book
-            $this->requestConvert();
+            $this->requestConvert($format);
         }
     }
     
@@ -222,7 +222,7 @@ class ConvertBook
     
     // Check if book is already converted.
     // Returns DB_BOOK_* constants (see above)
-    private function checkBook($md5)
+    private function checkBook($md5, $format)
     {
         global $convVersion;
         
@@ -231,7 +231,7 @@ class ConvertBook
         // check if this book already exists
         $status = self::DB_BOOK_NOT_FOUND;
         
-        $bookInfo = $db->getBookByMd5($md5);
+        $bookInfo = $db->getBookByMd5($md5, $format);
         if ($bookInfo)
         {
             $this->bookKey = $bookInfo["storage_key"];
@@ -253,7 +253,7 @@ class ConvertBook
     }
     
     // Insert a new book to be converted
-    private function insertBook($md5)
+    private function insertBook($md5, $format)
     {
         global $awsS3Bucket;
         
@@ -269,7 +269,7 @@ class ConvertBook
         // save to DB
         $db = getDBObject();
         
-        if (!$db->insertBook($key . ".zip", $this->book->author, $this->book->title, $this->book->isbn, $md5, "p"))
+        if (!$db->insertBook($key . ".zip", $this->book->author, $this->book->title, $this->book->isbn, $md5, "p", $format))
         {
             error_log("FB2PDF ERROR. Unable to insert book with key $key.zip into DB."); 
             // do not stop if DB is failed!
@@ -277,14 +277,14 @@ class ConvertBook
     }
     
     // Update an existing book to be reconverted 
-    private function updateBook()
+    private function updateBook($format)
     {
         global $awsS3Bucket;
         
         // update book status in the DB
         $db = getDBObject();
         
-        if (!$db->updateBookStatus($this->bookKey, "p", 0))
+        if (!$db->updateBookStatus($this->bookKey, "p", 0, $format))
         {
             error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$$this->bookKey"); 
             // do not stop if DB is failed!
@@ -309,7 +309,7 @@ class ConvertBook
     }
     
     // Send request to convert book
-    private function requestConvert()
+    private function requestConvert($format)
     {
         global $awsS3Bucket, $secret;
         
@@ -317,7 +317,12 @@ class ConvertBook
         
         // send SQS message
         $callbackUrl = getFullUrl("conv_callback.php");
-        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $this->fileName, $callbackUrl, md5($secret . $key . ".zip"), $this->email))
+
+        $db =  getDBObject();
+
+        $formatParams = $db->getFormatParameters($format);
+
+        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $this->fileName, $callbackUrl, md5($secret . $key . ".zip"), $this->email, $formatParams))
             throw new Exception("Unable to send Amazon SQS message for key $key.", self::ERR_CONVERT);
     }
 

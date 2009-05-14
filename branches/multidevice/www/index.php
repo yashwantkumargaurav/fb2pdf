@@ -139,7 +139,7 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
                         $list = $db->getFormats();
                         if ($list)
                         {
-			    print "<select id=\"format\">";
+			    print "<select id=\"format\" name=\"format\">";
                             $count = count($list);
                             for ($i = 0; $i < $count ; $i++)
                             {

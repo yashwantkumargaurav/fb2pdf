@@ -11,7 +11,7 @@ if (!isset ($_GET["url"]))
 try
 {
     $conv = new ConvertBook();
-    $conv->convertFromUrl($_GET["url"]);
+    $conv->convertFromUrl($_GET["url"], $_GET["format"]);
     
     $key    = $conv->bookKey;
     $author = $conv->book->author;
