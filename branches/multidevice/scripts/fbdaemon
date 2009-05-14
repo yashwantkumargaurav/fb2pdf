@@ -161,8 +161,10 @@ def processMessage(m):
     conv_options = {}
     parameters = root.getElementsByTagName('parameter')
     for p in parameters:
-        p_name  = src.getAttribute('name')
-        p_value = src.getAttribute('value')
+        p_name  = p.getAttribute('name')
+        p_value = p.getAttribute('value')
+        logging.getLogger('fbdaemon').debug("Conversion option %s=%s" % (p_name, p_value));
+
         conv_options[p_name]=p_value
         
     logs=root.getElementsByTagName('log')
