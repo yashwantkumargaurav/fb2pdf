@@ -2,7 +2,7 @@
 require_once 'awscfg.php';
 require_once 'sqs.client.php';
 
-function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, $email, $formatParams)
+function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, $email, $format, $formatParams)
 {
     global $awsApiKey, $awsApiSecretKey, $awsSQSQueue, $awsSQSTimeout;
 
@@ -18,7 +18,7 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
             "<source url=\"$sourceUrl\" type=\"application/fb2+xml\" name=\"$name\"/>" .
             "<result key=\"$id.zip\" encoding=\"application/zip\"/>" .
             "<log key=\"$id.txt\"/>" .
-   	    "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email\"/>";
+   	    "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email;format=$format\"/>";
             foreach(array_keys($formatParams) as $name)
             {
                 $value = $formatParams[$name];

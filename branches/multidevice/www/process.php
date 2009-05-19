@@ -258,14 +258,14 @@ class ConvertBook
         global $awsS3Bucket;
         
         $key = removeExt($this->bookKey);
-        
+ 
         // save fb2 file
         $s3 = getS3Object();
         
         $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$this->fileName.fb2\"");
         if (!$s3->writeFile($awsS3Bucket, $key . ".fb2", $this->fbFile, "application/fb2+xml", "public-read", "", $httpHeaders))
             throw new Exception("Unable to store file $key.fb2 in the Amazon S3 storage.", self::ERR_CONVERT);
-            
+        
         // save to DB
         $db = getDBObject();
         
@@ -322,7 +322,7 @@ class ConvertBook
 
         $formatParams = $db->getFormatParameters($format);
 
-        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $this->fileName, $callbackUrl, md5($secret . $key . ".zip"), $this->email, $formatParams))
+        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $this->fileName, $callbackUrl, md5($secret . $key . ".zip"), $this->email, $format, $formatParams))
             throw new Exception("Unable to send Amazon SQS message for key $key.", self::ERR_CONVERT);
     }
 
