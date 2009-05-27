@@ -169,24 +169,27 @@ class ConvertBook
         // process book
         if (!self::TEST_MODE)
         {
-	    $status = $this->checkBook($md5, $format);
-            if ($status == self::DB_BOOK_CONVERTED) // book is up-to-date
+            if (!$this->checkBook($md5))
             {
-                $this->notifyUserByEmail($this->email, $this->bookKey, "r");
-                return;
+  	        $this->insertBook($md5);
             }
             
+	    $status = $this->checkFormat($format);
+            if ($status == self::DB_BOOK_CONVERTED) // book is up-to-date
+            {
+                 $this->notifyUserByEmail($this->email, $this->bookKey, "r");
+                 return;
+            }
             if ($status == self::DB_BOOK_NOT_FOUND)
             {
-                // Insert a new book
-  	        $this->insertBook($md5, $format);
+                $this->insertFormat($format);
             }
             else if ($status == self::DB_BOOK_RECONVERT)
             {
                 // Prepare book for reconverting 
-                $this->updateBook($format);
+                $this->updateFormat($format);
             }
-                
+            
             // Send request to convert book
             $this->requestConvert($format);
         }
@@ -220,40 +223,21 @@ class ConvertBook
         return $ret;
     }
     
-    // Check if book is already converted.
-    // Returns DB_BOOK_* constants (see above)
-    private function checkBook($md5, $format)
+    private function checkBook($md5)
     {
-        global $convVersion;
-        
         $db = getDBObject();
-          
-        // check if this book already exists
-        $status = self::DB_BOOK_NOT_FOUND;
-        
-        $bookInfo = $db->getBookByMd5($md5, $format);
+        $bookInfo = $db->getBookByMd5($md5);
         if ($bookInfo)
         {
             $this->bookKey = $bookInfo["storage_key"];
-            
-            // check error status and converter version
-            $bookStatus = $bookInfo["status"];
-            $bookVer    = $bookInfo["conv_ver"];
-            if (($bookStatus == 'r' and $bookVer >= $convVersion) or $bookStatus == 'p') 
-            {
-                $status = self::DB_BOOK_CONVERTED;
-            }
-            else 
-            {
-                error_log("FB2PDF INFO. Books $this->bookKey needs to be converted again. Status=$bookStatus, Version=$bookVer"); 
-                $status = self::DB_BOOK_RECONVERT;
-            }
+            return TRUE;
         }
-        return $status;
+        
+        return FALSE;
     }
     
     // Insert a new book to be converted
-    private function insertBook($md5, $format)
+    private function insertBook($md5)
     {
         global $awsS3Bucket;
         
@@ -269,7 +253,7 @@ class ConvertBook
         // save to DB
         $db = getDBObject();
         
-        if (!$db->insertBook($key . ".zip", $this->book->author, $this->book->title, $this->book->isbn, $md5, "p", $format))
+        if (!$db->insertBook($key . ".zip", $this->book->author, $this->book->title, $this->book->isbn, $md5))
         {
             error_log("FB2PDF ERROR. Unable to insert book with key $key.zip into DB."); 
             // do not stop if DB is failed!
@@ -277,7 +261,7 @@ class ConvertBook
     }
     
     // Update an existing book to be reconverted 
-    private function updateBook($format)
+    private function updateFormat($format)
     {
         global $awsS3Bucket;
         
@@ -306,6 +290,48 @@ class ConvertBook
             error_log("FB2PDF ERROR. Unable to delete log file $key.txt from the Amazon S3 storage."); 
             // do not stop if failed!
         }
+    }
+    
+    // Returns status of specified format 
+    private function checkFormat($format)
+    {
+        global $convVersion;
+        
+        $db = getDBObject();
+          
+        // check if this book already exists
+        $status = self::DB_BOOK_NOT_FOUND;
+        
+        $bookInfo = $db->getBookStatus($this->bookKey, $format);
+        if ($bookInfo)
+        {
+            // check error status and converter version
+            $bookStatus = $bookInfo["status"];
+            $bookVer    = $bookInfo["conv_ver"];
+            if (($bookStatus == 'r' and $bookVer >= $convVersion) or $bookStatus == 'p') 
+            {
+                $status = self::DB_BOOK_CONVERTED;
+            }
+            else 
+            {
+                error_log("FB2PDF INFO. Books $this->bookKey needs to be converted again. Status=$bookStatus, Version=$bookVer"); 
+                $status = self::DB_BOOK_RECONVERT;
+            }
+        }
+        return $status;
+    }
+
+    // Returns TRUE if specified format was successfully inserted 
+    private function insertFormat($format)
+    {
+        $db = getDBObject();
+        if (!$db->insertBookFormat($this->bookKey, $format))
+        {
+            error_log("FB2PDF ERROR. Unable to insert book format $format for book $this->bookKey into DB."); 
+            return TRUE;
+        }
+
+        return FALSE;
     }
     
     // Send request to convert book

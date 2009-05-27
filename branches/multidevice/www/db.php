@@ -29,7 +29,33 @@ class DB
     }
     
     // Insert a new book
-    function insertBook($storageKey, $author, $title, $isbn, $md5, $status, $format = 1)
+    function insertBook($storageKey, $author, $title, $isbn, $md5)
+    {
+        if (!$this->_connect())
+            return false;
+        
+        $storageKey = mysql_real_escape_string($storageKey);
+        $author     = mysql_real_escape_string($author);
+        $title      = mysql_real_escape_string($title);
+        $isbn       = mysql_real_escape_string($isbn);
+        $status     = mysql_real_escape_string($status);
+        $md5        = mysql_real_escape_string($md5);
+
+        // insert into OriginalBooks
+        $query = "INSERT INTO OriginalBooks (storage_key, author, title, isbn, md5hash, submitted) 
+            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
+
+        if (!mysql_query($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+        
+        $this->_disconnect();
+        return true;
+    }
+
+    function insertBookFormat($storageKey, $format)
     {
         if (!is_numeric($format))
             return false;
@@ -38,45 +64,23 @@ class DB
             return false;
             
         $storageKey = mysql_real_escape_string($storageKey);
-        $author     = mysql_real_escape_string($author);
-        $title      = mysql_real_escape_string($title);
-        $isbn       = mysql_real_escape_string($isbn);
-        $status     = mysql_real_escape_string($status);
-        $md5        = mysql_real_escape_string($md5);
+        $ver        = mysql_real_escape_string($ver);
 
-        mysql_query("BEGIN");
-        
-        // insert into OriginalBooks
-        $query = "INSERT INTO OriginalBooks (storage_key, author, title, isbn, md5hash, submitted) 
-            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
-        
+        $query = "INSERT INTO ConvertedBooks (book_id, format, status) " .
+            "SELECT id, $format, \"p\" FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+
         if (!mysql_query($query))
         {
-            mysql_query("ROLLBACK");
             $this->_disconnect();
             return false;
         }
-        
-        $bookId = mysql_insert_id();
-        
-        // insert into ConvertedBooks
-        $query = "INSERT INTO ConvertedBooks (book_id, format, status, converted)" . 
-                 " VALUES($bookId, $format, \"$status\", NULL)";
-        if (!mysql_query($query))
-        {
-            mysql_query("ROLLBACK");
-            $this->_disconnect();
-            return false;
-        }
-        
-        mysql_query("COMMIT");
         
         $this->_disconnect();
         return true;
     }
     
     // Updade status
-    function updateBookStatus($storageKey, $status, $ver, $format = 1)
+    function updateBookStatus($storageKey, $status, $ver, $format)
     {
         if (!is_numeric($format))
             return false;
@@ -122,7 +126,7 @@ class DB
     }
     
     // Updade status
-    function updateBookCounter($storageKey, $format = 1)
+    function updateBookCounter($storageKey, $format)
     {
         if (!is_numeric($format))
             return false;
@@ -180,6 +184,27 @@ class DB
         
         $this->_disconnect();
         return $list;
+    }
+    
+    // Get book formats
+    function getBookStatus($storageKey, $format)
+    {
+        if (!is_numeric($format))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+
+        $query = "SELECT status, converted, counter, conv_ver FROM ConvertedBooks " .
+            " WHERE format = $format AND book_id IN" .
+            " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $row = mysql_fetch_array($this->result, MYSQL_ASSOC);
+        
+        $this->_disconnect();
+        return $row;
     }
     
     // Get list of books by author.
@@ -263,11 +288,8 @@ class DB
     }
     
     // Get book by md5
-    function getBookByMd5($md5, $format = 1)
+    function getBookByMd5($md5)
     {
-        if (!is_numeric($format))
-            return false;
-            
         if (!$this->_connect())
             return false;
             
@@ -275,10 +297,9 @@ class DB
 
         //TODO: this query does not use indices. Add indices to approriate tables.
         // see mysql EXPLAIN
-        $query = "SELECT OriginalBooks.storage_key AS storage_key, ConvertedBooks.status AS status, ConvertedBooks.conv_ver AS conv_ver" .                 " FROM OriginalBooks" . 
-                 " INNER JOIN ConvertedBooks ON OriginalBooks.id = ConvertedBooks.book_id" . 
-                 " WHERE OriginalBooks.md5hash = \"$md5\" AND ConvertedBooks.format = $format" . 
-                 " LIMIT 1";
+        $query = "SELECT id, storage_key FROM OriginalBooks" . 
+                 " WHERE md5hash = \"$md5\"";
+        
         if (!$this->_execQuery($query))
             return false;
         
