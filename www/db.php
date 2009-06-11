@@ -275,13 +275,37 @@ class DB
             
         $key = mysql_real_escape_string($key);
         
-        $query = "SELECT title,author FROM OriginalBooks WHERE storage_key = \"$key\" LIMIT 1";
+        $query = "SELECT id,title,author FROM OriginalBooks WHERE storage_key = \"$key\" LIMIT 1";
         if (!$this->_execQuery($query))
             return false;
         
         $list = array();
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list = $row;
+            
+        $this->_disconnect();
+        return $list;
+    }
+    
+    // Get book formats by key
+    function getBookFormatsById($id)
+    {
+        if (!is_numeric($id))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $query = "SELECT id, title, description FROM Formats WHERE id IN " .
+            "(SELECT format FROM ConvertedBooks WHERE book_id = $id)";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
             
         $this->_disconnect();
         return $list;
