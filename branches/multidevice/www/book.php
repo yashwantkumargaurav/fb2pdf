@@ -19,6 +19,7 @@ try
     $db = getDBObject();
     $bookInfo = $db->getBookByKey($key);
 
+    $id     = $bookInfo["id"];
     $title  = $bookInfo["title"];
     $author = $bookInfo["author"];
 
@@ -27,6 +28,7 @@ try
     if (!$title)
         $title = "Название неизвестно";
 
+    $formats = $db->getBookFormatsById($id);
 }
 catch(Exception $e)
 {
@@ -61,19 +63,28 @@ catch(Exception $e)
             <img src="images/green_px.gif" class="line"/>
             <div id="status" class="message">
                 <?php        
-                echo "<h3 class='left'><a href='books.php?author=$author' style='color:black'>$author</a>&nbsp;&nbsp;\"$title\"</h3><br/><br/>";
-                echo "<p>Загрузить книгу в формате:<br/>";
-                echo "[<a href='$bs->pdfFile'>Sony Reader (pdf)</a>]&nbsp;&nbsp;[<a href='$bs->fbFile'>оригинал (fb2)</a>]</p>";
-                echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
-                echo "<p>";
-                $book_link  = getFullUrl("book.php") . "?key=".urlencode($key) . "&format=1";
-                $book_path  = "/book/".$key;
-                $book_title = $author."  '".$title."'";
-                echo "<div class=\"js-kit-rating\" title=\"$book_title\" permalink=\"$book_link\" path=\"$book_path\"></div>";
-                echo "<div class=\"js-kit-comments\" permalink=\"$book_link\" path=\"$book_path\"></div>";
-                echo "<script src=\"http://js-kit.com/reviews.js\" permalink=\"$book_link\" path=\"$book_path\"></script>";
+                    echo "<h3 class='left'><a href='books.php?author=$author' style='color:black'>$author</a>&nbsp;&nbsp;\"$title\"</h3><br/><br/>";
+                    echo "<p>Загрузить книгу в формате:<br/>";
+                    echo "[<a href='$bs->fbFile'>оригинал (fb2)</a>]<br/>";
+                    if ($formats) {
+                        $count = count($formats);
+                        for ($i = 0; $i < $count ; $i++)
+                        {
+                            $formatId = $formats[$i]["id"];
+                            $formatTitle = $formats[$i]["title"];
+                            
+                            echo "[<a href='$bs->pdfFile&amp;format=$formatId'>$formatTitle (pdf)</a>]<br/>";
+                        }
+                    }
+                    echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
+                    echo "<p>";
+                    $book_link  = getFullUrl("book.php") . "?key=".urlencode($key) . "&format=1";
+                    $book_path  = "/book/".$key;
+                    $book_title = $author."  '".$title."'";
+                    echo "<div class=\"js-kit-rating\" title=\"$book_title\" permalink=\"$book_link\" path=\"$book_path\"></div>";
+                    echo "<div class=\"js-kit-comments\" permalink=\"$book_link\" path=\"$book_path\"></div>";
+                    echo "<script src=\"http://js-kit.com/reviews.js\" permalink=\"$book_link\" path=\"$book_path\"></script>";
                 ?>
-                
             </div>    
             <img src="images/green_px.gif" class="line"/>
             <?php include 'footer.inc.php'; ?>
