@@ -171,7 +171,7 @@ class DB
         if (!$this->_connect())
             return false;
 
-        $query = "SELECT author, title, storage_key" . 
+        $query = "SELECT id,title,author,storage_key,submitted" . 
         " FROM OriginalBooks WHERE valid=TRUE" .
         " ORDER BY id DESC LIMIT $number";
         if (!$this->_execQuery($query))
