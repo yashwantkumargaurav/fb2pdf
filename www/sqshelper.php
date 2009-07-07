@@ -12,13 +12,15 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
     {
         // Create the queue.  TODO: If the queue has recently been deleted, the application needs to wait for 60 seconds before
         $sqs->CreateQueue($awsSQSQueue);
-        
+
+        $suffix = ($format != 1) ? "-$format" : "";
+            
         // Send a message to the queue
         $message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><fb2pdfjob version=\"3\">" . 
             "<source url=\"$sourceUrl\" type=\"application/fb2+xml\" name=\"$name\"/>" .
-            "<result key=\"$id.zip\" encoding=\"application/zip\"/>" .
-            "<log key=\"$id.txt\"/>" .
-   	    "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email;format=$format\"/>";
+            "<result key=\"$id\" encoding=\"application/zip\" name=\"$id$suffix.zip\"/>" .
+            "<log key=\"$id$suffix.txt\"/>" .
+   	    "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email&amp;format=$format\"/>";
             foreach(array_keys($formatParams) as $name)
             {
                 $value = $formatParams[$name];

@@ -38,7 +38,7 @@ try
     }
     
     $key = $conv->bookKey;
-    httpRedirect("status.php?key=$key");
+    httpRedirect("status.php?key=$key&format=$format");
 }
 catch(Exception $e)
 {

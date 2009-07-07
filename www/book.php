@@ -13,7 +13,7 @@ $key = $_GET['key'];
 $bs = new BookStatus();
 try
 {
-    $status = $bs->checkStatus($key);
+    $bs->checkStatus($key);
     
     // get book info
     $db = getDBObject();
@@ -72,13 +72,14 @@ catch(Exception $e)
                         {
                             $formatId = $formats[$i]["id"];
                             $formatTitle = $formats[$i]["title"];
-                            
-                            echo "[<a href='$bs->pdfFile&amp;format=$formatId'>$formatTitle (pdf)</a>]<br/>";
+                            $bs->checkStatus($key, $formatId);
+
+                            echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
                         }
                     }
                     echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
                     echo "<p>";
-                    $book_link  = getFullUrl("book.php") . "?key=".urlencode($key) . "&format=1";
+                    $book_link  = getFullUrl("book.php") . "?key=".urlencode($key);
                     $book_path  = "/book/".$key;
                     $book_title = $author."  '".$title."'";
                     echo "<div class=\"js-kit-rating\" title=\"$book_title\" permalink=\"$book_link\" path=\"$book_path\"></div>";
