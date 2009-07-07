@@ -157,6 +157,7 @@ def processMessage(m):
         raise PersistentError("Message must contain exactly one 'result' element")
     res_key = results[0].getAttribute('key')
     res_encoding = results[0].getAttribute('encoding')
+    res_name= results[0].getAttribute('name')
 
     conv_options = {}
     parameters = root.getElementsByTagName('parameter')
@@ -197,7 +198,7 @@ def processMessage(m):
         callbacks.append(x)
 
     processDocument(str(src_url), str(src_type), src_name, str(src_encoding),
-                    str(res_key), str(res_encoding),
+                    str(res_key), str(res_name), str(res_encoding),
                     str(log_key),
                     conv_options,
                     callbacks)
@@ -249,7 +250,7 @@ def processCallbacks(res_key, status, callbacks):
         except:
             logging.getLogger('fbdaemon').exception("Error calling callback %s" % c['url'])
 
-def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_encoding, log_key, conv_options, callbacks):
+def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name, res_encoding, log_key, conv_options, callbacks):
 
     global cfg
     bucket = cfg.get('storage','bucket')
@@ -363,7 +364,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
                     # upload PDF 
                     logging.getLogger('fb2pdf').debug("Uploading resulting file to S3")
                     logging.getLogger('fbdaemon').debug("Uploading resulting file to S3")
-                    upload_file(bucket, res_key, resfilename)
+                    upload_file(bucket, res_name, resfilename)
 
                 finally:
                     # close logger
