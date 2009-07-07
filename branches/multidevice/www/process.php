@@ -155,7 +155,7 @@ class ConvertBook
             throw new Exception("$fileName is not a fb2 or zip file", self::ERR_FORMAT);
         
         // genarate unique book key
-        $this->bookKey = md5(uniqid("")) . ".zip";
+        $this->bookKey = md5(uniqid(""));
         
         // get md5 of the file content (
         // NOTE! Here is a BUG. We should calculate md5 based on full book content (md5file), but we can do it only after reconverting all books.
@@ -164,7 +164,7 @@ class ConvertBook
         // get the filename without extension
         $this->fileName = $this->getBaseFileName($fileName);
         if (!$this->fileName)
-            $this->fileName = $this->bookKey;
+            $this->fileName = $this->bookKey . ".zip";
 
         // process book
         if (!self::TEST_MODE)
@@ -241,21 +241,19 @@ class ConvertBook
     {
         global $awsS3Bucket;
         
-        $key = removeExt($this->bookKey);
- 
         // save fb2 file
         $s3 = getS3Object();
         
         $httpHeaders = array("Content-Disposition"=>"attachement; filename=\"$this->fileName.fb2\"");
-        if (!$s3->writeFile($awsS3Bucket, $key . ".fb2", $this->fbFile, "application/fb2+xml", "public-read", "", $httpHeaders))
-            throw new Exception("Unable to store file $key.fb2 in the Amazon S3 storage.", self::ERR_CONVERT);
+        if (!$s3->writeFile($awsS3Bucket, $this->bookKey . ".fb2", $this->fbFile, "application/fb2+xml", "public-read", "", $httpHeaders))
+            throw new Exception("Unable to store file $this->bookKey.fb2 in the Amazon S3 storage.", self::ERR_CONVERT);
         
         // save to DB
         $db = getDBObject();
         
-        if (!$db->insertBook($key . ".zip", $this->book->author, $this->book->title, $this->book->isbn, $md5))
+        if (!$db->insertBook($this->bookKey, $this->book->author, $this->book->title, $this->book->isbn, $md5))
         {
-            error_log("FB2PDF ERROR. Unable to insert book with key $key.zip into DB."); 
+            error_log("FB2PDF ERROR. Unable to insert book with key $this->bookKey.zip into DB."); 
             // do not stop if DB is failed!
         }
     }
@@ -273,21 +271,21 @@ class ConvertBook
             error_log("FB2PDF ERROR. Callback: Unable to update book status. Key=$$this->bookKey"); 
             // do not stop if DB is failed!
         }
+
+        $suffix = ($format != 1 )? "-$format" : "";
         
-        // remove result/log file
-        $key = removeExt($this->bookKey);
-            
         $s3 = getS3Object();
-        
-        if (!$s3->deleteObject($awsS3Bucket, $key . ".zip"))
+        $zipFile = $this->bookkey . $suffix . ".zip";
+        if (!$s3->deleteObject($awsS3Bucket, $zipFile))
         {
-            error_log("FB2PDF ERROR. Unable to delete converted file $key.zip from the Amazon S3 storage."); 
+            error_log("FB2PDF ERROR. Unable to delete converted file $zipFile from the Amazon S3 storage."); 
             // do not stop if failed!
         }
-        
-        if (!$s3->deleteObject($awsS3Bucket, $key . ".txt"))
+
+        $txtFile = $this->bookKey . $suffix . ".txt";
+        if (!$s3->deleteObject($awsS3Bucket, $txtFile))
         {
-            error_log("FB2PDF ERROR. Unable to delete log file $key.txt from the Amazon S3 storage."); 
+            error_log("FB2PDF ERROR. Unable to delete log file $txtFile from the Amazon S3 storage."); 
             // do not stop if failed!
         }
     }
@@ -339,8 +337,6 @@ class ConvertBook
     {
         global $awsS3Bucket, $secret;
         
-        $key = removeExt($this->bookKey);
-        
         // send SQS message
         $callbackUrl = getFullUrl("conv_callback.php");
 
@@ -348,8 +344,8 @@ class ConvertBook
 
         $formatParams = $db->getFormatParameters($format);
 
-        if(!sqsPutMessage($key, "http://s3.amazonaws.com/$awsS3Bucket/$key.fb2", $this->fileName, $callbackUrl, md5($secret . $key . ".zip"), $this->email, $format, $formatParams))
-            throw new Exception("Unable to send Amazon SQS message for key $key.", self::ERR_CONVERT);
+        if(!sqsPutMessage($this->bookKey, "http://s3.amazonaws.com/$awsS3Bucket/$this->bookKey.fb2", $this->fileName, $callbackUrl, md5($secret . $this->bookKey), $this->email, $format, $formatParams))
+            throw new Exception("Unable to send Amazon SQS message for key $this->bookKey.", self::ERR_CONVERT);
     }
 
     // Send notification email to user
@@ -413,42 +409,47 @@ class BookStatus
     const STATUS_PROGRESS = 'p';
     const STATUS_SUCCESS  = 'r';
     const STATUS_ERROR    = 'e';
-    
+
     // Check status. Returns STATUS_* constants
-    public function checkStatus($key)
+    // format 0 mean check original only
+    public function checkStatus($key, $format = 0)
     {
         global $awsS3Bucket;
     
-        // remove "extension" part from the key
-        $key = removeExt($key);
-
         // check existance
         $s3 = getS3Object();
         
         $fbExists  = $s3->objectExists($awsS3Bucket, $key . ".fb2");
         if (!$fbExists)
             throw new Exception("$key.fb2 does not exist.");
-            
-        $pdfExists = $s3->objectExists($awsS3Bucket, $key . ".pdf");
-        $zipExists = $s3->objectExists($awsS3Bucket, $key . ".zip");
-        $logExists = $s3->objectExists($awsS3Bucket, $key . ".txt");
-        
-        // check status and generate links
-        $status = self::STATUS_PROGRESS;
-        
+
         $this->fbFile  = "getfile.php?key=$key.fb2";
-        if (($pdfExists or $zipExists) and $logExists)
-        {
-            $status = self::STATUS_SUCCESS;
-            $this->pdfFile = ($pdfExists) ? "getfile.php?key=$key.pdf" : "getfile.php?key=$key.zip";
-            $this->logFile = "getfile.php?key=$key.txt";
-        }
-        else if ($logExists)
-        {
-            $status = self::STATUS_ERROR;
-            $this->logFile = "getfile.php?key=$key.txt";
-        }
+
+        if ($format != 0) {
+            $suffix =  ($format != 1) ? "-$format" : "";
+            
+            $pdfExists = $s3->objectExists($awsS3Bucket, $key . $suffix . ".pdf");
+            $zipExists = $s3->objectExists($awsS3Bucket, $key . $suffix . ".zip");
+            $logExists = $s3->objectExists($awsS3Bucket, $key . $suffix . ".txt");
         
+            // check status and generate links
+            $status = self::STATUS_PROGRESS;
+        
+            if (($pdfExists or $zipExists) and $logExists)
+            {
+                $status = self::STATUS_SUCCESS;
+                $this->pdfFile = ($pdfExists) ? "getfile.php?key=$key$suffix.pdf" : "getfile.php?key=$key$suffix.zip";
+                $this->logFile = "getfile.php?key=$key$suffix.txt";
+            }
+            else if ($logExists)
+            {
+                $status = self::STATUS_ERROR;
+                $this->logFile = "getfile.php?key=$key$suffix.txt";
+            }
+        }
+        else {
+            $status = self::STATUS_SUCCESS;
+        }
         return $status;
     }
 }

@@ -8,11 +8,11 @@ if (!isset ($_GET['key']))
     die;
 }
 $key = $_GET['key'];
+$format = $_GET['format'];
 
 // get book info
 $db = getDBObject();
 $bookInfo = $db->getBookByKey($key);
-
 $book = "";
 if ($bookInfo)
 {
@@ -73,6 +73,7 @@ if ($bookInfo)
 
 <?php
 echo "var key = '$key';";
+echo "var format = '$format';";
 echo "var book = '$book';";
 ?>
 
@@ -80,7 +81,7 @@ checkStatus();
 
 function checkStatus()
 {
-    var requestUrl = encodeURI('conv_status.php?key=' + key);
+    var requestUrl = encodeURI('conv_status.php?key=' + key + "&format=" + format);
 
     // callback
     var callback =
