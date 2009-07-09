@@ -35,4 +35,13 @@ function removeExt($name)
 
     return $name;
 }
+
+function getStorageName($storageKey, $format, $extension = "")
+{
+    $suffix = ($format != 1) ? "-$format" : "";
+
+    return ($storageKey . $suffix . $extension);
+}
+
+
 ?>

@@ -70,9 +70,9 @@ catch(Exception $e)
                         $count = count($formats);
                         for ($i = 0; $i < $count ; $i++)
                         {
-                            $formatId = $formats[$i]["id"];
+                            $format = $formats[$i]["id"];
                             $formatTitle = $formats[$i]["title"];
-                            $bs->checkStatus($key, $formatId);
+                            $bs->checkStatus($key, $format);
 
                             echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
                         }

@@ -272,17 +272,15 @@ class ConvertBook
             // do not stop if DB is failed!
         }
 
-        $suffix = ($format != 1 )? "-$format" : "";
-        
         $s3 = getS3Object();
-        $zipFile = $this->bookkey . $suffix . ".zip";
+        $zipFile = getStorageName($this->bookkey, $format, ".zip");
         if (!$s3->deleteObject($awsS3Bucket, $zipFile))
         {
             error_log("FB2PDF ERROR. Unable to delete converted file $zipFile from the Amazon S3 storage."); 
             // do not stop if failed!
         }
 
-        $txtFile = $this->bookKey . $suffix . ".txt";
+        $txtFile = getStorageName($this->bookKey, $format, ".txt");
         if (!$s3->deleteObject($awsS3Bucket, $txtFile))
         {
             error_log("FB2PDF ERROR. Unable to delete log file $txtFile from the Amazon S3 storage."); 
@@ -418,19 +416,27 @@ class BookStatus
     
         // check existance
         $s3 = getS3Object();
-        
+
+        // This info is never used. It is 'just in case' check,
+        // which requires an extra query. Is it really necessary?
         $fbExists  = $s3->objectExists($awsS3Bucket, $key . ".fb2");
         if (!$fbExists)
             throw new Exception("$key.fb2 does not exist.");
 
-        $this->fbFile  = "getfile.php?key=$key.fb2";
+        $this->fbFile = "getfile.php?key=$key.fb2";
 
-        if ($format != 0) {
-            $suffix =  ($format != 1) ? "-$format" : "";
-            
-            $pdfExists = $s3->objectExists($awsS3Bucket, $key . $suffix . ".pdf");
-            $zipExists = $s3->objectExists($awsS3Bucket, $key . $suffix . ".zip");
-            $logExists = $s3->objectExists($awsS3Bucket, $key . $suffix . ".txt");
+        if ($format != 0)
+        {
+            $pdfName = getStorageName($key, $format, ".pdf"); 
+            $zipName = getStorageName($key, $format, ".zip");
+            $logName = getStorageName($key, $format, ".txt");
+
+            // PDFs can be found only for books that where added through early versions of fb2pdf,
+            // when there was no support for formats. There is no need to quiry them
+            // if format is set to semething other then 1.
+            $pdfExists = ($format == 1) && $s3->objectExists($awsS3Bucket, $pdfName);
+            $zipExists = $s3->objectExists($awsS3Bucket, $zipName);
+            $logExists = $s3->objectExists($awsS3Bucket, $logName);
         
             // check status and generate links
             $status = self::STATUS_PROGRESS;
@@ -438,16 +444,17 @@ class BookStatus
             if (($pdfExists or $zipExists) and $logExists)
             {
                 $status = self::STATUS_SUCCESS;
-                $this->pdfFile = ($pdfExists) ? "getfile.php?key=$key$suffix.pdf" : "getfile.php?key=$key$suffix.zip";
-                $this->logFile = "getfile.php?key=$key$suffix.txt";
+                $this->pdfFile = ($pdfExists) ? "getfile.php?key=$pdfName" : "getfile.php?key=$zipName";
+                $this->logFile = "getfile.php?key=$logName";
             }
             else if ($logExists)
             {
                 $status = self::STATUS_ERROR;
-                $this->logFile = "getfile.php?key=$key$suffix.txt";
+                $this->logFile = "getfile.php?key=$logName";
             }
         }
-        else {
+        else
+        {
             $status = self::STATUS_SUCCESS;
         }
         return $status;
