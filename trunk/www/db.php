@@ -29,30 +29,62 @@ class DB
     }
     
     // Insert a new book
-    function insertBook($storageKey, $author, $title, $isbn, $md5, $status)
+    function insertBook($storageKey, $author, $title, $isbn, $md5)
     {
         if (!$this->_connect())
             return false;
-            
+        
         $storageKey = mysql_real_escape_string($storageKey);
         $author     = mysql_real_escape_string($author);
         $title      = mysql_real_escape_string($title);
         $isbn       = mysql_real_escape_string($isbn);
         $status     = mysql_real_escape_string($status);
         $md5        = mysql_real_escape_string($md5);
-        
-        $query = "INSERT INTO Books (storage_key, author, title, isbn, md5hash, status, converted) 
-            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", \"$status\",  UTC_TIMESTAMP())";
-        if (!$this->_execQuery($query))
+
+        // insert into OriginalBooks
+        $query = "INSERT INTO OriginalBooks (storage_key, author, title, isbn, md5hash, submitted) 
+            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
+
+        if (!mysql_query($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
-        $this->_freeQuery();
+        $this->_disconnect();
+        return true;
+    }
+
+    function insertBookFormat($storageKey, $format)
+    {
+        if (!is_numeric($format))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $storageKey = mysql_real_escape_string($storageKey);
+        $ver        = mysql_real_escape_string($ver);
+
+        $query = "INSERT INTO ConvertedBooks (book_id, format, status) " .
+            "SELECT id, $format, \"p\" FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+
+        if (!mysql_query($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+        
+        $this->_disconnect();
         return true;
     }
     
     // Updade status
-    function updateBookStatus($storageKey, $status, $ver)
+    function updateBookStatus($storageKey, $status, $ver, $format)
     {
+        if (!is_numeric($format))
+            return false;
+            
         if (!$this->_connect())
             return false;
             
@@ -60,27 +92,57 @@ class DB
         $status     = mysql_real_escape_string($status);
         $ver        = mysql_real_escape_string($ver);
         
-        $query = "UPDATE Books SET status = \"$status\",  conv_ver = $ver, converted = UTC_TIMESTAMP() WHERE storage_key = \"$storageKey\"";
-        if (!$this->_execQuery($query))
-            return false;
+        mysql_query("BEGIN");
         
-        $this->_freeQuery();
+        // update ConvertedBooks status
+        $query = "UPDATE ConvertedBooks SET status = \"$status\", conv_ver = $ver, converted = UTC_TIMESTAMP()" .
+                 " WHERE format = $format AND book_id IN" . 
+                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
+        if (!mysql_query($query))
+        {
+            error_log("Query '$query' failed. Rolling back");
+            mysql_query("ROLLBACK");
+            $this->_disconnect();
+            return false;
+        }
+
+        // update OrginalBooks if converted successfully
+        if ($status == 'r')
+        {
+            $query = "UPDATE OriginalBooks SET valid = TRUE WHERE storage_key = \"$storageKey\"";
+            if (!mysql_query($query))
+            {
+                error_log("Query '$query' failed. Rolling back");
+                mysql_query("ROLLBACK");
+                $this->_disconnect();
+                return false;
+            }
+        }
+
+        mysql_query("COMMIT");
+
+        $this->_disconnect();
         return true;
     }
     
     // Updade status
-    function updateBookCounter($storageKey)
+    function updateBookCounter($storageKey, $format)
     {
+        if (!is_numeric($format))
+            return false;
+            
         if (!$this->_connect())
             return false;
             
         $storageKey = mysql_real_escape_string($storageKey);
         
-        $query = "UPDATE Books SET counter = counter + 1 WHERE storage_key = \"$storageKey\"";
+        $query = "UPDATE ConvertedBooks SET counter = counter + 1" . 
+                 " WHERE format = $format AND book_id IN" .
+                 " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
         if (!$this->_execQuery($query))
             return false;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return true;
     }
     
@@ -92,47 +154,26 @@ class DB
             
         $storageKey = mysql_real_escape_string($storageKey);
         
-        $query = "DELETE FROM Books WHERE storage_key = \"$storageKey\"";
+        $query = "DELETE FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
         if (!$this->_execQuery($query))
             return false;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return true;
     }
     
     // Get list of books
     function getBooks($number)
     {
-        if (!$this->_connect())
-            return false;
-            
-        $query = "SELECT * FROM Books WHERE status = \"r\" ORDER BY id DESC LIMIT $number";
-        if (!$this->_execQuery($query))
-            return false;
-        
-        $list = array();
-        $count = 0;
-        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
-            $list[$count++] = $row;
-        
-        $this->_freeQuery();
-        return $list;
-    }
-    //Get books by parcial author
-    function getBooksByParcialAuthor($author, $number)
-    {
         if (!is_numeric($number))
             return false;
             
         if (!$this->_connect())
             return false;
-            
-        $author = mysql_real_escape_string($author);
-        
-        $query = "SELECT * FROM Books WHERE author LIKE \"%$author%\" AND status = \"r\" ORDER BY title DESC";
-        if ($number > 0)
-            $query = $query . " LIMIT $number";
-            
+
+        $query = "SELECT id,title,author,storage_key,submitted" . 
+        " FROM OriginalBooks WHERE valid=TRUE" .
+        " ORDER BY id DESC LIMIT $number";
         if (!$this->_execQuery($query))
             return false;
         
@@ -141,9 +182,31 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list[$count++] = $row;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
+    
+    // Get book formats
+    function getBookStatus($storageKey, $format)
+    {
+        if (!is_numeric($format))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+
+        $query = "SELECT status, converted, counter, conv_ver FROM ConvertedBooks " .
+            " WHERE format = $format AND book_id IN" .
+            " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $row = mysql_fetch_array($this->result, MYSQL_ASSOC);
+        
+        $this->_disconnect();
+        return $row;
+    }
+    
     // Get list of books by author.
     // if number == 0, no limit
     function getBooksByAuthor($author, $number)
@@ -155,8 +218,12 @@ class DB
             return false;
             
         $author = mysql_real_escape_string($author);
-        
-        $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY title DESC";
+
+        //TODO: see if we can get rid of filesort in this query
+        // (see mysql EXPLAIN on it)
+        $query = "SELECT title, storage_key FROM OriginalBooks ".
+        " WHERE valid=TRUE" .
+        " AND author=\"$author\" ORDER BY title DESC";
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -168,7 +235,7 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list[$count++] = $row;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -183,8 +250,8 @@ class DB
             return false;
             
         $author = mysql_real_escape_string($author);
-        
-        $query = "SELECT * FROM Books WHERE author = \"$author\" AND status = \"r\" ORDER BY id DESC";
+
+        $query = "SELECT id,title,author,storage_key,submitted FROM OriginalBooks WHERE author = \"$author\" AND valid=TRUE ORDER BY id DESC";
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -196,7 +263,7 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list[$count++] = $row;
         
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
 
@@ -208,7 +275,7 @@ class DB
             
         $key = mysql_real_escape_string($key);
         
-        $query = "SELECT * FROM Books WHERE storage_key = \"$key\" LIMIT 1";
+        $query = "SELECT id,title,author FROM OriginalBooks WHERE storage_key = \"$key\" LIMIT 1";
         if (!$this->_execQuery($query))
             return false;
         
@@ -216,7 +283,31 @@ class DB
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list = $row;
             
-        $this->_freeQuery();
+        $this->_disconnect();
+        return $list;
+    }
+    
+    // Get book formats by key
+    function getBookFormatsById($id)
+    {
+        if (!is_numeric($id))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $query = "SELECT id, title, description FROM Formats WHERE id IN " .
+            "(SELECT format FROM ConvertedBooks WHERE book_id = $id)";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
         return $list;
     }
     
@@ -227,8 +318,12 @@ class DB
             return false;
             
         $md5 = mysql_real_escape_string($md5);
+
+        //TODO: this query does not use indices. Add indices to approriate tables.
+        // see mysql EXPLAIN
+        $query = "SELECT id, storage_key FROM OriginalBooks" . 
+                 " WHERE md5hash = \"$md5\"";
         
-        $query = "SELECT * FROM Books WHERE md5hash = \"$md5\" LIMIT 1";
         if (!$this->_execQuery($query))
             return false;
         
@@ -236,7 +331,7 @@ class DB
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
             $list = $row;
             
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -246,8 +341,10 @@ class DB
     {
         if (!$this->_connect())
             return false;
-            
-        $query = "SELECT DISTINCT UPPER(LEFT(author,1)) as letter FROM Books WHERE status = \"r\"";
+
+        //TODO: see if we can get rid of 'using temporary' here.
+        // see mysql EXPLAIN
+        $query = "SELECT DISTINCT UPPER(LEFT(author,1)) as letter FROM OriginalBooks WHERE valid=TRUE";
         if (!$this->_execQuery($query))
             return false;
         
@@ -258,7 +355,7 @@ class DB
             $list[$letter] = $letter;
         }
             
-        $this->_freeQuery();
+        $this->_disconnect();
         return $list;
     }
     
@@ -272,7 +369,7 @@ class DB
             
         $letter = mysql_real_escape_string($letter);
         
-        $query = "SELECT author, count(id) AS number FROM Books WHERE author LIKE \"$letter%\" AND status=\"r\" GROUP BY author ORDER BY author ASC";
+        $query = "SELECT author, count(id) AS number FROM OriginalBooks WHERE author LIKE \"$letter%\" AND valid=TRUE GROUP BY author ORDER BY author ASC";
         if (!$this->_execQuery($query))
             return false;
         
@@ -281,10 +378,199 @@ class DB
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
             $list[$count++] = $row;
             
-        $this->_freeQuery();
+        $this->_disconnect();
+        return $list;
+    }
+
+    // Get list of formats
+    function getFormats() 
+    {
+        if (!$this->_connect())
+            return false;
+
+	$query = "SELECT id, title FROM Formats ORDER BY id";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+    }
+      
+    // Get list of formats
+    function getFormatParameters($format) 
+    {
+        if (!is_numeric($format))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+
+	$query = "SELECT name, value FROM FormatParams WHERE format = $format";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+        {
+            $name = $row["name"];
+            $value = $row["value"];
+            $list[$name] = $value;
+        }   
+        $this->_disconnect();
         return $list;
     }
     
+    function countTitles($search) {
+
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT COUNT(*) FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\")";
+        
+        if (!$this->_execQuery($query))
+            return false;
+            
+        $count = mysql_result($this->result, 0, 0);
+            
+        $this->_disconnect();
+        return $count;
+    }
+    
+    function countAuthors($search) {
+        
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT COUNT(*) FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\")";
+        
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $count = mysql_result($this->result, 0, 0);
+            
+        $this->_disconnect();
+        return $count;
+    }
+
+    function searchTitles($search, $limit1, $limit2)
+    {
+        if (!is_numeric($limit1) && !is_numeric($limit2))
+            return false;
+
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT TitleSearch.book_id, TitleSearch.title, OriginalBooks.author, OriginalBooks.storage_key
+                  FROM TitleSearch
+                  LEFT JOIN OriginalBooks ON TitleSearch.book_id = OriginalBooks.id 
+                  WHERE MATCH(TitleSearch.title) AGAINST (\"$search\")";
+        
+        if ($limit1 == 0 && $limit2 != 0)
+            $query .= " LIMIT $limit2";
+
+        if ($limit1 > 0 && $limit2 > 0)
+            $query .= " LIMIT $limit1, $limit2";
+        
+        if (!$this->_execQuery($query))
+            return false;
+
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+
+    }
+
+    function searchAuthors($search, $limit1, $limit2)
+    {
+        if (!is_numeric($limit1) && !is_numeric($limit2))
+            return false;
+
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT * FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\")";
+        
+        if ($limit1 == 0 && $limit2 != 0)
+            $query .= " LIMIT $limit2";
+
+        if ($limit1 > 0 && $limit2 > 0)
+            $query .= " LIMIT $limit1, $limit2";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+    }
+
+    function scoreAuthor($search)
+    {
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT author AS text, MATCH(author) AGAINST (\"$search\") AS score FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\") LIMIT 10";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+
+    }
+
+    function scoreTitle($search)
+    {
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT title AS text, MATCH(title) AGAINST (\"$search\") AS score FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\") LIMIT 10";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+
+    }
+
     // Internal methods
     function _connect()
     {
@@ -321,9 +607,10 @@ class DB
         return true;
     }
     
-    function _freeQuery()
+    function _disconnect()
     {
-        if (($this->result !== true) and ($this->result !== false))
+        if (($this->result !== true) and ($this->result !== false)
+            and ($this->result !== NULL))
             mysql_free_result($this->result);
             
         mysql_close($this->link);
