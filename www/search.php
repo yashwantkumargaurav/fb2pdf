@@ -38,9 +38,12 @@
             
             $per_page = 10;
 
+            $countTitles  = $db->countTitles($_GET["search"]);
+            $countAuthors = $db->countAuthors($_GET["search"]);
+
             //Max page numbers for each
-            $total_title_pages  = floor($db->countTitles ($_GET["search"]) / 10) + (($db->countTitles ($_GET["search"]) % $per_page == 0) ? 0 : 1);
-            $total_author_pages = floor($db->countAuthors($_GET["search"]) / 10) + (($db->countAuthors($_GET["search"]) % $per_page == 0) ? 0 : 1);
+            $total_title_pages  = floor($countTitles  / 10) + (($countTitles  % $per_page == 0) ? 0 : 1);
+            $total_author_pages = floor($countAuthors / 10) + (($countAuthors % $per_page == 0) ? 0 : 1);
 
             //For page changing
             $url = $_SERVER["PHP_SELF"] . "?search=" . $_GET["search"];
@@ -51,7 +54,7 @@
                       <br/>
                       <img src="images/green_px.gif" class="line"/> <br/>';
             
-                for ($i = 0; $i < count($title); $i++)
+                for ($i = 0; $i < $countTitles; $i++)
                     echo '<a href="book.php?key=' . $title[$i]["storage_key"] . '">' . $title[$i]['title'] . '</a>
                           <br/>
                           By: ' . $title[$i]["author"] . ' <br/><br/>';
@@ -85,7 +88,7 @@
                       <br/>
                       <img src="images/green_px.gif" class="line"/> <br/>';
 
-                for ($i = 0; $i < count($author); $i++)
+                for ($i = 0; $i < $countAuthors; $i++)
                     echo '<a href="books.php?author=' . $author[$i]['author'] . '">' . $author[$i]['author'] . '</a><br/>';            
 
                 if ($total_author_pages > 1) {
