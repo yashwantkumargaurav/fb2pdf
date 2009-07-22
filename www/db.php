@@ -1,4 +1,6 @@
 <?php
+require_once "awscfg.php";
+
 // Helper function to create DB object (see db.php)
 function getDBObject()
 {
@@ -51,6 +53,31 @@ class DB
             return false;
         }
         
+        $query = "SELECT id FROM OriginalBooks ORDER BY id DESC LIMIT 1";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $result = mysql_fetch_array($this->result, MYSQL_ASSOC);
+
+        $id = $result['id'];
+
+        $query = "INSERT INTO TitleSearch(book_id, title) VALUES(\"$id\", \"$title\")";
+
+        if (!mysql_query($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+
+        $query = "INSERT INTO AuthorSearch (author) VALUES(\"$author\")";
+
+        if (!mysql_query($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+
         $this->_disconnect();
         return true;
     }
@@ -153,11 +180,36 @@ class DB
             return false;
             
         $storageKey = mysql_real_escape_string($storageKey);
-        
-        $query = "DELETE FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+
+        $query = "SELECT id, author FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+
         if (!$this->_execQuery($query))
             return false;
+
+        $result = mysql_fetch_array($this->result, MYSQL_ASSOC);
         
+        $id = $result['id'];
+        $author = $result['author'];
+
+        $query = "DELETE FROM TitleSearch WHERE book_id = \"$id\"";
+        
+        if (!$this->_execQuery($query))
+            return false;
+
+        $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+
+        if ($db->searchAuthors($author, 0, 0) == 1) {
+            $query = "DELETE FROM AuthorSearch WHERE author = \"$author\"";
+        
+            if (!$this->_execQuery($query))
+                return false;
+        }
+
+        $query = "DELETE FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+        
+        if (!$this->_execQuery($query))
+            return false;
+
         $this->_disconnect();
         return true;
     }
