@@ -51,6 +51,32 @@ class DB
             return false;
         }
         
+        //Get ID of submitted book
+        $query = "SELECT id FROM OriginalBooks ORDER BY id DESC LIMIT 1";
+
+        if (!$this->_execQuery($query))
+            return false;
+
+        $result = mysql_fetch_array($this->result, MYSQL_ASSOC);
+        $id     = $result['id'];
+
+        //Insert Title Search
+        $query = "INSERT INTO TitleSearch(book_id, title) VALUES(\"$id\", \"$title\")";
+
+        if (!mysql_query($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+
+        $query = "INSERT INTO AuthorSearch (author) VALUES(\"$name\")";
+
+        if (!mysql_query($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+
         $this->_disconnect();
         return true;
     }
@@ -153,11 +179,36 @@ class DB
             return false;
             
         $storageKey = mysql_real_escape_string($storageKey);
-        
-        $query = "DELETE FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+
+        $query = "SELECT id, author FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+
         if (!$this->_execQuery($query))
             return false;
+
+        $result = mysql_fetch_array($this->result, MYSQL_ASSOC);
         
+        $id = $result['id'];
+        $author = $result['author'];
+
+        $query = "DELETE FROM TitleSearch WHERE book_id = \"$id\"";
+        
+        if (!$this->_execQuery($query))
+            return false;
+
+        $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+
+        if ($db->searchAuthors($author, 0, 0) == 1) {
+            $query = "DELETE FROM AuthorSearch WHERE author = \"$author\"";
+        
+            if (!$this->_execQuery($query))
+                return false;
+        }
+
+        $query = "DELETE FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
+        
+        if (!$this->_execQuery($query))
+            return false;
+
         $this->_disconnect();
         return true;
     }
@@ -426,7 +477,151 @@ class DB
         $this->_disconnect();
         return $list;
     }
-      
+     
+    function countTitles($search) {
+
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT COUNT(*) FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\")";
+        
+        if (!$this->_execQuery($query))
+            return false;
+            
+        $count = mysql_result($this->result, 0, 0);
+            
+        $this->_disconnect();
+        return $count;
+    }
+    
+    function countAuthors($search) {
+        
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT COUNT(*) FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\")";
+        
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $count = mysql_result($this->result, 0, 0);
+            
+        $this->_disconnect();
+        return $count;
+    }
+
+    function searchTitles($search, $limit1, $limit2)
+    {
+        if (!is_numeric($limit1) && !is_numeric($limit2))
+            return false;
+
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT TitleSearch.book_id, TitleSearch.title, OriginalBooks.author, OriginalBooks.storage_key
+                  FROM TitleSearch
+                  LEFT JOIN OriginalBooks ON TitleSearch.book_id = OriginalBooks.id 
+                  WHERE MATCH(TitleSearch.title) AGAINST (\"$search\")";
+        
+        if ($limit1 == 0 && $limit2 != 0)
+            $query .= " LIMIT $limit2";
+
+        if ($limit1 > 0 && $limit2 > 0)
+            $query .= " LIMIT $limit1, $limit2";
+        
+        if (!$this->_execQuery($query))
+            return false;
+
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+
+    }
+
+    function searchAuthors($search, $limit1, $limit2)
+    {
+        if (!is_numeric($limit1) && !is_numeric($limit2))
+            return false;
+
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT * FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\")";
+        
+        if ($limit1 == 0 && $limit2 != 0)
+            $query .= " LIMIT $limit2";
+
+        if ($limit1 > 0 && $limit2 > 0)
+            $query .= " LIMIT $limit1, $limit2";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+    }
+
+    function scoreAuthor($search)
+    {
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT author AS text, MATCH(author) AGAINST (\"$search\") AS score FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\") LIMIT 10";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+
+    }
+
+    function scoreTitle($search)
+    {
+        if (!$this->_connect())
+            return false;
+            
+        $search = mysql_real_escape_string($search);
+        
+        $query = "SELECT title AS text, MATCH(title) AGAINST (\"$search\") AS score FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\") LIMIT 10";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+
+    }
+
     // Internal methods
     function _connect()
     {
