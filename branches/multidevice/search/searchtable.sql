@@ -1,0 +1,16 @@
+CREATE TABLE TitleSearch (
+id INT NOT NULL AUTO_INCREMENT ,
+book_id INT NOT NULL ,
+title VARCHAR( 256 ) ,
+PRIMARY KEY ( id ) ,
+FULLTEXT (title)
+) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+CREATE TABLE AuthorSearch (
+id INT NOT NULL AUTO_INCREMENT ,
+author VARCHAR( 256 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+PRIMARY KEY ( id ) ,
+FULLTEXT (author) ,
+UNIQUE (author)
+) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_general_ci;
+
