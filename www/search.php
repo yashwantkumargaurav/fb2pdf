@@ -54,7 +54,8 @@
                       <br/>
                       <img src="images/green_px.gif" class="line"/> <br/>';
             
-                for ($i = 0; $i < $countTitles; $i++)
+                $limit = ($countTitles < $per_page) ? $countTitles : $per_page;
+                for ($i = 0; $i < $limit; $i++)
                     echo '<a href="book.php?key=' . $title[$i]["storage_key"] . '">' . $title[$i]['title'] . '</a>
                           <br/>
                           By: ' . $title[$i]["author"] . ' <br/><br/>';
@@ -88,7 +89,8 @@
                       <br/>
                       <img src="images/green_px.gif" class="line"/> <br/>';
 
-                for ($i = 0; $i < $countAuthors; $i++)
+                $limit = ($countAuthors < $per_page) ? $countAuthors : $per_page;
+                for ($i = 0; $i < $limit; $i++)
                     echo '<a href="books.php?author=' . $author[$i]['author'] . '">' . $author[$i]['author'] . '</a><br/>';            
 
                 if ($total_author_pages > 1) {
