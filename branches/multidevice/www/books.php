@@ -19,6 +19,7 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
 <link rel="alternate" type="application/atom+xml" title="Atom" href="<?php echo $link; ?>" />
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'analytics.inc.php'; ?>
+<?php include 'searchstyle.inc.php'; ?>
 </head>
 
 <body>

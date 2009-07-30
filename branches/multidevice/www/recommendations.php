@@ -5,6 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'analytics.inc.php'; ?>
+<?php include 'searchstyle.inc.php'; ?>
 </head>
 
 <body>
