@@ -6,12 +6,16 @@ $password = trim($_POST['pass']);
 $email    = trim($_POST['email']);
 $key      = trim($_POST['key']);
 $status   = trim($_POST['status']);
-$format   = trim($_POST['format']);
 
 if (isset ($_POST['ver']))
     $ver = trim($_POST['ver']);
 else
     $ver = 0;
+
+if (isset ($_POST['format']))
+    $format = trim($_POST['format']);
+else
+    $format = 1;
 
 try
 {
