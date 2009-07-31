@@ -13,7 +13,7 @@ $key = $_GET['key'];
 $bs = new BookStatus();
 try
 {
-    $bs->checkStatus($key);
+    $bs->checkOriginal($key);
     
     // get book info
     $db = getDBObject();
@@ -72,7 +72,7 @@ catch(Exception $e)
                         {
                             $format = $formats[$i]["id"];
                             $formatTitle = $formats[$i]["title"];
-                            $bs->checkStatus($key, $format);
+                            $bs->checkConverted($key, $format);
 
                             echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
                         }

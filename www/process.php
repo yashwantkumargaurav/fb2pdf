@@ -408,9 +408,8 @@ class BookStatus
     const STATUS_SUCCESS  = 'r';
     const STATUS_ERROR    = 'e';
 
-    // Check status. Returns STATUS_* constants
-    // format 0 mean check original only
-    public function checkStatus($key, $format = 0)
+    // Check status of the original book
+    public function checkOriginal($key)
     {
         global $awsS3Bucket;
     
@@ -424,38 +423,40 @@ class BookStatus
             throw new Exception("$key.fb2 does not exist.");
 
         $this->fbFile = "getfile.php?key=$key.fb2";
+    }
+    
+    // Check converted book status. Returns STATUS_* constants
+    public function checkConverted($key, $format)
+    {
+        global $awsS3Bucket;
+    
+        // check existance
+        $s3 = getS3Object();
 
-        if ($format != 0)
-        {
-            $pdfName = getStorageName($key, $format, ".pdf"); 
-            $zipName = getStorageName($key, $format, ".zip");
-            $logName = getStorageName($key, $format, ".txt");
+        $pdfName = getStorageName($key, $format, ".pdf"); 
+        $zipName = getStorageName($key, $format, ".zip");
+        $logName = getStorageName($key, $format, ".txt");
 
-            // PDFs can be found only for books that where added through early versions of fb2pdf,
-            // when there was no support for formats. There is no need to quiry them
-            // if format is set to semething other then 1.
-            $pdfExists = ($format == 1) && $s3->objectExists($awsS3Bucket, $pdfName);
-            $zipExists = $s3->objectExists($awsS3Bucket, $zipName);
-            $logExists = $s3->objectExists($awsS3Bucket, $logName);
+        // PDFs can be found only for books that where added through early versions of fb2pdf,
+        // when there was no support for formats. There is no need to quiry them
+        // if format is set to semething other then 1.
+        $pdfExists = ($format == 1) && $s3->objectExists($awsS3Bucket, $pdfName);
+        $zipExists = $s3->objectExists($awsS3Bucket, $zipName);
+        $logExists = $s3->objectExists($awsS3Bucket, $logName);
         
-            // check status and generate links
-            $status = self::STATUS_PROGRESS;
+        // check status and generate links
+        $status = self::STATUS_PROGRESS;
         
-            if (($pdfExists or $zipExists) and $logExists)
-            {
-                $status = self::STATUS_SUCCESS;
-                $this->pdfFile = ($pdfExists) ? "getfile.php?key=$pdfName" : "getfile.php?key=$zipName";
-                $this->logFile = "getfile.php?key=$logName";
-            }
-            else if ($logExists)
-            {
-                $status = self::STATUS_ERROR;
-                $this->logFile = "getfile.php?key=$logName";
-            }
-        }
-        else
+        if (($pdfExists or $zipExists) and $logExists)
         {
             $status = self::STATUS_SUCCESS;
+            $this->pdfFile = ($pdfExists) ? "getfile.php?key=$pdfName" : "getfile.php?key=$zipName";
+            $this->logFile = "getfile.php?key=$logName";
+        }
+        else if ($logExists)
+        {
+            $status = self::STATUS_ERROR;
+            $this->logFile = "getfile.php?key=$logName";
         }
         return $status;
     }
