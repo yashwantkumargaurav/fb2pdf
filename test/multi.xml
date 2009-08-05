@@ -1,7 +1,0 @@
-<?xml version = "1.0" encoding = "UTF-8" ?>
-<fb2pdfbatchjob version="1"> 
-  <source url="http://fictionbook.ru/author/bunin_ivan_alekseevich/okayanniye_dni/bunin_okayanniye_dni.fb2.zip" type="application/fb2+xml" encoding="application/zip" name="bunin_okayanniye_dni"/> 
-  <source url="http://fictionbook.ru/author/bunin_ivan_alekseevich/okayanniye_dni/bunin_okayanniye_dni.fb2.zip" type="application/fb2+xml" encoding="application/zip" name="bunin_okayanniye_dni"/> 
-  <source url="http://fictionbook.ru/author/bunin_ivan_alekseevich/okayanniye_dni/bunin_okayanniye_dni.fb2.zip" type="application/fb2+xml" encoding="application/zip" name="bunin_okayanniye_dni"/> 
-</fb2pdfbatchjob>
-

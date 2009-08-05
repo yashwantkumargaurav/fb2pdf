@@ -4,6 +4,7 @@ require_once 'utils.php';
 
 $url = (isset($_GET["url"])) ? $_GET["url"] : null;
 $email = $_POST['email'];
+$format = $_POST['format'];
 
 $conv = new ConvertBook();
 $file = null;
@@ -13,7 +14,7 @@ try
     {
         $file = ($url) ? $url : $_POST['url'];
             
-        $conv->convertFromUrl($file, $email);
+        $conv->convertFromUrl($file, $format, $email);
     }
     else if ($_POST['uploadtype'] == 'file')
     {
@@ -24,7 +25,7 @@ try
             $path = $_FILES['fileupload']['tmp_name'];
             $file = $_FILES['fileupload']['name'];
             
-            $conv->convertFromFile($path, $file, $email);
+            $conv->convertFromFile($path, $file, $format, $email);
         }
         else
         {
@@ -37,7 +38,7 @@ try
     }
     
     $key = $conv->bookKey;
-    httpRedirect("status.php?key=$key");
+    httpRedirect("status.php?key=$key&format=$format");
 }
 catch(Exception $e)
 {

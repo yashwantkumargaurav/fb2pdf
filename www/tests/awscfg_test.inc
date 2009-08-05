@@ -15,10 +15,10 @@ $awsSQSTimeout = 600;
 $secret = "";   // Specify secret phrase here
 
 // db settings
-$dbServer = "";     // Specify DB server here
-$dbName = "";       // Specify DB name here
-$dbUser = "";       // Specify DB user here
-$dbPassword = "";   // Specify DB password here
+$dbServer = "localhost";     // Specify DB server here
+$dbName = "FB2PDF";       // Specify DB name here
+$dbUser = "fb2pdf";       // Specify DB user here
+$dbPassword = "XXX";   // Specify DB password here
 
 // converter version
 $convVersion = 3.14;

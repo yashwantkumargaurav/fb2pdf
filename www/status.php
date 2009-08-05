@@ -8,11 +8,11 @@ if (!isset ($_GET['key']))
     die;
 }
 $key = $_GET['key'];
+$format = $_GET['format'];
 
 // get book info
 $db = getDBObject();
 $bookInfo = $db->getBookByKey($key);
-
 $book = "";
 if ($bookInfo)
 {
@@ -30,36 +30,13 @@ if ($bookInfo)
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="alternate" type="application/atom+xml" title="Atom" href="atom.php" />
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
-<?php include 'searchstyle.inc.php'; ?>
 <?php include 'analytics.inc.php'; ?>
 
 
 </head>
 <body>
 
-
-<div id="survey-prompt" style="background-color:white;z-index:99999;padding:2;position:absolute;top:20px;left:5px;width:275px">
-
-
-Мы проводим небольшой опрос пользователей, чтобы
-решить как мы можем улучшить сайт. Мы будем
-благодарны если вы потратите пару минут вашего
-времени чтобы ответить на несколько вопросов.
-<br><br>
-<b><a href="http://www.surveymonkey.com/s.aspx?sm=TNNb2tslWSrdK6TvgPa_2fsA_3d_3d" target="_blank">[Принять участие в опросе]</a></b>
-<i>(опрос отроется в новом окне броузера)</i>.
-<br>
-<script type="text/javascript">
-function hideSurveyPrompt()
-{
-    document.getElementById("survey-prompt").style.display="none";
-}
-
-</script>
-<a href="javascript:hideSurveyPrompt()">[спрятать]</a>
-</div>
-
-<center>  
+<center>
 <div id="container" class="WidthPage">
     <?php 
     include 'header.inc.php'; 
@@ -96,6 +73,7 @@ function hideSurveyPrompt()
 
 <?php
 echo "var key = '$key';";
+echo "var format = '$format';";
 echo "var book = '$book';";
 ?>
 
@@ -103,7 +81,7 @@ checkStatus();
 
 function checkStatus()
 {
-    var requestUrl = encodeURI('conv_status.php?key=' + key);
+    var requestUrl = encodeURI('conv_status.php?key=' + key + "&format=" + format);
 
     // callback
     var callback =

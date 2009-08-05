@@ -6,6 +6,7 @@ $password = trim($_POST['pass']);
 $email    = trim($_POST['email']);
 $key      = trim($_POST['key']);
 $status   = trim($_POST['status']);
+$format   = trim($_POST['format']);
 
 if (isset ($_POST['ver']))
     $ver = trim($_POST['ver']);
@@ -15,7 +16,7 @@ else
 try
 {
     $conv = new ConvertBook();
-    $conv->converted($email, $password, $key, $status, $ver);
+    $conv->converted($email, $password, $key, $status, $ver, $format);
     
     httpResponseCode("200 OK");
 }

@@ -1,6 +1,4 @@
 <?php
-require_once "awscfg.php";
-
 // Helper function to create DB object (see db.php)
 function getDBObject()
 {
@@ -33,50 +31,69 @@ class DB
     // Insert a new book
     function insertBook($storageKey, $author, $title, $isbn, $md5)
     {
+
         if (!$this->_connect())
             return false;
         
         $storageKey = mysql_real_escape_string($storageKey);
-        $author     = mysql_real_escape_string($author);
         $title      = mysql_real_escape_string($title);
         $isbn       = mysql_real_escape_string($isbn);
         $status     = mysql_real_escape_string($status);
         $md5        = mysql_real_escape_string($md5);
 
         // insert into OriginalBooks
-        $query = "INSERT INTO OriginalBooks (storage_key, author, title, isbn, md5hash, submitted) 
-            VALUES(\"$storageKey\", \"$author\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
+        $query = "INSERT INTO OriginalBooks (storage_key, title, isbn, md5hash, submitted) 
+            VALUES(\"$storageKey\", \"$title\", \"$isbn\", \"$md5\", UTC_TIMESTAMP())";
 
         if (!mysql_query($query))
         {
             $this->_disconnect();
             return false;
         }
-        
+
+        //Insert Authors
+        for ($i = 0; $i < count($author); $i++)
+        {
+            $first =  mysql_real_escape_string($author[$i]["first"]);
+            $last  =  mysql_real_escape_string($author[$i]["last"]);
+
+            $middle_name = (isset($author[$i]["middle"]))   ? mysql_real_escape_string($author[$i]["middle"])   : "";
+            $nickname    = (isset($author[$i]["nickname"])) ? mysql_real_escape_string($author[$i]["nickname"]) : "";
+            $homepage    = (isset($author[$i]["homepage"])) ? mysql_real_escape_string($author[$i]["homepage"]) : "";
+            $email       = (isset($author[$i]["email"]))    ? mysql_real_escape_string($author[$i]["email"])    : "";
+
+            $query = "INSERT INTO Authors (title, first_name, last_name, middle_name, nickname, homepage, email) 
+                                   VALUES (\"$title\", \"$first\", \"$last\", \"$middle_name\", \"$nickname\", \"$homepage\", \"$email\")";
+
+            if (!mysql_query($query))
+            {
+                $this->_disconnect();
+                return false;
+            }
+
+            //No return if false because author is UNIQUE and mysql returns a failed query if it exists
+            $query = "INSERT INTO AuthorSearch (author) VALUES(\"$name\")";
+
+            mysql_query($query);
+        }
+
+        //Get ID of submitted book
         $query = "SELECT id FROM OriginalBooks ORDER BY id DESC LIMIT 1";
 
         if (!$this->_execQuery($query))
             return false;
-        
+
         $result = mysql_fetch_array($this->result, MYSQL_ASSOC);
+        $id     = $result['id'];
 
-        $id = $result['id'];
-
+        //Insert Title Search
         $query = "INSERT INTO TitleSearch(book_id, title) VALUES(\"$id\", \"$title\")";
 
         if (!mysql_query($query))
         {
             $this->_disconnect();
             return false;
-        }
-
-        $query = "INSERT INTO AuthorSearch (author) VALUES(\"$author\")";
-
-        if (!mysql_query($query))
-        {
-            $this->_disconnect();
-            return false;
-        }
+        }        
 
         $this->_disconnect();
         return true;
@@ -214,7 +231,7 @@ class DB
         return true;
     }
     
-    // Get list of books
+     // Get list of books
     function getBooks($number)
     {
         if (!is_numeric($number))
@@ -223,9 +240,12 @@ class DB
         if (!$this->_connect())
             return false;
 
-        $query = "SELECT id,title,author,storage_key,submitted" . 
-        " FROM OriginalBooks WHERE valid=TRUE" .
-        " ORDER BY id DESC LIMIT $number";
+
+        $query = "SELECT OriginalBooks.id, OriginalBooks.title, Authors.first_name, Authors.last_name, OriginalBooks.storage_key, OriginalBooks.submitted 
+                  FROM (OriginalBooks left join BookAuthors ON BookAuthors.book_id = OriginalBooks.id)
+                  LEFT JOIN Authors on BookAuthors.author_id = Authors.id
+                  WHERE OriginalBooks.valid = TRUE ORDER BY id DESC LIMIT $number";
+
         if (!$this->_execQuery($query))
             return false;
         
@@ -273,9 +293,11 @@ class DB
 
         //TODO: see if we can get rid of filesort in this query
         // (see mysql EXPLAIN on it)
-        $query = "SELECT title, storage_key FROM OriginalBooks ".
-        " WHERE valid=TRUE" .
-        " AND author=\"$author\" ORDER BY title DESC";
+        $query = "SELECT OriginalBooks.title, OriginalBooks.storage_key 
+                  FROM (OriginalBooks left join BookAuthors ON BookAuthors.book_id = OriginalBooks.id)
+                  LEFT JOIN Authors on BookAuthors.author_id = Authors.id
+                  WHERE OriginalBooks.valid = TRUE AND Authors.author=\"$author\" ORDER BY id DESC";
+
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -303,7 +325,12 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-        $query = "SELECT id,title,author,storage_key,submitted FROM OriginalBooks WHERE author = \"$author\" AND valid=TRUE ORDER BY id DESC";
+        $query = "SELECT OriginalBooks.id, OriginalBooks.title, OriginalBooks.author, OriginalBooks.storage_key, OriginalBooks.submitted
+                  FROM (OriginalBooks left join BookAuthors ON BookAuthors.book_id = OriginalBooks.id)
+                  LEFT JOIN Authors on BookAuthors.author_id = Authors.id
+                  WHERE OriginalBooks.valid = TRUE AND Authors.author=\"$author\" ORDER BY id DESC";
+
+        $query = "SELECT id, title, author, storage_key, submitted FROM OriginalBooks WHERE author = \"$author\" AND valid=TRUE ORDER BY id DESC";
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -396,7 +423,12 @@ class DB
 
         //TODO: see if we can get rid of 'using temporary' here.
         // see mysql EXPLAIN
-        $query = "SELECT DISTINCT UPPER(LEFT(author,1)) as letter FROM OriginalBooks WHERE valid=TRUE";
+
+        $query = "SELECT DISTINCT UPPER(LEFT(Authors.author,1)) as letter
+                  FROM Authors
+                  LEFT JOIN OriginalBooks ON Authors.book_id = OriginalBooks.id 
+                  WHERE OriginalBooks.valid=TRUE";
+
         if (!$this->_execQuery($query))
             return false;
         
@@ -411,7 +443,7 @@ class DB
         return $list;
     }
     
-    // Get authors by first letter
+    /// Get authors by first letter
     // Returns array each element of it is an array with keys "author" and "number". 
     // This array is sorted by authors.
     function getAuthorsByFirstLetter($letter)
@@ -421,7 +453,11 @@ class DB
             
         $letter = mysql_real_escape_string($letter);
         
-        $query = "SELECT author, count(id) AS number FROM OriginalBooks WHERE author LIKE \"$letter%\" AND valid=TRUE GROUP BY author ORDER BY author ASC";
+        $query = "SELECT Authors.author, count(OriginalBooks.id) 
+                  FROM Authors
+                  LEFT JOIN OriginalBooks ON Authors.book_id = OriginalBooks.id 
+                  WHERE Authors.author LIKE \"$letter%\" AND OriginalBooks.valid=TRUE GROUP BY Authors.author ORDER BY Authors.author ASC";
+
         if (!$this->_execQuery($query))
             return false;
         
@@ -478,7 +514,7 @@ class DB
         $this->_disconnect();
         return $list;
     }
-    
+     
     function countTitles($search) {
 
         if (!$this->_connect())

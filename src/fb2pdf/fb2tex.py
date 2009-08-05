@@ -28,7 +28,9 @@ default_parameters = {
     # codec to use for output - should be consistent with inputenc
     'outcodec': 'utf-8',
 
-    'margin': '1mm'
+    'margin': '1mm',
+
+    'fontsize': '12pt'
 }
 
 
@@ -367,7 +369,7 @@ def fb2tex(infile, outfile, conv_parameters={}):
             parameters['papersize']=default_papersize
             
     # laTeX-document header
-    f.write("""\\documentclass[12pt,openany]{book}
+    f.write("""\\documentclass[%(fontsize)s,openany]{book}
     \\usepackage{verse}
     \\usepackage{textcomp} 
     \\usepackage[
