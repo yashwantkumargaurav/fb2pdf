@@ -157,7 +157,11 @@ def processMessage(m):
         raise PersistentError("Message must contain exactly one 'result' element")
     res_key = results[0].getAttribute('key')
     res_encoding = results[0].getAttribute('encoding')
-    res_name= results[0].getAttribute('name')
+    res_name = results[0].getAttribute('name')
+
+    if res_name == '':
+	logging.getLogger('fbdaemon').debug('Name is empty, using key instead')
+        res_name = res_key
 
     conv_options = {}
     parameters = root.getElementsByTagName('parameter')
@@ -206,7 +210,7 @@ def processMessage(m):
 def upload_file(bucket, key, filename, disp='attachment'):
     global cfg
     retries = int(cfg.get('storage','retries'))
-
+  
     if filename == None:
         raise PersistentError("Invalid None filename")
     if disp == None:
