@@ -28,7 +28,7 @@ try
     if (!$title)
         $title = "Название неизвестно";
 
-    $formats = $db->getBookFormatsById($id);
+    $formats = $db->getFormats();
 }
 catch(Exception $e)
 {
@@ -72,9 +72,14 @@ catch(Exception $e)
                         {
                             $format = $formats[$i]["id"];
                             $formatTitle = $formats[$i]["title"];
-                            $bs->checkConverted($key, $format);
-
-                            echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
+                            $status = $bs->checkConverted($key, $format);
+                            if ($status == BookStatus::STATUS_SUCCESS)
+                            {
+                                echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
+                            }
+                            else {
+                                echo "[<a href='convert.php?key=$key&format=$format'>$formatTitle (pdf)</a>]<br/>";
+                            }
                         }
                     }
                     echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
