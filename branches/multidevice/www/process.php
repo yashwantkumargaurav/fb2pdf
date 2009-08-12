@@ -101,6 +101,41 @@ class ConvertBook
         if ($exc)
             throw $exc;
     }
+
+    // Process book from storage
+    public function convertFromS3($key, $format, $email = null)
+    {
+        $this->email = $email;
+        $this->bookKey = $key;
+
+        global $awsS3Bucket;
+        
+        $status = $this->checkFormat($format);
+        if ($status == self::DB_BOOK_CONVERTED) // book is up-to-date
+        {
+            $this->notifyUserByEmail($this->email, $this->bookKey, "r");
+            return;
+        }
+        if ($status == self::DB_BOOK_NOT_FOUND)
+        {
+            $this->insertFormat($format);
+        }
+        else if ($status == self::DB_BOOK_RECONVERT)
+        {
+            // Prepare book for reconverting 
+            $this->updateFormat($format);
+        }
+        // save fb2 file
+        $s3 = getS3Object();
+        $this->fileName = $s3->getObjectFilename($awsS3Bucket, $this->bookKey . ".fb2");
+        if ($this->fileName) 
+            $this->fileName = removeExt($this->fileName);
+        else
+            $this->fileName = $this->bookKey;
+        
+        // Send request to convert book
+        $this->requestConvert($format);
+    }
     
     // This method should be called from callback when conversion is done
     public function converted($email, $password, $key, $status, $ver, $format)
@@ -166,7 +201,7 @@ class ConvertBook
         if (!$this->fileName)
             $this->fileName = $this->bookKey . ".zip";
 
-        // process book
+        // Process book
         if (!self::TEST_MODE)
         {
             if (!$this->checkBook($md5))
@@ -273,7 +308,7 @@ class ConvertBook
         }
 
         $s3 = getS3Object();
-        $zipFile = getStorageName($this->bookkey, $format, ".zip");
+        $zipFile = getStorageName($this->bookKey, $format, ".zip");
         if (!$s3->deleteObject($awsS3Bucket, $zipFile))
         {
             error_log("FB2PDF ERROR. Unable to delete converted file $zipFile from the Amazon S3 storage."); 

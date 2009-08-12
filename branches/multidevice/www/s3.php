@@ -111,6 +111,33 @@ class S3
         return ($this->responseCode == 200) ? true : false;
     }
     
+    // Gets array of object's filename
+    function getObjectFilename($bucket, $object)
+    {
+        $resource = $bucket . "/" . $object;
+        
+        $this->request =& new HTTP_Request($this->serviceUrl . $resource);
+		$this->initRequest("HEAD", $resource, "", "private", "", "");
+        
+        $this->request->sendRequest();
+        $this->gotResponse();
+
+        $filename = null;
+        if ($this->responseCode == 200) {
+            foreach ($this->responseHeader as $key => $value) 
+            {
+                if (stristr($key, "Content-Disposition"))
+                {
+                    $values = array();
+                    $values = explode("\"", strstr($value, "filename="));
+                    $filename = $values[1];
+                }
+            }
+        }
+
+        return $filename;
+    }
+    
   	// Gets array of object's metadata
     function getObjectMetadata($bucket, $object)
     {
@@ -124,7 +151,7 @@ class S3
         
         if ($this->responseCode == 200)
         {
-			$metadata = array();
+	    $metadata = array();
             $metaPrefix = "x-amz-meta-";
             foreach ($this->responseHeader as $key => $value) 
             {
