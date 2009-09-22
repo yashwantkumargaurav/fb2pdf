@@ -1,18 +1,14 @@
--- SQL script to convert from old to new db schema
+-- SQL script to convert db
 
-TRUNCATE OriginalBooks;
-TRUNCATE ConvertedBooks;
+UPDATE OriginalBooks SET storage_key=REPLACE(storage_key, '.zip', '') WHERE storage_key LIKE '%.zip';
+
 TRUNCATE TitleSearch;
 TRUNCATE AuthorSearch;
 
-INSERT INTO OriginalBooks (id, storage_key, author, title, isbn, md5hash, submitted, valid)
-       SELECT id, REPLACE(storage_key, '.zip', ''), author, title, isbn, md5hash, converted, status="r" FROM Books;
-
-INSERT INTO ConvertedBooks (book_id, format, status, converted, counter, conv_ver)
-       SELECT id, 1, status, converted, counter, conv_ver FROM Books;
-
 INSERT INTO TitleSearch (book_id, title) 
-       SELECT id, title FROM Books;
+       SELECT id, title FROM OriginalBooks;
 
 INSERT INTO AuthorSearch (author) 
-       SELECT DISTINCT author FROM Books;
+       SELECT DISTINCT author FROM OriginalBooks;
+
+DROP TABLE IF EXISTS Books;
