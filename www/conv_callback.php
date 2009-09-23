@@ -14,9 +14,9 @@ else
 
 if (isset ($_POST['format']))
     $format = trim($_POST['format']);
-else
-    $format = 1;
 
+if (!$format || $format == '') 
+        $format = 1;
 try
 {
     $conv = new ConvertBook();

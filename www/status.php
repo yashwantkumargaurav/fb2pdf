@@ -1,4 +1,5 @@
 <?php
+require_once 'awscfg.php';
 require_once 'db.php';
 require_once 'utils.php';
 
@@ -7,8 +8,8 @@ if (!isset ($_GET['key']))
     httpResponseCode("400 Bad Request", "Missing parameter \"key\"");
     die;
 }
-$key = $_GET['key'];
-$format = $_GET['format'];
+$key = removeExt($_GET['key']);
+$format = (isset($_GET['format'])) ? $_GET['format'] : 1;
 
 // get book info
 $db = getDBObject();

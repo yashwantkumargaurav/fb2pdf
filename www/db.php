@@ -90,7 +90,6 @@ class DB
             return false;
             
         $storageKey = mysql_real_escape_string($storageKey);
-        $ver        = mysql_real_escape_string($ver);
 
         $query = "INSERT INTO ConvertedBooks (book_id, format, status) " .
             "SELECT id, $format, \"p\" FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
@@ -222,9 +221,8 @@ class DB
         if (!$this->_connect())
             return false;
 
-        $query = "SELECT id,title,author,storage_key,submitted" . 
-        " FROM OriginalBooks WHERE valid=TRUE" .
-        " ORDER BY id DESC LIMIT $number";
+        $query = "SELECT o.id,title,author,storage_key,submitted,(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted FROM OriginalBooks AS o WHERE valid=TRUE ORDER BY o.id DESC LIMIT $number";
+
         if (!$this->_execQuery($query))
             return false;
         
@@ -302,7 +300,8 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-        $query = "SELECT id,title,author,storage_key,submitted FROM OriginalBooks WHERE author = \"$author\" AND valid=TRUE ORDER BY id DESC";
+        $query = "SELECT o.id,title,author,storage_key,submitted,(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted FROM OriginalBooks AS o WHERE author=\"$author\" AND valid=TRUE ORDER BY o.id DESC";
+
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
