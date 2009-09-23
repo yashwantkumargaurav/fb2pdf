@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS OriginalBooks
 
         INDEX   storage_key_idx (storage_key),
         INDEX   author_idx (valid, author),
+        INDEX   valid_idx (valid),
         
         UNIQUE  storage_key_uniq (storage_key),
         UNIQUE  md5hash_uniq (md5hash),
