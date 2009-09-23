@@ -3,8 +3,13 @@ require_once 'process.php';
 require_once 'utils.php';
 
 $url = (isset($_GET["url"])) ? $_GET["url"] : null;
-$email = $_POST['email'];
-$format = $_POST['format'];
+$email = (isset($_POST["email"])) ? $_POST["email"] : null;
+
+if (isset($_POST["format"]))
+    $format = $_POST["format"];
+
+if (!$format || $format == '') 
+    $format = 1;
 
 $conv = new ConvertBook();
 $file = null;

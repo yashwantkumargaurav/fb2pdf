@@ -8,7 +8,7 @@ if (!isset ($_GET['key']))
     httpResponseCode("400 Bad Request", "Missing parameter \"key\"");
     die;
 }
-$key = $_GET['key'];
+$key = removeExt($_GET['key']);
 
 $bs = new BookStatus();
 try
