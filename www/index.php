@@ -132,25 +132,25 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
                     
                     <div id="sony_reader">
                         <img src="images/sony_reader.jpg" alt="sony reader"/>
-	                <?php
-                        require_once 'awscfg.php';
-                        require_once 'db.php';
+                         <select id="format" name="format" style="width: 150px; margin: 5px 0px 0px 0px;">
+                            <?php
+                            require_once 'awscfg.php';
+                            require_once 'db.php';
 
-	                $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
-                        $list = $db->getFormats();
-                        if ($list)
-                        {
-			    print "<select id=\"format\" name=\"format\">";
-                            $count = count($list);
-                            for ($i = 0; $i < $count ; $i++)
+                            $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
+                            $list = $db->getFormats();
+                            if ($list)
                             {
-   			        $formatId = $list[$i]["id"];
-                                $formatTitle= $list[$i]["title"];
-                                print "<option value=\"$formatId\">$formatTitle</option>";
-			    }
-                            print "</select>";
-			}
-                        ?>
+                                $count = count($list);
+                                for ($i = 0; $i < $count ; $i++)
+                                {
+                                    $formatId = $list[$i]["id"];
+                                    $formatTitle= $list[$i]["title"];
+                                    print "<option value=\"$formatId\">$formatTitle</option>";
+                                }
+                            }
+                            ?>
+                        </select>
                         <input id="ConvertBtnUpld" style="margin: 5px 0px 0px 0px;"
                             onmouseup  ="this.src='images/button.gif'" 
                             onmousedown="this.src='images/button_pressed.gif'"
