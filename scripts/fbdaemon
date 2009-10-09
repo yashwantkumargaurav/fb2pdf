@@ -416,7 +416,6 @@ def main():
         
         qname = cfg.get('queue','name')
         qtimeout = int(cfg.get('queue','timeout'))
-        ptimeout = int(cfg.get('processing','timeout'))
         pdelay = int(cfg.get('queue','polling_delay'))
 
         q = c.create_queue(qname)
@@ -434,7 +433,7 @@ def main():
                 m=None
 
             try:
-                signal.alarm(qtimeout+1) # add a second to not conflict with reading timeout
+                signal.alarm(qtimeout)
                 m = q.read(qtimeout)
             except:
                 logging.getLogger('fbdaemon').exception("Error reading queue")
@@ -444,7 +443,7 @@ def main():
                 time.sleep(pdelay)
             else:
                 try:
-                    signal.alarm(ptimeout)
+                    signal.alarm(qtimeout)
                     processMessage(m)
                 except TemporaryError, ex:
                     logging.getLogger('fbdaemon').exception(ex)
