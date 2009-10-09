@@ -272,7 +272,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name
         basedir = os.getcwd()
 
         logging.getLogger('fbdaemon').info("Processing '%s'." % src_fname)
-        tmpdirname = tempfile.gettempdir() + '/' + str(int(time.time()))
+        tmpdirname = tempfile.gettempdir() + '/' + str(os.getpid()) + str(int(time.time()))
         logging.getLogger('fbdaemon').debug("Creating temporary directory '%s'." % tmpdirname)
         os.mkdir(tmpdirname)
 

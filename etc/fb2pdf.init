@@ -13,20 +13,25 @@
 [ ${NETWORKING} = "no" ] && exit 0
 
 unset FB2PDFARGS
-FB2PDFARGS="-c ~fb2pdf/src/fb2pdf/etc/aws.cfg -p ~fb2pdf/logs/fbdaemon.pid -l ~fb2pdf/logs/fbdaemon.log -d -v"
+FB2PDFARGS="-c ~fb2pdf/src/fb2pdf/etc/aws.cfg -p ~fb2pdf/logs/fbdaemon-#.pid -l ~fb2pdf/logs/fbdaemon-#.log -d -v"
+NPROCESS=2
 
 prog="fbdaemon"
 USER="fb2pdf"
 
 start() {
     echo -n $"Starting $prog: "
-    RETVAL=0
-    runuser -l ${USER} -c "cd ~${USER} && fbdaemon ${FB2PDFARGS}" 
-    RETVAL=$?
-    [ "$RETVAL" -eq 0 ] && success $"fb2pdf startup" || \
-        failure $"fb2pdf start"
+    for (( i=0; $i < $NPROCESS; i++ )); do
+        RETVAL=0
+	ARGS=$(echo ${FB2PDFARGS} | sed -e s/#/$i/g)
+    	runuser -l ${USER} -c "cd ~${USER} && fbdaemon ${ARGS}" 
+    	RETVAL=$?
+    	[ "$RETVAL" -eq 0 ] || ( killproc fbdaemon; break )
+    done
+    [ "$RETVAL" -eq 0 ] && \
+        ( success $"fb2pdf startup"; touch /var/lock/subsys/fb2pdf ) || \
+             failure $"fb2pdf start"
     echo
-    [ "$RETVAL" -eq 0 ] && touch /var/lock/subsys/fb2pdf
 }
 
 stop() {
