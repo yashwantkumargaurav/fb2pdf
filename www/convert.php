@@ -4,10 +4,10 @@ require_once 'process.php';
 
 header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 
-if (isset ($_GET["key"]) and isset ($_GET["format"]))
+if (isset ($_REQUEST["key"]) and isset ($_REQUEST["format"]))
 {
-    $key = $_GET["key"];
-    $format = $_GET["format"];
+    $key = $_REQUEST["key"];
+    $format = $_REQUEST["format"];
     
     $conv = new ConvertBook();
     try
@@ -21,11 +21,11 @@ if (isset ($_GET["key"]) and isset ($_GET["format"]))
         httpResponseCode("400 Bad Request", "Ошибка конвертации. Пожалуйста, попробуйте ешё раз.");
     }
 }
-else if (isset ($_GET["url"]))
+else if (isset ($_REQUEST["url"]))
 {
     // redirect to the index page
-    $url = $_GET["url"];
-    if (isset ($_GET["auto"]))
+    $url = $_REQUEST["url"];
+    if (isset ($_REQUEST["auto"]))
         httpRedirect("uploader.php?url=$url");
     else
         httpRedirect("index.php?url=$url");
