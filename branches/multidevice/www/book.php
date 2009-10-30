@@ -46,6 +46,15 @@ catch(Exception $e)
 <link rel="alternate" type="application/atom+xml" title="Atom" href="atom.php" />
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'analytics.inc.php'; ?>
+
+<script type="text/javascript">
+function convertBook(key, format) 
+{
+    document.convertform.key.value = key;
+    document.convertform.format.value = format;
+    document.convertform.submit();
+}
+</script> 
 </head>
 
 <body>
@@ -62,7 +71,10 @@ catch(Exception $e)
         <div class="tab_box_content">
             <img src="images/green_px.gif" class="line"/>
             <div id="status" class="message">
-                <?php        
+                <form name="convertform" enctype="multipart/form-data" action="convert.php" method="POST">
+                    <input type="hidden" name="key" value=""/>
+                    <input type="hidden" name="format" value=""/>
+                    <?php        
                     echo "<h3 class='left'><a href='books.php?author=$author' style='color:black'>$author</a>&nbsp;&nbsp;\"$title\"</h3><br/><br/>";
                     echo "<p>Загрузить книгу в формате:<br/>";
                     echo "[<a href='$bs->fbFile'>оригинал (fb2)</a>]<br/>";
@@ -78,7 +90,7 @@ catch(Exception $e)
                                 echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
                             }
                             else {
-                                echo "[<a href='convert.php?key=$key&format=$format'>$formatTitle (pdf)</a>]<br/>";
+                                echo "[<a href='javascript:convertBook(\"$key\", $format)'>$formatTitle (pdf)</a>]<br/>";
                             }
                         }
                     }
@@ -91,6 +103,7 @@ catch(Exception $e)
                     echo "<div class=\"js-kit-comments\" permalink=\"$book_link\" path=\"$book_path\"></div>";
                     echo "<script src=\"http://js-kit.com/reviews.js\" permalink=\"$book_link\" path=\"$book_path\"></script>";
                 ?>
+                </form>
             </div>    
             <img src="images/green_px.gif" class="line"/>
             <?php include 'footer.inc.php'; ?>
