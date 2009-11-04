@@ -34,7 +34,7 @@ class ConvertBook
     
     // test mode (no amazon, no db)
     const TEST_MODE = false; // set false on prod.
-    
+
     // Process book from file uploaded via POST
     public function convertFromFile($filePath, $fileName, $format, $email = null)
     {
@@ -163,6 +163,14 @@ class ConvertBook
         }
     }
     
+    //Check the converted status for specific format
+    public function checkConverted($key, $format) {
+
+        $this->bookKey = $key;
+
+        return $this->checkFormat($format);
+    }
+   
     // Convert file
     private function convert($filePath, $fileName, $format)
     {
