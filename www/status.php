@@ -103,7 +103,7 @@ function successHandler(o)
     if (response.status == 'r')
     {
         document.getElementById("status").innerHTML = 
-            '<h3 class="left">Книга ' + book + ' успешно сконвертированна.</h3>' +
+            '<h3 class="left">Книга <a href="book.php?key=' + key + '">' + book + '</a> успешно сконвертированна.</h3>' +
             '<p>Теперь Вы можете <b><a href="' + response.converted + '">загрузить сконвертированную книгу</a></b> и записать её в Ваш Sony Reader. ' +
             '(Возможные ошибки и предупреждения, возникшие в результате конвертации Вы можете посмотреть ' +
             '<a href="' + response.log + '">здесь</a>.)</p>' +
@@ -113,7 +113,7 @@ function successHandler(o)
     else if (response.status == 'e')
     {
         document.getElementById("status").innerHTML = 
-            '<h3 class="left">При конвертации книги ' + book + ' произошла ошибка. ' +
+            '<h3 class="left">При конвертации книги <a href="book.php?key=' + key + '">' + book + '</a> произошла ошибка. ' +
             'Вы можете посмотреть её <a href="' + response.log + '">здесь</a>.</h3>' +
             '<p>Хотите нам сообщить об ошибке? Это можно сделать <a href="http://groups.google.com/group/fb2pdf-users/about?hl=ru">здесь</a>. ' +
             'Не забудьте скопировать <a href="' + response.log +'">информацию об ошибке</a> в текст Вашего сообщения.</p>' +

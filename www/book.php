@@ -11,6 +11,8 @@ if (!isset ($_GET['key']))
 $key = removeExt($_GET['key']);
 
 $bs = new BookStatus();
+$cb = new ConvertBook();
+
 try
 {
     $bs->checkOriginal($key);
@@ -79,13 +81,18 @@ function convertBook(key, format)
                     echo "<p>Загрузить книгу в формате:<br/>";
                     echo "[<a href='$bs->fbFile'>оригинал (fb2)</a>]<br/>";
                     if ($formats) {
+                        
                         $count = count($formats);
                         for ($i = 0; $i < $count ; $i++)
                         {
                             $format = $formats[$i]["id"];
                             $formatTitle = $formats[$i]["title"];
-                            $status = $bs->checkConverted($key, $format);
-                            if ($status == BookStatus::STATUS_SUCCESS)
+                            $storageStatus = BookStatus::STATUS_ERROR;
+                            $formatStatus = $cb->checkConverted($key, $format);
+                            if ($formatStatus == ConvertBook::DB_BOOK_CONVERTED) {
+                                $storageStatus = $bs->checkConverted($key, $format);
+                            }
+                            if ($storageStatus == BookStatus::STATUS_SUCCESS)
                             {
                                 echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
                             }
