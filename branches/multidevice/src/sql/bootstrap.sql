@@ -46,7 +46,7 @@ INSERT INTO FormatParams (format, name, value) VALUES (9, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (9, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (9, 'papersize','90.6mm,122.4mm');
 
-INSERT INTO Formats (id, title, description) VALUES (10, 'Amazon Kindle 2 (landscape)', 'Amazon Kindle 2 (landscape)');
+INSERT INTO Formats (id, title, description) VALUES (10, 'Kindle 2 (landscape)', 'Amazon Kindle 2 (landscape)');
 INSERT INTO FormatParams (format, name, value) VALUES (10, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (10, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (10, 'papersize','122.4mm,90.6mm');
