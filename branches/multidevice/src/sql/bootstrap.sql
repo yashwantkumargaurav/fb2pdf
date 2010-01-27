@@ -24,12 +24,12 @@ INSERT INTO FormatParams (format, name, value) VALUES (4, 'papersize','100mm,79m
 INSERT INTO Formats (id, title, description) VALUES (5, 'iPhone', 'Apple iPhone (portrait). Includes: iPhone, iPhone3G');
 INSERT INTO FormatParams (format, name, value) VALUES (5, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (5, 'fontsize','12pt');
-INSERT INTO FormatParams (format, name, value) VALUES (5, 'papersize','61mm,115mm');
+INSERT INTO FormatParams (format, name, value) VALUES (5, 'papersize','80mm,120mm');
 
 INSERT INTO Formats (id, title, description) VALUES (6, 'iPhone (landscape)', 'Apple iPhone (landscape). Includes: iPhone, iPhone3G');
 INSERT INTO FormatParams (format, name, value) VALUES (6, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (6, 'fontsize','12pt');
-INSERT INTO FormatParams (format, name, value) VALUES (6, 'papersize','115mm,61mm');
+INSERT INTO FormatParams (format, name, value) VALUES (6, 'papersize','120mm,80mm');
 
 INSERT INTO Formats (id, title, description) VALUES (7, 'Kindle DX', 'Amazon Kindle DX (portrate)');
 INSERT INTO FormatParams (format, name, value) VALUES (7, 'margin','1mm');
