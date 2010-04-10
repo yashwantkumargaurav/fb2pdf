@@ -1,7 +1,0 @@
-#summary Project TODO list
-#labels Phase-Requirements
-
-  * Support for multiple output devices: iPhone, JetBook, etc.
-  * Allow users to customize PDF generation (fonts, margins, spacing, etc.)
-  * 'image' elemnt support for external images referenced by URL
-  * Convert images in unsupported formats using ImageMagick
