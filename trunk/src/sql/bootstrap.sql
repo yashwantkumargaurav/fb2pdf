@@ -1,12 +1,12 @@
 -- Bootstapping SQL
 -- Defines basic device formats
 
-INSERT INTO Formats (id, title, description) VALUES (1, 'Sony Reader', 'Sony Reader (portrait). Includes: PRS-500,505,700');
+INSERT INTO Formats (id, title, description) VALUES (1, 'Sony Reader PRS-500,505,700', 'Sony Reader (portrait). Includes: PRS-500,505,700');
 INSERT INTO FormatParams (format, name, value) VALUES (1, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (1, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (1, 'papersize','90.6mm,122.4mm');
 
-INSERT INTO Formats (id, title, description) VALUES (2, 'Sony Reader (landscape)', 'Sony Reader (landscape). Includes: PRS-500,505,700');
+INSERT INTO Formats (id, title, description) VALUES (2, 'Sony Reader PRS-500,505,700 (landscape)', 'Sony Reader (landscape). Includes: PRS-500,505,700');
 INSERT INTO FormatParams (format, name, value) VALUES (2, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (2, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (2, 'papersize','122.4mm,90.6mm');
@@ -61,13 +61,22 @@ INSERT INTO FormatParams (format, name, value) VALUES (12, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (12, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (12, 'papersize','197.1mm,147.8mm');
 
-INSERT INTO Formats (id, title, description) VALUES (13, 'Reader Pocket Edition', 'Sony Reader Pocket Edition (portrait). Includes: PRS-300');
+INSERT INTO Formats (id, title, description) VALUES (13, 'Sony Reader PRS-300', 'Sony Reader (portrait). Includes: PRS-300');
 INSERT INTO FormatParams (format, name, value) VALUES (13, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (13, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (13, 'papersize','76.12mm,101.5mm');
 
-INSERT INTO Formats (id, title, description) VALUES (14,  'Reader Pocket Edition (landscape)', 'Sony Reader Pocket Edition (landscape). Includes: PRS-300');
+INSERT INTO Formats (id, title, description) VALUES (14,  'Sony Reader PRS-300 (landscape)', 'Sony Reader (landscape). Includes: PRS-300');
 INSERT INTO FormatParams (format, name, value) VALUES (14, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (14, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (14, 'papersize','101.5mm,76.12mm');
 
+INSERT INTO Formats (id, title, description) VALUES (15, 'Sony Reader PRS-900', 'Sony Reader (portrait). Includes: PRS-900');
+INSERT INTO FormatParams (format, name, value) VALUES (15, 'margin','1mm');
+INSERT INTO FormatParams (format, name, value) VALUES (15, 'fontsize','12pt');
+INSERT INTO FormatParams (format, name, value) VALUES (15, 'papersize','91.17mm,155.6mm');
+
+INSERT INTO Formats (id, title, description) VALUES (16,  'Sony Reader PRS-900 (landscape)', 'Sony Reader (landscape). Includes: PRS-900');
+INSERT INTO FormatParams (format, name, value) VALUES (16, 'margin','1mm');
+INSERT INTO FormatParams (format, name, value) VALUES (16, 'fontsize','12pt');
+INSERT INTO FormatParams (format, name, value) VALUES (16, 'papersize','155.6mm,91.17mm');
