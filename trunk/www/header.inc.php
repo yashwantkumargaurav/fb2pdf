@@ -18,7 +18,7 @@
 	                <div id="myContainer"></div>
                 </div>
             </form>
-        </div>		
+        </div>	
     </div><!--header_box_content-->
     <b class="hbottom"><b class="hb4"></b><b class="hb3"></b><b class="hb2"></b><b class="hb1"></b></b>
 </div><!--header_box-->

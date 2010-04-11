@@ -8,10 +8,13 @@ if (!isset ($_GET["key"]))
     die;
 }
 
+$key = $_GET["key"];
+$format = $_GET["format"];
 $bs = new BookStatus();
 try
 {
-    $status = $bs->checkStatus($_GET["key"]);
+    $bs->checkOriginal($key);
+    $status = $bs->checkConverted($key, $format);
     
     // generate response json
     header('Content-type: application/json');    

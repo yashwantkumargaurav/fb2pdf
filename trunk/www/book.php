@@ -8,17 +8,20 @@ if (!isset ($_GET['key']))
     httpResponseCode("400 Bad Request", "Missing parameter \"key\"");
     die;
 }
-$key = $_GET['key'];
+$key = removeExt($_GET['key']);
 
 $bs = new BookStatus();
+$cb = new ConvertBook();
+
 try
 {
-    $status = $bs->checkStatus($key);
+    $bs->checkOriginal($key);
     
     // get book info
     $db = getDBObject();
     $bookInfo = $db->getBookByKey($key);
 
+    $id     = $bookInfo["id"];
     $title  = $bookInfo["title"];
     $author = $bookInfo["author"];
 
@@ -27,6 +30,7 @@ try
     if (!$title)
         $title = "Название неизвестно";
 
+    $formats = $db->getFormats();
 }
 catch(Exception $e)
 {
@@ -45,6 +49,15 @@ catch(Exception $e)
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'searchstyle.inc.php'; ?>
 <?php include 'analytics.inc.php'; ?>
+
+<script type="text/javascript">
+function convertBook(key, format) 
+{
+    document.convertform.key.value = key;
+    document.convertform.format.value = format;
+    document.convertform.submit();
+}
+</script> 
 </head>
 
 <body>
@@ -61,20 +74,44 @@ catch(Exception $e)
         <div class="tab_box_content">
             <img src="images/green_px.gif" class="line"/>
             <div id="status" class="message">
-                <?php        
-                echo "<h3 class='left'><a href='books.php?author=$author' style='color:black'>$author</a>&nbsp;&nbsp;\"$title\"</h3><br/><br/>";
-                echo "<p>Загрузить книгу в формате:<br/>";
-                echo "[<a href='$bs->pdfFile'>Sony Reader (pdf)</a>]&nbsp;&nbsp;[<a href='$bs->fbFile'>оригинал (fb2)</a>]</p>";
-                echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
-                echo "<p>";
-                $book_link  = getFullUrl("book.php") . "?key=".urlencode($key);
-                $book_path  = "/book/".$key;
-                $book_title = $author."  '".$title."'";
-                echo "<div class=\"js-kit-rating\" title=\"$book_title\" permalink=\"$book_link\" path=\"$book_path\"></div>";
-                echo "<div class=\"js-kit-comments\" permalink=\"$book_link\" path=\"$book_path\"></div>";
-                echo "<script src=\"http://js-kit.com/reviews.js\" permalink=\"$book_link\" path=\"$book_path\"></script>";
+                <form name="convertform" enctype="multipart/form-data" action="convert.php" method="POST">
+                    <input type="hidden" name="key" value=""/>
+                    <input type="hidden" name="format" value=""/>
+                    <?php        
+                    echo "<h3 class='left'><a href='books.php?author=$author' style='color:black'>$author</a>&nbsp;&nbsp;\"$title\"</h3><br/><br/>";
+                    echo "<p>Загрузить книгу в формате:<br/>";
+                    echo "[<a href='$bs->fbFile'>оригинал (fb2)</a>]<br/>";
+                    if ($formats) {
+                        
+                        $count = count($formats);
+                        for ($i = 0; $i < $count ; $i++)
+                        {
+                            $format = $formats[$i]["id"];
+                            $formatTitle = $formats[$i]["title"];
+                            $storageStatus = BookStatus::STATUS_ERROR;
+                            $formatStatus = $cb->checkConverted($key, $format);
+                            if ($formatStatus == ConvertBook::DB_BOOK_CONVERTED) {
+                                $storageStatus = $bs->checkConverted($key, $format);
+                            }
+                            if ($storageStatus == BookStatus::STATUS_SUCCESS)
+                            {
+                                echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
+                            }
+                            else {
+                                echo "[<a href='javascript:convertBook(\"$key\", $format)'>$formatTitle (pdf)</a>]<br/>";
+                            }
+                        }
+                    }
+                    echo "<p><a href='books.php?author=$author' style='color:black'>Другие книги автора</a></p>";
+                    echo "<p>";
+                    $book_link  = getFullUrl("book.php") . "?key=".urlencode($key);
+                    $book_path  = "/book/".$key;
+                    $book_title = $author."  '".$title."'";
+                    echo "<div class=\"js-kit-rating\" title=\"$book_title\" permalink=\"$book_link\" path=\"$book_path\"></div>";
+                    echo "<div class=\"js-kit-comments\" permalink=\"$book_link\" path=\"$book_path\"></div>";
+                    echo "<script src=\"http://js-kit.com/reviews.js\" permalink=\"$book_link\" path=\"$book_path\"></script>";
                 ?>
-                
+                </form>
             </div>    
             <img src="images/green_px.gif" class="line"/>
             <?php include 'footer.inc.php'; ?>

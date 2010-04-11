@@ -40,8 +40,8 @@
 		$title   =    $list[$i]["title"];
 		$author  =    $list[$i]["author"];
 		$id      =    $list[$i]["id"];
-		$date    =    formatDateIntoAtom($list[$i]["converted"]);
-		$key     =    "getfile.php?key=" . $list[$i]["storage_key"]."";
+		$date    =    formatDateIntoAtom($list[$i]["submitted"]);
+		$key     =    "getfile.php?key=" . $list[$i]["storage_key"].".zip";
 		if (!$author)
 			$author = "Автор неизвестен";
 		if (!$title)
