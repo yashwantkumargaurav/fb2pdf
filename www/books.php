@@ -20,6 +20,7 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'searchstyle.inc.php'; ?>
 <?php include 'analytics.inc.php'; ?>
+<?php include 'searchstyle.inc.php'; ?>
 </head>
 
 <body>
@@ -71,8 +72,6 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
                         {
                             $title  = $list[$i]["title"];
                             $key    = $list[$i]["storage_key"];
-                            if (strrpos($key, ".") === false) // old style key (no extension)
-                                $key = $key . ".pdf";
 
                             if (!$title)
                                 $title = "Название неизвестно";

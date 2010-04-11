@@ -12,10 +12,15 @@ if (isset ($_POST['ver']))
 else
     $ver = 0;
 
+if (isset ($_POST['format']))
+    $format = trim($_POST['format']);
+
+if (!$format || $format == '') 
+        $format = 1;
 try
 {
     $conv = new ConvertBook();
-    $conv->converted($email, $password, $key, $status, $ver);
+    $conv->converted($email, $password, $key, $status, $ver, $format);
     
     httpResponseCode("200 OK");
 }

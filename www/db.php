@@ -1,6 +1,4 @@
 <?php
-require_once "awscfg.php";
-
 // Helper function to create DB object (see db.php)
 function getDBObject()
 {
@@ -49,35 +47,39 @@ class DB
 
         if (!mysql_query($query))
         {
+            error_log("Query '$query' failed.");
             $this->_disconnect();
             return false;
         }
         
+        //Get ID of submitted book
         $query = "SELECT id FROM OriginalBooks ORDER BY id DESC LIMIT 1";
 
         if (!$this->_execQuery($query))
+        {
+            error_log("Query '$query' failed.");
+            $this->_disconnect();
             return false;
+        }
         
         $result = mysql_fetch_array($this->result, MYSQL_ASSOC);
+        $id     = $result['id'];
 
-        $id = $result['id'];
-
+        //Insert Title Search
         $query = "INSERT INTO TitleSearch(book_id, title) VALUES(\"$id\", \"$title\")";
 
         if (!mysql_query($query))
         {
+            error_log("Query '$query' failed.");
             $this->_disconnect();
             return false;
         }
 
-        $query = "INSERT INTO AuthorSearch (author) VALUES(\"$author\")";
+        $query = "INSERT INTO AuthorSearch (author) VALUES(\"$name\")";
 
-        if (!mysql_query($query))
-        {
-            $this->_disconnect();
-            return false;
-        }
-
+        mysql_query($query); // This query fails on insertion of duplicate author
+                             // so don't report failures. TODO: fix this properly
+ 
         $this->_disconnect();
         return true;
     }
@@ -91,7 +93,6 @@ class DB
             return false;
             
         $storageKey = mysql_real_escape_string($storageKey);
-        $ver        = mysql_real_escape_string($ver);
 
         $query = "INSERT INTO ConvertedBooks (book_id, format, status) " .
             "SELECT id, $format, \"p\" FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
@@ -223,9 +224,10 @@ class DB
         if (!$this->_connect())
             return false;
 
-        $query = "SELECT id,title,author,storage_key,submitted" . 
-        " FROM OriginalBooks WHERE valid=TRUE" .
-        " ORDER BY id DESC LIMIT $number";
+        $query = "SELECT o.id,title,author,storage_key,submitted," .
+            "(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted " .
+            "FROM OriginalBooks AS o WHERE valid=TRUE ORDER BY o.id DESC LIMIT $number";
+
         if (!$this->_execQuery($query))
             return false;
         
@@ -303,7 +305,10 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-        $query = "SELECT id,title,author,storage_key,submitted FROM OriginalBooks WHERE author = \"$author\" AND valid=TRUE ORDER BY id DESC";
+        $query = "SELECT o.id,title,author,storage_key,submitted, " .
+            "(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted " .
+            "FROM OriginalBooks AS o WHERE author=\"$author\" AND valid=TRUE ORDER BY o.id DESC";
+
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
@@ -421,7 +426,8 @@ class DB
             
         $letter = mysql_real_escape_string($letter);
         
-        $query = "SELECT author, count(id) AS number FROM OriginalBooks WHERE author LIKE \"$letter%\" AND valid=TRUE GROUP BY author ORDER BY author ASC";
+        $query = "SELECT author, count(id) AS number FROM OriginalBooks " .
+            "WHERE author LIKE \"$letter%\" AND valid=TRUE GROUP BY author ORDER BY author ASC";
         if (!$this->_execQuery($query))
             return false;
         
@@ -478,7 +484,7 @@ class DB
         $this->_disconnect();
         return $list;
     }
-    
+     
     function countTitles($search) {
 
         if (!$this->_connect())
@@ -586,7 +592,8 @@ class DB
             
         $search = mysql_real_escape_string($search);
         
-        $query = "SELECT author AS text, MATCH(author) AGAINST (\"$search\") AS score FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\") LIMIT 10";
+        $query = "SELECT author AS text, MATCH(author) AGAINST (\"$search\") AS score " .
+            " FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\") LIMIT 10";
 
         if (!$this->_execQuery($query))
             return false;
@@ -608,7 +615,8 @@ class DB
             
         $search = mysql_real_escape_string($search);
         
-        $query = "SELECT title AS text, MATCH(title) AGAINST (\"$search\") AS score FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\") LIMIT 10";
+        $query = "SELECT title AS text, MATCH(title) AGAINST (\"$search\") AS score " .
+            "FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\") LIMIT 10";
 
         if (!$this->_execQuery($query))
             return false;

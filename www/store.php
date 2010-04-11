@@ -6,6 +6,7 @@
 <title>Конвертор FictionBook2 в PDF для Sony Reader</title>
 <?php include 'searchstyle.inc.php'; ?>
 <?php include 'analytics.inc.php'; ?>
+<?php include 'searchstyle.inc.php'; ?>
 </head>
 
 <body>
