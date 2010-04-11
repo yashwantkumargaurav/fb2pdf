@@ -51,3 +51,23 @@ INSERT INTO FormatParams (format, name, value) VALUES (10, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (10, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (10, 'papersize','122.4mm,90.6mm');
 
+INSERT INTO Formats (id, title, description) VALUES (11, 'iPad', 'Apple iPad (portrait)');
+INSERT INTO FormatParams (format, name, value) VALUES (11, 'margin','1mm');
+INSERT INTO FormatParams (format, name, value) VALUES (11, 'fontsize','12pt');
+INSERT INTO FormatParams (format, name, value) VALUES (11, 'papersize','147.8mm,197.1mm');
+
+INSERT INTO Formats (id, title, description) VALUES (12, 'iPad (landscape)', 'Apple iPad (landscape)');
+INSERT INTO FormatParams (format, name, value) VALUES (12, 'margin','1mm');
+INSERT INTO FormatParams (format, name, value) VALUES (12, 'fontsize','12pt');
+INSERT INTO FormatParams (format, name, value) VALUES (12, 'papersize','197.1mm,147.8mm');
+
+INSERT INTO Formats (id, title, description) VALUES (13, 'Reader Pocket Edition', 'Sony Reader Pocket Edition (portrait). Includes: PRS-300');
+INSERT INTO FormatParams (format, name, value) VALUES (13, 'margin','1mm');
+INSERT INTO FormatParams (format, name, value) VALUES (13, 'fontsize','12pt');
+INSERT INTO FormatParams (format, name, value) VALUES (13, 'papersize','76.12mm,101.5mm');
+
+INSERT INTO Formats (id, title, description) VALUES (14,  'Reader Pocket Edition (landscape)', 'Sony Reader Pocket Edition (portrait). Includes: PRS-300');
+INSERT INTO FormatParams (format, name, value) VALUES (14, 'margin','1mm');
+INSERT INTO FormatParams (format, name, value) VALUES (14, 'fontsize','12pt');
+INSERT INTO FormatParams (format, name, value) VALUES (14, 'papersize','101.5mm,76.12mm');
+
