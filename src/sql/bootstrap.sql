@@ -1,12 +1,12 @@
 -- Bootstapping SQL
 -- Defines basic device formats
 
-INSERT INTO Formats (id, title, description) VALUES (1, 'Sony Reader PRS-500,505,700', 'Sony Reader (portrait). Includes: PRS-500,505,700');
+INSERT INTO Formats (id, title, description) VALUES (1, 'Sony Reader PRS-500,505,600,700', 'Sony Reader (portrait). Includes: PRS-500,505,600,700');
 INSERT INTO FormatParams (format, name, value) VALUES (1, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (1, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (1, 'papersize','90.6mm,122.4mm');
 
-INSERT INTO Formats (id, title, description) VALUES (2, 'Sony Reader PRS-500,505,700 (landscape)', 'Sony Reader (landscape). Includes: PRS-500,505,700');
+INSERT INTO Formats (id, title, description) VALUES (2, 'Sony Reader PRS-500,505,600,700 (landscape)', 'Sony Reader (landscape). Includes: PRS-500,505,600,700');
 INSERT INTO FormatParams (format, name, value) VALUES (2, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (2, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (2, 'papersize','122.4mm,90.6mm');
