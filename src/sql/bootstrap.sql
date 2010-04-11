@@ -66,7 +66,7 @@ INSERT INTO FormatParams (format, name, value) VALUES (13, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (13, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (13, 'papersize','76.12mm,101.5mm');
 
-INSERT INTO Formats (id, title, description) VALUES (14,  'Reader Pocket Edition (landscape)', 'Sony Reader Pocket Edition (portrait). Includes: PRS-300');
+INSERT INTO Formats (id, title, description) VALUES (14,  'Reader Pocket Edition (landscape)', 'Sony Reader Pocket Edition (landscape). Includes: PRS-300');
 INSERT INTO FormatParams (format, name, value) VALUES (14, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (14, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (14, 'papersize','101.5mm,76.12mm');
