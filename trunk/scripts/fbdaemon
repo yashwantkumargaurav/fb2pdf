@@ -8,7 +8,7 @@ Author: Vadim Zaliva <lord@crocodile.org>
 
 import getopt
 import logging, logging.handlers
-import sys, os, os.path, shutil
+import sys, os, os.path, shutil, signal
 import string, time
 import urllib2, tempfile, cgi, urllib
 import traceback
@@ -40,6 +40,10 @@ logfile = '/var/log/fbdaemon.log'
 log_verbosity = logging.INFO
 
 # --- Code ---
+
+def alarm_handler(signum, frame): 
+    logging.getLogger('fbdaemon').debug("Alarm")
+    raise PersistentError, "Timeout alarm!" 
 
 def _translify(s):
     for symb_in, symb_out in pytils.translit.TRANSTABLE:
@@ -157,12 +161,19 @@ def processMessage(m):
         raise PersistentError("Message must contain exactly one 'result' element")
     res_key = results[0].getAttribute('key')
     res_encoding = results[0].getAttribute('encoding')
+    res_name = results[0].getAttribute('name')
+
+    if res_name == '':
+	logging.getLogger('fbdaemon').debug('Name is empty, using key instead')
+        res_name = res_key
 
     conv_options = {}
-    parameters = results.getElementsByTagName('parameter')
+    parameters = root.getElementsByTagName('parameter')
     for p in parameters:
-        p_name  = src.getAttribute('name')
-        p_value = src.getAttribute('value')
+        p_name  = p.getAttribute('name')
+        p_value = p.getAttribute('value')
+        logging.getLogger('fbdaemon').debug("Conversion option %s=%s" % (p_name, p_value));
+
         conv_options[p_name]=p_value
         
     logs=root.getElementsByTagName('log')
@@ -195,14 +206,15 @@ def processMessage(m):
         callbacks.append(x)
 
     processDocument(str(src_url), str(src_type), src_name, str(src_encoding),
-                    str(res_key), str(res_encoding),
+                    str(res_key), str(res_name), str(res_encoding),
                     str(log_key),
+                    conv_options,
                     callbacks)
 
 def upload_file(bucket, key, filename, disp='attachment'):
     global cfg
     retries = int(cfg.get('storage','retries'))
-
+  
     if filename == None:
         raise PersistentError("Invalid None filename")
     if disp == None:
@@ -246,7 +258,7 @@ def processCallbacks(res_key, status, callbacks):
         except:
             logging.getLogger('fbdaemon').exception("Error calling callback %s" % c['url'])
 
-def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_encoding, log_key, callbacks):
+def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name, res_encoding, log_key, conv_options, callbacks):
 
     global cfg
     bucket = cfg.get('storage','bucket')
@@ -260,7 +272,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
         basedir = os.getcwd()
 
         logging.getLogger('fbdaemon').info("Processing '%s'." % src_fname)
-        tmpdirname = tempfile.gettempdir() + '/' + str(int(time.time()))
+        tmpdirname = tempfile.gettempdir() + '/' + str(os.getpid()) + str(int(time.time()))
         logging.getLogger('fbdaemon').debug("Creating temporary directory '%s'." % tmpdirname)
         os.mkdir(tmpdirname)
 
@@ -360,7 +372,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_enco
                     # upload PDF 
                     logging.getLogger('fb2pdf').debug("Uploading resulting file to S3")
                     logging.getLogger('fbdaemon').debug("Uploading resulting file to S3")
-                    upload_file(bucket, res_key, resfilename)
+                    upload_file(bucket, res_name, resfilename)
 
                 finally:
                     # close logger
@@ -395,9 +407,11 @@ def main():
     try:
         global cfg
         parseCommandLineAndReadConfiguration()
-
+                          
         logging.getLogger('fbdaemon').info("Starting")
-            
+        
+        signal.signal(signal.SIGALRM, alarm_handler)
+
         c = Connection(aws_access_key_id=cfg.get('aws','public'), aws_secret_access_key=cfg.get('aws','private'))
         
         qname = cfg.get('queue','name')
@@ -406,32 +420,44 @@ def main():
 
         q = c.create_queue(qname)
 
+        m = None
+
         while True:
-            m = None
+
+            if m!=None:
+                try:
+                    signal.alarm(qtimeout)
+                    q.delete_message(m)
+                except:
+                    logging.getLogger('fbdaemon').exception("Error deleting message from queue")
+                m=None
+
             try:
+                signal.alarm(qtimeout)
                 m = q.read(qtimeout)
             except:
                 logging.getLogger('fbdaemon').exception("Error reading queue")
+
             if m==None:
+                signal.alarm(0)
                 time.sleep(pdelay)
             else:
                 try:
+                    signal.alarm(qtimeout)
                     processMessage(m)
-                    q.delete_message(m)
                 except TemporaryError, ex:
                     logging.getLogger('fbdaemon').exception(ex)
                     if ex.nested:
                         pass #TODO Log msg.nested
+                    m=None # Prevent deletion
                 except PersistentError, ex:
                     logging.getLogger('fbdaemon').exception(ex)
                     if ex.nested:
                         pass #TODO Log msg nested
                     logging.getLogger('fbdaemon').debug("removing message due to persistent error")
-                    q.delete_message(m)
                 except:
                     logging.getLogger('fbdaemon').exception('Unknown Processing Error - treating as Persistent')
-                    q.delete_message(m)
-                    
+                
     except getopt.GetoptError, msg:
         if len(sys.argv[1:]) > 0:
             print >>sys.stderr, "Error: %s\n" % msg

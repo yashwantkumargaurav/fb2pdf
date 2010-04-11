@@ -19,7 +19,7 @@ from fb2pdf import fb2tex
 logfile = 'fb2tex.log'
 
 def usage():
-    sys.stderr.write("Usage: fb2tex.py [-v] [-o oname:ovalue] -f fb2file -o texfile\n")
+    sys.stderr.write("Usage: fb2tex.py [-v] [-p oname:ovalue] -f fb2file -o texfile\n")
 
 def initLog(logfilename, log_verbosity):
     hdlr = logging.FileHandler(logfilename)
