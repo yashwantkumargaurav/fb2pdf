@@ -446,7 +446,7 @@ class DB
         if (!$this->_connect())
             return false;
 
-	$query = "SELECT id, title FROM Formats ORDER BY id";
+	$query = "SELECT id, filetype, title FROM Formats ORDER BY id";
 
         if (!$this->_execQuery($query))
             return false;
@@ -460,7 +460,7 @@ class DB
         return $list;
     }
       
-    // Get list of formats
+    // Get list of format parameters
     function getFormatParameters($format) 
     {
         if (!is_numeric($format))
@@ -483,6 +483,26 @@ class DB
         }   
         $this->_disconnect();
         return $list;
+    }
+     
+    // Get list of format parameters
+    function getFormatFiletype($format) 
+    {
+        if (!is_numeric($format))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+
+	$query = "SELECT filetype FROM Formats WHERE id = $format";
+
+        if (!$this->_execQuery($query))
+            return false;
+        
+        $row = mysql_fetch_array($this->result, MYSQL_ASSOC);
+        
+        $this->_disconnect();
+        return $row["filetype"];
     }
      
     function countTitles($search) {
@@ -573,7 +593,7 @@ class DB
         if ($limit1 > 0 && $limit2 > 0)
             $query .= " LIMIT $limit1, $limit2";
 
-        if (!$this->_execQuery($query))
+        if (!$this->_execQuery($query)) 
             return false;
         
         $list = array();
