@@ -81,4 +81,4 @@ INSERT INTO FormatParams (format, name, value) VALUES (16, 'margin','1mm');
 INSERT INTO FormatParams (format, name, value) VALUES (16, 'fontsize','12pt');
 INSERT INTO FormatParams (format, name, value) VALUES (16, 'papersize','155.6mm,91.17mm');
 
-INSERT INTO Formats (id, title, description) VALUES (17,  'epub', 'EPUB', 'Open e-book standard by the International Digital Publishing Forum');
+INSERT INTO Formats (id, filetype, title, description) VALUES (17,  'epub', 'EPUB', 'Open e-book standard by the International Digital Publishing Forum');
