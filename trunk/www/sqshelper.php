@@ -3,7 +3,7 @@ require_once 'awscfg.php';
 require_once 'sqs.client.php';
 require_once 'utils.php';
 
-function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, $email, $format, $formatParams)
+function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, $email, $format, $formatFiletype, $formatParams)
 {
     global $awsApiKey, $awsApiSecretKey, $awsSQSQueue, $awsSQSTimeout;
 
@@ -14,13 +14,13 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword, 
         // Create the queue.  TODO: If the queue has recently been deleted, the application needs to wait for 60 seconds before
         $sqs->CreateQueue($awsSQSQueue);
 
-        $zipName = getStorageName($id, $format, ".zip");
         $logName = getStorageName($id, $format, ".txt");
-            
+        $zipName = getStorageName($id, $format, ".zip");
+        
         // Send a message to the queue
-        $message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><fb2pdfjob version=\"3\">" . 
+        $message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><fb2pdfjob version=\"4\">" . 
             "<source url=\"$sourceUrl\" type=\"application/fb2+xml\" name=\"$name\"/>" .
-            "<result key=\"$id\" encoding=\"application/zip\" name=\"$zipName\"/>" .
+            "<result key=\"$id\" encoding=\"application/zip\" name=\"$zipName\" filetype=\"$formatFiletype\"/>" .
             "<log key=\"$logName\"/>" .
    	    "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email&amp;format=$format\"/>";
             foreach(array_keys($formatParams) as $name)

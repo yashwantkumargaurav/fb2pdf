@@ -383,9 +383,10 @@ class ConvertBook
 
         $db =  getDBObject();
 
+        $formatFiletype = $db->getFormatFiletype($format);
         $formatParams = $db->getFormatParameters($format);
 
-        if(!sqsPutMessage($this->bookKey, "http://s3.amazonaws.com/$awsS3Bucket/$this->bookKey.fb2", $this->fileName, $callbackUrl, md5($secret . $this->bookKey), $this->email, $format, $formatParams))
+        if(!sqsPutMessage($this->bookKey, "http://s3.amazonaws.com/$awsS3Bucket/$this->bookKey.fb2", $this->fileName, $callbackUrl, md5($secret . $this->bookKey), $this->email, $format, $formatFiletype, $formatParams))
             throw new Exception("Unable to send Amazon SQS message for key $this->bookKey.", self::ERR_CONVERT);
     }
 

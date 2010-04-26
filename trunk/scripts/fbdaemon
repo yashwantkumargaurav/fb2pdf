@@ -8,7 +8,7 @@ Author: Vadim Zaliva <lord@crocodile.org>
 
 import getopt
 import logging, logging.handlers
-import sys, os, os.path, shutil, signal
+import sys, os, os.path, shutil, signal, subprocess, glob
 import string, time
 import urllib2, tempfile, cgi, urllib
 import traceback
@@ -31,7 +31,7 @@ from fb2pdf import TemporaryError, PersistentError, tex2pdf, fb2tex
 
 # --- Constants --- 
 
-SUPPORTED_MSG_FORMAT_VER=[2,3]
+SUPPORTED_MSG_FORMAT_VER=[2,3,4]
 
 # --- Defaults ---
 
@@ -162,6 +162,7 @@ def processMessage(m):
     res_key = results[0].getAttribute('key')
     res_encoding = results[0].getAttribute('encoding')
     res_name = results[0].getAttribute('name')
+    res_filetype = results[0].getAttribute('filetype')
 
     if res_name == '':
 	logging.getLogger('fbdaemon').debug('Name is empty, using key instead')
@@ -206,7 +207,7 @@ def processMessage(m):
         callbacks.append(x)
 
     processDocument(str(src_url), str(src_type), src_name, str(src_encoding),
-                    str(res_key), str(res_name), str(res_encoding),
+                    str(res_key), str(res_name), str(res_encoding), str(res_filetype),
                     str(log_key),
                     conv_options,
                     callbacks)
@@ -258,7 +259,7 @@ def processCallbacks(res_key, status, callbacks):
         except:
             logging.getLogger('fbdaemon').exception("Error calling callback %s" % c['url'])
 
-def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name, res_encoding, log_key, conv_options, callbacks):
+def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name, res_encoding, res_filetype, log_key, conv_options, callbacks):
 
     global cfg
     bucket = cfg.get('storage','bucket')
@@ -339,25 +340,45 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name
                             logging.getLogger('fb2pdf').exception("Error extracting content from ZIP file")
                             raise PersistentError("Error extracting content from ZIP file")
 
-                    texfilename = src_fname + '.tex'
-                    pdffilename = src_fname + '.pdf'
+                    logging.getLogger('fbdaemon').debug("Filetype: '%s'" % res_filetype)
+                    if res_filetype == 'epub':
+                        epubfilename = src_fname + '.epub'
+                        args = ["/usr/bin/java", "-cp", 
+                               "/usr/share/java/epubgen-0.5.0.jar",
+                               "com.adobe.dp.epub.conv.CLDriver",
+                               srcfilename];
+                        logging.getLogger('fbdaemon').debug("Converting to EPUB")
+                        retcode = subprocess.call(args);
+                        if retcode != 0:
+                            raise PersistentError("Error converting to EPUB format")
+                        # EPUB converter saves the output file using book name
+                        # from fb2 metadata. Let's use the first *.epub file
+                        # in the current dirrectory and assume this is our output.
+                        epubfiles = glob.glob('./*.epub');
+                        if len(epubfiles) == 0:
+                            raise  PersistentError("No output EPUB file was generated");
+                        resfilename = epubfiles[0]
+                    else:
+                        # Assume everything else is PDF
+                        texfilename = src_fname + '.tex'
+                        pdffilename = src_fname + '.pdf'
 
-                    logging.getLogger('fbdaemon').debug("Converting to TeX")
-                    fb2tex.fb2tex(fbfilename, texfilename, conv_options)
+                        logging.getLogger('fbdaemon').debug("Converting to TeX")
+                        fb2tex.fb2tex(fbfilename, texfilename, conv_options)
 
-                    logging.getLogger('fbdaemon').debug("Converting to PDF")
-                    tex2pdf.tex2pdf(texfilename, pdffilename)
+                        logging.getLogger('fbdaemon').debug("Converting to PDF")
+                        tex2pdf.tex2pdf(texfilename, pdffilename)
 
-                    resfilename = pdffilename
+                        resfilename = pdffilename
                     
                     if res_encoding:
                         if res_encoding=='application/zip':
                             try:
-                                zipfilename = pdffilename + '.zip'
+                                zipfilename = resfilename + '.zip'
                                 logging.getLogger('fbdaemon').debug("Creating ZIP '%s'" % zipfilename)
                                 z=zipfile.ZipFile(zipfilename,'w',compression=zipfile.ZIP_DEFLATED)
                                 try:
-                                    z.write(pdffilename)
+                                    z.write(resfilename)
                                 finally:
                                     z.close()
                                 resfilename = zipfilename

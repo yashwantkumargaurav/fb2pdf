@@ -87,6 +87,7 @@ function convertBook(key, format)
                         for ($i = 0; $i < $count ; $i++)
                         {
                             $format = $formats[$i]["id"];
+                            $formatFiletype = $formats[$i]["filetype"];
                             $formatTitle = $formats[$i]["title"];
                             $storageStatus = BookStatus::STATUS_ERROR;
                             $formatStatus = $cb->checkConverted($key, $format);
@@ -95,10 +96,10 @@ function convertBook(key, format)
                             }
                             if ($storageStatus == BookStatus::STATUS_SUCCESS)
                             {
-                                echo "[<a href='$bs->pdfFile'>$formatTitle (pdf)</a>]<br/>";
+                                echo "[<a href='$bs->pdfFile'>$formatTitle ($formatFiletype)</a>]<br/>";
                             }
                             else {
-                                echo "[<a href='javascript:convertBook(\"$key\", $format)'>$formatTitle (pdf)</a>]<br/>";
+                                echo "[<a href='javascript:convertBook(\"$key\", $format)'>$formatTitle ($formatFiletype)</a>]<br/>";
                             }
                         }
                     }
