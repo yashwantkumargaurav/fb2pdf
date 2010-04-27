@@ -346,6 +346,7 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name
                         args = ["/usr/bin/java", "-cp", 
                                "/usr/share/java/epubgen-0.5.0.jar",
                                "com.adobe.dp.epub.conv.CLDriver",
+                               "-translit", "0",
                                srcfilename];
                         logging.getLogger('fbdaemon').debug("Converting to EPUB")
                         retcode = subprocess.call(args);
