@@ -108,7 +108,7 @@ INSERT INTO Formats (id, title, description, filetype, compress)
 INSERT INTO FormatParams (format, name, value) VALUES (17, '-translit','0');
 
 INSERT INTO Formats (id, title, description, filetype, compress) 
-       VALUES (18,  'EPUB (transliterated)', 'Open e-book standard by the International Digital Publishing Forum. Title and list of contents have been transliterated', 'epub', 'none');
+       VALUES (18,  'EPUB (transliterated title)', 'Open e-book standard by the International Digital Publishing Forum. Title and list of contents have been transliterated', 'epub', 'none');
 
 COMMIT;
 SET FOREIGN_KEY_CHECKS=1;
