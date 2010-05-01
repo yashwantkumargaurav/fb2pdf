@@ -168,7 +168,10 @@ class DB
                  " WHERE format = $format AND book_id IN" .
                  " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $this->_disconnect();
         return true;
@@ -185,7 +188,10 @@ class DB
         $query = "SELECT id, author FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
 
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
 
         $result = mysql_fetch_array($this->result, MYSQL_ASSOC);
         
@@ -195,7 +201,10 @@ class DB
         $query = "DELETE FROM TitleSearch WHERE book_id = \"$id\"";
         
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
 
         $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
 
@@ -203,13 +212,19 @@ class DB
             $query = "DELETE FROM AuthorSearch WHERE author = \"$author\"";
         
             if (!$this->_execQuery($query))
+            {
+                $this->_disconnect();
                 return false;
+            }
         }
 
         $query = "DELETE FROM OriginalBooks WHERE storage_key = \"$storageKey\"";
         
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
 
         $this->_disconnect();
         return true;
@@ -224,12 +239,18 @@ class DB
         if (!$this->_connect())
             return false;
 
-        $query = "SELECT o.id,title,author,storage_key,submitted," .
-            "(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted " .
-            "FROM OriginalBooks AS o WHERE valid=TRUE ORDER BY o.id DESC LIMIT $number";
+        $query = "SELECT o.id,o.title,author,storage_key,submitted,c.converted,c.format,f.filetype,f.compress " .
+            "FROM OriginalBooks AS o " .
+            "JOIN ConvertedBooks AS c ON o.id = c.book_id " .
+            "JOIN Formats AS f ON c.format = f.id " .
+            "WHERE c.converted = (SELECT MAX(c2.converted) FROM ConvertedBooks AS c2 WHERE c2.book_id = o.id AND c2.status = 'r') " .
+            "AND valid=TRUE ORDER BY c.converted DESC LIMIT $number";
 
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -253,7 +274,10 @@ class DB
             " WHERE format = $format AND book_id IN" .
             " (SELECT id FROM OriginalBooks WHERE storage_key = \"$storageKey\")";
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $row = mysql_fetch_array($this->result, MYSQL_ASSOC);
         
@@ -282,7 +306,10 @@ class DB
             $query = $query . " LIMIT $number";
             
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -305,15 +332,21 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-        $query = "SELECT o.id,title,author,storage_key,submitted, " .
-            "(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted " .
-            "FROM OriginalBooks AS o WHERE author=\"$author\" AND valid=TRUE ORDER BY o.id DESC";
+        $query = "SELECT o.id,o.title,author,storage_key,submitted,c.converted,c.format,f.filetype,f.compress " .
+            "FROM OriginalBooks AS o " .
+            "JOIN ConvertedBooks AS c ON o.id = c.book_id " .
+            "JOIN Formats AS f ON c.format = f.id " .
+            "WHERE c.converted = (SELECT MAX(c2.converted) FROM ConvertedBooks AS c2 WHERE c2.book_id = o.id AND c2.status = 'r') " .
+            "AND author=\"$author\" AND valid=TRUE ORDER BY c.converted DESC";
 
         if ($number > 0)
             $query = $query . " LIMIT $number";
             
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -334,7 +367,10 @@ class DB
         
         $query = "SELECT id,title,author FROM OriginalBooks WHERE storage_key = \"$key\" LIMIT 1";
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
@@ -353,11 +389,14 @@ class DB
         if (!$this->_connect())
             return false;
             
-        $query = "SELECT id, title, description FROM Formats WHERE id IN " .
+        $query = "SELECT id, filetype, title, description FROM Formats WHERE id IN " .
             "(SELECT format FROM ConvertedBooks WHERE book_id = $id)";
 
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -382,7 +421,10 @@ class DB
                  " WHERE md5hash = \"$md5\"";
         
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         if ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
@@ -403,7 +445,10 @@ class DB
         // see mysql EXPLAIN
         $query = "SELECT DISTINCT UPPER(LEFT(author,1)) as letter FROM OriginalBooks WHERE valid=TRUE";
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
@@ -429,7 +474,10 @@ class DB
         $query = "SELECT author, count(id) AS number FROM OriginalBooks " .
             "WHERE author LIKE \"$letter%\" AND valid=TRUE GROUP BY author ORDER BY author ASC";
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -446,10 +494,13 @@ class DB
         if (!$this->_connect())
             return false;
 
-	$query = "SELECT id, filetype, title FROM Formats ORDER BY id";
+	$query = "SELECT id, filetype, title, filetype, compress FROM Formats ORDER BY id";
 
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -460,6 +511,29 @@ class DB
         return $list;
     }
       
+    // Get list of format parameters
+    function getFormat($format) 
+    {
+        if (!is_numeric($format))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+
+	$query = "SELECT title, description, filetype, compress FROM Formats WHERE id = $format";
+
+        if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+        
+        $row = mysql_fetch_array($this->result, MYSQL_ASSOC);
+        
+        $this->_disconnect();
+        return $row;
+    }
+     
     // Get list of format parameters
     function getFormatParameters($format) 
     {
@@ -472,7 +546,10 @@ class DB
 	$query = "SELECT name, value FROM FormatParams WHERE format = $format";
 
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
@@ -485,26 +562,6 @@ class DB
         return $list;
     }
      
-    // Get list of format parameters
-    function getFormatFiletype($format) 
-    {
-        if (!is_numeric($format))
-            return false;
-            
-        if (!$this->_connect())
-            return false;
-
-	$query = "SELECT filetype FROM Formats WHERE id = $format";
-
-        if (!$this->_execQuery($query))
-            return false;
-        
-        $row = mysql_fetch_array($this->result, MYSQL_ASSOC);
-        
-        $this->_disconnect();
-        return $row["filetype"];
-    }
-     
     function countTitles($search) {
 
         if (!$this->_connect())
@@ -515,7 +572,10 @@ class DB
         $query = "SELECT COUNT(*) FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\")";
         
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
             
         $count = mysql_result($this->result, 0, 0);
             
@@ -533,7 +593,10 @@ class DB
         $query = "SELECT COUNT(*) FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\")";
         
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $count = mysql_result($this->result, 0, 0);
             
@@ -563,7 +626,10 @@ class DB
             $query .= " LIMIT $limit1, $limit2";
         
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
 
         $list = array();
         $count = 0;
@@ -594,7 +660,10 @@ class DB
             $query .= " LIMIT $limit1, $limit2";
 
         if (!$this->_execQuery($query)) 
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -616,7 +685,10 @@ class DB
             " FROM AuthorSearch WHERE MATCH(author) AGAINST (\"$search\") LIMIT 10";
 
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;
@@ -639,7 +711,10 @@ class DB
             "FROM TitleSearch WHERE MATCH(title) AGAINST (\"$search\") LIMIT 10";
 
         if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
             return false;
+        }
         
         $list = array();
         $count = 0;

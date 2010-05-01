@@ -11,6 +11,7 @@ if (!isset ($_GET["key"]))
 $key = $_GET["key"];
 $format = $_GET["format"];
 $bs = new BookStatus();
+
 try
 {
     $bs->checkOriginal($key);
@@ -23,7 +24,7 @@ try
     "{
         'status'    : '$status',
         'source'    : '$bs->fbFile',
-        'converted' : '$bs->pdfFile',
+        'converted' : '$bs->convFile',
         'log'       : '$bs->logFile'
     }";
     echo $response;
