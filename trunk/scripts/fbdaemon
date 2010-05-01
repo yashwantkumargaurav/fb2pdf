@@ -259,6 +259,47 @@ def processCallbacks(res_key, status, callbacks):
         except:
             logging.getLogger('fbdaemon').exception("Error calling callback %s" % c['url'])
 
+def processEpubDocument(fbfilename, src_fname, conv_options):
+
+    epubfilename = src_fname + '.epub'
+    args = ["/usr/bin/java", "-cp", 
+            "/usr/share/fb2pdf/epubgen-0.5.0.jar",
+            "com.adobe.dp.epub.conv.CLDriver"];
+
+    for (n,v) in conv_options.iteritems():
+        args.append(n);
+        args.append(v);
+        
+    args.append(fbfilename);
+
+    logging.getLogger('fbdaemon').debug("Converting to EPUB")
+
+    retcode = subprocess.call(args);
+    if retcode != 0:
+        raise PersistentError("Error converting to EPUB format")
+
+    # EPUB converter saves the output file using book name
+    # from fb2 metadata. Let's use the first *.epub file
+    # in the current dirrectory and assume this is our output.
+    epubfiles = glob.glob('*.epub');
+    if len(epubfiles) == 0:
+        raise  PersistentError("No output EPUB file was generated");
+
+    return epubfiles[0]
+
+def processPdfDocument(fbfilename, src_fname, conv_options):
+
+    texfilename = src_fname + '.tex'
+    pdffilename = src_fname + '.pdf'
+                        
+    logging.getLogger('fbdaemon').debug("Converting to TeX")
+    fb2tex.fb2tex(fbfilename, texfilename, conv_options)
+
+    logging.getLogger('fbdaemon').debug("Converting to PDF")
+    tex2pdf.tex2pdf(texfilename, pdffilename)
+
+    return pdffilename;
+
 def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name, res_encoding, res_filetype, log_key, conv_options, callbacks):
 
     global cfg
@@ -342,36 +383,11 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name
 
                     logging.getLogger('fbdaemon').debug("Filetype: '%s'" % res_filetype)
                     if res_filetype == 'epub':
-                        epubfilename = src_fname + '.epub'
-                        args = ["/usr/bin/java", "-cp", 
-                               "/usr/share/java/epubgen-0.5.0.jar",
-                               "com.adobe.dp.epub.conv.CLDriver",
-                               "-translit", "0",
-                               srcfilename];
-                        logging.getLogger('fbdaemon').debug("Converting to EPUB")
-                        retcode = subprocess.call(args);
-                        if retcode != 0:
-                            raise PersistentError("Error converting to EPUB format")
-                        # EPUB converter saves the output file using book name
-                        # from fb2 metadata. Let's use the first *.epub file
-                        # in the current dirrectory and assume this is our output.
-                        epubfiles = glob.glob('./*.epub');
-                        if len(epubfiles) == 0:
-                            raise  PersistentError("No output EPUB file was generated");
-                        resfilename = epubfiles[0]
+                        resfilename = processEpubDocument(fbfilename, src_fname, conv_options);
                     else:
                         # Assume everything else is PDF
-                        texfilename = src_fname + '.tex'
-                        pdffilename = src_fname + '.pdf'
-
-                        logging.getLogger('fbdaemon').debug("Converting to TeX")
-                        fb2tex.fb2tex(fbfilename, texfilename, conv_options)
-
-                        logging.getLogger('fbdaemon').debug("Converting to PDF")
-                        tex2pdf.tex2pdf(texfilename, pdffilename)
-
-                        resfilename = pdffilename
-                    
+                        resfilename = processPdfDocument(fbfilename, src_fname, conv_options);
+                         
                     if res_encoding:
                         if res_encoding=='application/zip':
                             try:

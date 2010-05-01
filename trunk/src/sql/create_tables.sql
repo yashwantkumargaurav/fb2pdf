@@ -41,15 +41,15 @@ CREATE TABLE IF NOT EXISTS Formats
 (
         id INT NOT NULL AUTO_INCREMENT,
 
-        filetype ENUM ('pdf', 'epub') DEFAULT 'pdf',
-        compress ENUM ('zip', 'none') DEFAULT 'zip',
-
         -- Human-readable format name, as shwon to the users.
         -- e.g. Sony Reader, JetBook, iPhone, etc.
         title VARCHAR(128) NOT NULL,
 
         -- (optional) brief format description which might be shown to the user
         description VARCHAR(256) NULL,
+
+        filetype ENUM ('pdf', 'epub') DEFAULT 'pdf',
+        compress ENUM ('none', 'zip') DEFAULT 'zip',
 
         PRIMARY KEY(id)
 ) TYPE=INNODB;
