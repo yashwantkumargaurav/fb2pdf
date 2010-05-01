@@ -2,6 +2,7 @@
 require_once 'utils.php';
 require_once 'db.php';
 require_once 'process.php';
+require_once 'book_status.php';
 
 if (!isset ($_GET['key']))
 {
@@ -87,16 +88,17 @@ function convertBook(key, format)
                         for ($i = 0; $i < $count ; $i++)
                         {
                             $format = $formats[$i]["id"];
-                            $formatFiletype = $formats[$i]["filetype"];
                             $formatTitle = $formats[$i]["title"];
+                            $formatFiletype = $formats[$i]["filetype"];
+                            $formatCompress = $formats[$i]["compress"];
                             $storageStatus = BookStatus::STATUS_ERROR;
                             $formatStatus = $cb->checkConverted($key, $format);
                             if ($formatStatus == ConvertBook::DB_BOOK_CONVERTED) {
-                                $storageStatus = $bs->checkConverted($key, $format);
+                                $storageStatus = $bs->checkConverted($key, $format, $formatFiletype, $formatCompress);
                             }
                             if ($storageStatus == BookStatus::STATUS_SUCCESS)
                             {
-                                echo "[<a href='$bs->pdfFile'>$formatTitle ($formatFiletype)</a>]<br/>";
+                                echo "[<a href='$bs->convFile'>$formatTitle ($formatFiletype)</a>]<br/>";
                             }
                             else {
                                 echo "[<a href='javascript:convertBook(\"$key\", $format)'>$formatTitle ($formatFiletype)</a>]<br/>";

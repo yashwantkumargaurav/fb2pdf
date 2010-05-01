@@ -5,6 +5,7 @@ require_once 's3.php';
 require_once 'db.php';
 require_once 'sqshelper.php';
 require_once 'book_info.php';
+require_once 'book_status.php';
 require_once 'utils.php';
 require_once 'dUnzip2.inc.php';
 
@@ -383,10 +384,14 @@ class ConvertBook
 
         $db =  getDBObject();
 
-        $formatFiletype = $db->getFormatFiletype($format);
+        $formatInfo = $db->getFormat($format);
         $formatParams = $db->getFormatParameters($format);
-
-        if(!sqsPutMessage($this->bookKey, "http://s3.amazonaws.com/$awsS3Bucket/$this->bookKey.fb2", $this->fileName, $callbackUrl, md5($secret . $this->bookKey), $this->email, $format, $formatFiletype, $formatParams))
+        $filetype = $formatInfo["filetype"];
+        $compress = $formatInfo["compress"];
+        
+        if(!sqsPutMessage($this->bookKey, "http://s3.amazonaws.com/$awsS3Bucket/$this->bookKey.fb2",
+                          $this->fileName, $callbackUrl, md5($secret . $this->bookKey), $this->email,
+                          $format, $formatParams, $filetype, $compress))
             throw new Exception("Unable to send Amazon SQS message for key $this->bookKey.", self::ERR_CONVERT);
     }
 
@@ -437,72 +442,6 @@ class ConvertBook
         $pathParts = pathinfo($fileName);
         $name = removeExt($pathParts["basename"]);
         return $name;
-    }
-}
-
-// Check book status
-class BookStatus
-{
-    public $fbFile  = null;  // url to original FB2 file
-    public $pdfFile = null;  // url to converted ZIP/PDF file
-    public $logFile = null;  // url to converted ZIP/PDF file
-    
-    // book status constants
-    const STATUS_PROGRESS = 'p';
-    const STATUS_SUCCESS  = 'r';
-    const STATUS_ERROR    = 'e';
-
-    // Check status of the original book
-    public function checkOriginal($key)
-    {
-        global $awsS3Bucket;
-    
-        // check existance
-        $s3 = getS3Object();
-
-        // This info is never used. It is 'just in case' check,
-        // which requires an extra query. Is it really necessary?
-        $fbExists  = $s3->objectExists($awsS3Bucket, $key . ".fb2");
-        if (!$fbExists)
-            throw new Exception("$key.fb2 does not exist.");
-
-        $this->fbFile = "getfile.php?key=$key.fb2";
-    }
-    
-    // Check converted book status. Returns STATUS_* constants
-    public function checkConverted($key, $format)
-    {
-        global $awsS3Bucket;
-    
-        // check existance
-        $s3 = getS3Object();
-
-        $pdfName = getStorageName($key, $format, ".pdf"); 
-        $zipName = getStorageName($key, $format, ".zip");
-        $logName = getStorageName($key, $format, ".txt");
-
-        // PDFs can be found only for books that where added through early versions of fb2pdf,
-        // when there was no support for formats. There is no need to quiry them
-        // if format is set to semething other then 1.
-        $pdfExists = ($format == 1) && $s3->objectExists($awsS3Bucket, $pdfName);
-        $zipExists = $s3->objectExists($awsS3Bucket, $zipName);
-        $logExists = $s3->objectExists($awsS3Bucket, $logName);
-        
-        // check status and generate links
-        $status = self::STATUS_PROGRESS;
-        
-        if (($pdfExists or $zipExists) and $logExists)
-        {
-            $status = self::STATUS_SUCCESS;
-            $this->pdfFile = ($pdfExists) ? "getfile.php?key=$pdfName" : "getfile.php?key=$zipName";
-            $this->logFile = "getfile.php?key=$logName";
-        }
-        else if ($logExists)
-        {
-            $status = self::STATUS_ERROR;
-            $this->logFile = "getfile.php?key=$logName";
-        }
-        return $status;
     }
 }
 ?>
