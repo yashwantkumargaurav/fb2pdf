@@ -212,7 +212,7 @@ def processMessage(m):
                     conv_options,
                     callbacks)
 
-def upload_file(bucket, key, filename, disp='attachment'):
+def upload_file(bucket, key, filename, disp, contenttype = ''):
     global cfg
     retries = int(cfg.get('storage','retries'))
   
@@ -221,6 +221,11 @@ def upload_file(bucket, key, filename, disp='attachment'):
     if disp == None:
         raise PersistentError("Invalid None disposition")
     
+    headers = {}
+    headers['Content-Disposition'] = '%s; filename=\"%s\"' % (disp,filename)
+    if (contenttype != ''):
+        headers['Content-Type'] = contenttype
+
     for i in range(retries):
         try:
             c = S3Connection(aws_access_key_id=cfg.get('aws','public'),
@@ -228,7 +233,7 @@ def upload_file(bucket, key, filename, disp='attachment'):
             b = c.create_bucket(bucket)
             k = Key(b)
             k.key = key
-            k.set_contents_from_filename(filename,{'Content-Disposition':'%s; filename=\"%s\"' % (disp,filename)})
+            k.set_contents_from_filename(filename, headers)
             k.set_acl('public-read')
             return
         except Exception, e:
@@ -264,26 +269,26 @@ def processEpubDocument(fbfilename, src_fname, conv_options):
     epubfilename = src_fname + '.epub'
     args = ["/usr/bin/java", "-cp", 
             "/usr/share/fb2pdf/epubgen-0.5.0.jar",
-            "com.adobe.dp.epub.conv.CLDriver"];
+            "com.adobe.dp.epub.conv.CLDriver"]
 
     for (n,v) in conv_options.iteritems():
-        args.append(n);
-        args.append(v);
+        args.append(n)
+        args.append(v)
         
-    args.append(fbfilename);
+    args.append(fbfilename)
 
     logging.getLogger('fbdaemon').debug("Converting to EPUB")
 
-    retcode = subprocess.call(args);
+    retcode = subprocess.call(args)
     if retcode != 0:
         raise PersistentError("Error converting to EPUB format")
 
     # EPUB converter saves the output file using book name
     # from fb2 metadata. Let's use the first *.epub file
     # in the current dirrectory and assume this is our output.
-    epubfiles = glob.glob('*.epub');
+    epubfiles = glob.glob('*.epub')
     if len(epubfiles) == 0:
-        raise  PersistentError("No output EPUB file was generated");
+        raise  PersistentError("No output EPUB file was generated")
 
     return epubfiles[0]
 
@@ -298,7 +303,7 @@ def processPdfDocument(fbfilename, src_fname, conv_options):
     logging.getLogger('fbdaemon').debug("Converting to PDF")
     tex2pdf.tex2pdf(texfilename, pdffilename)
 
-    return pdffilename;
+    return pdffilename
 
 def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name, res_encoding, res_filetype, log_key, conv_options, callbacks):
 
@@ -383,34 +388,30 @@ def processDocument(src_url, src_type, src_name, src_encoding, res_key, res_name
 
                     logging.getLogger('fbdaemon').debug("Filetype: '%s'" % res_filetype)
                     if res_filetype == 'epub':
-                        resfilename = processEpubDocument(fbfilename, src_fname, conv_options);
+                        resfilename = processEpubDocument(fbfilename, src_fname, conv_options)
                     else:
                         # Assume everything else is PDF
-                        resfilename = processPdfDocument(fbfilename, src_fname, conv_options);
+                        resfilename = processPdfDocument(fbfilename, src_fname, conv_options)
                          
-                    if res_encoding:
-                        if res_encoding=='application/zip':
+                    if res_encoding=='application/zip':
+                        try:
+                            zipfilename = resfilename + '.zip'
+                            logging.getLogger('fbdaemon').debug("Creating ZIP '%s'" % zipfilename)
+                            z=zipfile.ZipFile(zipfilename,'w',compression=zipfile.ZIP_DEFLATED)
                             try:
-                                zipfilename = resfilename + '.zip'
-                                logging.getLogger('fbdaemon').debug("Creating ZIP '%s'" % zipfilename)
-                                z=zipfile.ZipFile(zipfilename,'w',compression=zipfile.ZIP_DEFLATED)
-                                try:
-                                    z.write(resfilename)
-                                finally:
-                                    z.close()
-                                resfilename = zipfilename
-                            except:
-                                logging.getLogger('fb2pdf').exception("Error creating resulting ZIP")
-                                raise PersistentError("Error creating resulting ZIP")
-                        else:
-                            logging.getLogger('fb2pdf').error("Unsupporeted encoding '%s'" % res_encoding)
-                            raise PersistentError("Unsupporeted encoding '%s'" % res_encoding)
+                                z.write(resfilename)
+                            finally:
+                                z.close()
+                            resfilename = zipfilename
+                        except:
+                            logging.getLogger('fb2pdf').exception("Error creating resulting ZIP")
+                            raise PersistentError("Error creating resulting ZIP")
 
                     # all OK
                     # upload PDF 
                     logging.getLogger('fb2pdf').debug("Uploading resulting file to S3")
                     logging.getLogger('fbdaemon').debug("Uploading resulting file to S3")
-                    upload_file(bucket, res_name, resfilename)
+                    upload_file(bucket, res_name, resfilename, 'attachment', res_encoding)
 
                 finally:
                     # close logger

@@ -35,26 +35,26 @@ class BookStatus
     }
     
     // Check converted book status. Returns STATUS_* constants
-    public function checkConverted($key, $format, $fileType = "", $compress = "")
+    public function checkConverted($key, $format, $fileType = "", $contentType = "")
     {
         global $awsS3Bucket;
 
-        if ($fileType == "" or $compress == "")
+        if ($fileType == "" or $contentType == "")
         {
             // update status in the DB
             $db = getDBObject();
             $formatInfo = $db->getFormat($format);
-            $fileType = $formatInfo["filetype"];
-            $compress = $formatInfo["compress"];
+            $fileType = $formatInfo["file_type"];
+            $contentType = $formatInfo["content_type"];
         }
         
         // check existance
         $s3 = getS3Object();
 
         $pdfName = getStorageName($key, $format, ".pdf");
-        if ($compress != "none")
+        if ($contentType == "application/zip")
         {
-            $convName = getStorageName($key, $format, ".$compress");
+            $convName = getStorageName($key, $format, ".zip");
         }
         else
         {
