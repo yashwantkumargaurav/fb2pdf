@@ -239,11 +239,9 @@ class DB
         if (!$this->_connect())
             return false;
 
-        $query = "SELECT o.id,o.title,author,o.storage_key,o.submitted,c.converted,c.format " .
-            "FROM OriginalBooks AS o " .
-            "JOIN ConvertedBooks AS c ON o.id = c.book_id " .
-            "WHERE c.converted = (SELECT MAX(c2.converted) FROM ConvertedBooks AS c2 WHERE c2.book_id = o.id AND c2.status = 'r') " .
-            "AND valid=TRUE ORDER BY c.converted DESC LIMIT $number";
+        $query = "SELECT o.id,title,author,storage_key,submitted," .
+            "(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted " .
+            "FROM OriginalBooks AS o WHERE valid=TRUE ORDER BY o.id DESC LIMIT $number";
 
         if (!$this->_execQuery($query))
         {
@@ -331,10 +329,9 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-        $query = "SELECT o.id,o.title,author,storage_key,submitted,c.converted,c.format " .
-            "FROM OriginalBooks AS o JOIN ConvertedBooks AS c ON o.id = c.book_id " .
-            "WHERE c.converted = (SELECT MAX(c2.converted) FROM ConvertedBooks AS c2 WHERE c2.book_id = o.id AND c2.status = 'r') " .
-            "AND author=\"$author\" AND valid=TRUE ORDER BY c.converted DESC";
+        $query = "SELECT o.id,title,author,storage_key,submitted, " .
+            "(SELECT MAX(c.converted) FROM ConvertedBooks AS c WHERE c.book_id = o.id) AS converted " .
+            "FROM OriginalBooks AS o WHERE author=\"$author\" AND valid=TRUE ORDER BY o.id DESC";
 
         if ($number > 0)
             $query = $query . " LIMIT $number";

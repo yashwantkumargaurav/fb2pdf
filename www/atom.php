@@ -40,23 +40,8 @@ for ($i = 0; $i < $limit; $i++)
     $title = $list[$i]["title"];
     $author = $list[$i]["author"];
     $id = $list[$i]["id"];
-    $format = $list[$i]["format"];
-    $formatOpts = $db->getFormat($format);
-    $filetype = $formatOpts["filetype"];
-    $compress = $formatOpts["compress"];
     $date = formatDateIntoAtom($list[$i]["submitted"]);
-    $key = "getfile.php?key=" . $list[$i]["storage_key"];
-    if ($format != 1) {
-        $key .= "-$format"; 
-    }
-    if ($compress != "none")
-    {
-        $key .= ".$compress"; 
-    }
-    else
-    {
-        $key .= ".$filetype"; 
-    }
+    $key = "book.php?key=" . $list[$i]["storage_key"];
     if (!$author)
         $author = "Автор неизвестен";
     if (!$title)
