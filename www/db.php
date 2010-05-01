@@ -239,10 +239,9 @@ class DB
         if (!$this->_connect())
             return false;
 
-        $query = "SELECT o.id,o.title,author,storage_key,submitted,c.converted,c.format,f.filetype,f.compress " .
+        $query = "SELECT o.id,o.title,author,o.storage_key,o.submitted,c.converted,c.format " .
             "FROM OriginalBooks AS o " .
             "JOIN ConvertedBooks AS c ON o.id = c.book_id " .
-            "JOIN Formats AS f ON c.format = f.id " .
             "WHERE c.converted = (SELECT MAX(c2.converted) FROM ConvertedBooks AS c2 WHERE c2.book_id = o.id AND c2.status = 'r') " .
             "AND valid=TRUE ORDER BY c.converted DESC LIMIT $number";
 
@@ -332,10 +331,8 @@ class DB
             
         $author = mysql_real_escape_string($author);
 
-        $query = "SELECT o.id,o.title,author,storage_key,submitted,c.converted,c.format,f.filetype,f.compress " .
-            "FROM OriginalBooks AS o " .
-            "JOIN ConvertedBooks AS c ON o.id = c.book_id " .
-            "JOIN Formats AS f ON c.format = f.id " .
+        $query = "SELECT o.id,o.title,author,storage_key,submitted,c.converted,c.format " .
+            "FROM OriginalBooks AS o JOIN ConvertedBooks AS c ON o.id = c.book_id " .
             "WHERE c.converted = (SELECT MAX(c2.converted) FROM ConvertedBooks AS c2 WHERE c2.book_id = o.id AND c2.status = 'r') " .
             "AND author=\"$author\" AND valid=TRUE ORDER BY c.converted DESC";
 
