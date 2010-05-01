@@ -41,8 +41,9 @@ for ($i = 0; $i < $limit; $i++)
     $author = $list[$i]["author"];
     $id = $list[$i]["id"];
     $format = $list[$i]["format"];
-    $filetype = $list[$i]["filetype"];
-    $compress = $list[$i]["compress"];
+    $formatOpts = $db->getFormat($format);
+    $filetype = $formatOpts["filetype"];
+    $compress = $formatOpts["compress"];
     $date = formatDateIntoAtom($list[$i]["submitted"]);
     $key = "getfile.php?key=" . $list[$i]["storage_key"];
     if ($format != 1) {
