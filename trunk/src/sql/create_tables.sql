@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS Formats
         -- (optional) brief format description which might be shown to the user
         description VARCHAR(256) NULL,
 
-        filetype ENUM ('pdf', 'epub') DEFAULT 'pdf',
-        compress ENUM ('none', 'zip') DEFAULT 'zip',
+        file_type ENUM ('pdf', 'epub') DEFAULT 'pdf' NOT NULL,
+        content_type VARCHAR(128) DEFAULT 'application/zip' NOT NULL,
 
         PRIMARY KEY(id)
 ) TYPE=INNODB;

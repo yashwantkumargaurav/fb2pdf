@@ -89,19 +89,19 @@ function convertBook(key, format)
                         {
                             $format = $formats[$i]["id"];
                             $formatTitle = $formats[$i]["title"];
-                            $formatFiletype = $formats[$i]["filetype"];
-                            $formatCompress = $formats[$i]["compress"];
+                            $formatFileType = $formats[$i]["file_type"];
+                            $formatContentType = $formats[$i]["content_type"];
                             $storageStatus = BookStatus::STATUS_ERROR;
                             $formatStatus = $cb->checkConverted($key, $format);
                             if ($formatStatus == ConvertBook::DB_BOOK_CONVERTED) {
-                                $storageStatus = $bs->checkConverted($key, $format, $formatFiletype, $formatCompress);
+                                $storageStatus = $bs->checkConverted($key, $format, $formatFileType, $formatContentType);
                             }
                             if ($storageStatus == BookStatus::STATUS_SUCCESS)
                             {
-                                echo "[<a href='$bs->convFile'>$formatTitle ($formatFiletype)</a>]<br/>";
+                                echo "[<a href='$bs->convFile'>$formatTitle ($formatFileType)</a>]<br/>";
                             }
                             else {
-                                echo "[<a href='javascript:convertBook(\"$key\", $format)'>$formatTitle ($formatFiletype)</a>]<br/>";
+                                echo "[<a href='javascript:convertBook(\"$key\", $format)'>$formatTitle ($formatFileType)</a>]<br/>";
                             }
                         }
                     }

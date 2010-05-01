@@ -383,7 +383,7 @@ class DB
         if (!$this->_connect())
             return false;
             
-        $query = "SELECT id, filetype, title, description FROM Formats WHERE id IN " .
+        $query = "SELECT id, file_type, title, description FROM Formats WHERE id IN " .
             "(SELECT format FROM ConvertedBooks WHERE book_id = $id)";
 
         if (!$this->_execQuery($query))
@@ -488,7 +488,7 @@ class DB
         if (!$this->_connect())
             return false;
 
-	$query = "SELECT id, filetype, title, filetype, compress FROM Formats ORDER BY id";
+	$query = "SELECT id, file_type, title, file_type, content_type FROM Formats ORDER BY id";
 
         if (!$this->_execQuery($query))
         {
@@ -514,7 +514,7 @@ class DB
         if (!$this->_connect())
             return false;
 
-	$query = "SELECT title, description, filetype, compress FROM Formats WHERE id = $format";
+	$query = "SELECT title, description, file_type, content_type FROM Formats WHERE id = $format";
 
         if (!$this->_execQuery($query))
         {

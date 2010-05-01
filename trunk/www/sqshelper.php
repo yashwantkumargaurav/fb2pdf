@@ -4,7 +4,7 @@ require_once 'sqs.client.php';
 require_once 'utils.php';
 
 function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword,
-                       $email, $format, $formatParams, $filetype, $compress)
+                       $email, $format, $formatParams, $fileType, $contentType)
 {
     global $awsApiKey, $awsApiSecretKey, $awsSQSQueue, $awsSQSTimeout;
 
@@ -18,18 +18,16 @@ function sqsPutMessage($id, $sourceUrl, $name, $callbackUrl, $callbackPassword,
 
         $logName = getStorageName($id, $format, ".txt");
 
-        $encoding = "";
-        $extension = ".$filetype";
-        if ($compress == "zip")
+        $extension = ".$fileType";
+        if ($contentType == "application/zip")
         {
-            $encoding = "encoding=\"application/zip\"";
             $extension = ".zip";
         }
         $fileName = getStorageName($id, $format, $extension);
         // Send a message to the queue
         $message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><fb2pdfjob version=\"4\">" . 
             "<source url=\"$sourceUrl\" type=\"application/fb2+xml\" name=\"$name\"/>" .
-            "<result key=\"$id\" $encoding name=\"$fileName\" filetype=\"$filetype\"/>" .
+            "<result key=\"$id\" encoding=\"$contentType\" name=\"$fileName\" filetype=\"$fileType\"/>" .
             "<log key=\"$logName\"/>" .
    	    "<callback url=\"$callbackUrl\" method=\"POST\" params=\"pass=$callbackPassword&amp;email=$email&amp;format=$format\"/>";
             foreach(array_keys($formatParams) as $name)
