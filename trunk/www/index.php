@@ -82,8 +82,8 @@ $url = (isset($_GET["url"])) ? $_GET["url"] : NULL;
         <div class="tab_box_content">
             <div id="convert_box">
             <div id="more_news"><a href="http://blog.fb2pdf.com/"><u>Все новости</u></a></div>
-            <p class="news"><span class="light_green">Новость:</span>&nbsp;&nbsp;<span class="green">04.01.2009</span>&nbsp;&nbsp;--&nbsp;&nbsp;
-            Добавлена закладка <a href="recommendations.php">Рекомендации</a>.</p>
+            <p class="news"><span class="light_green">Новость:</span>&nbsp;&nbsp;<span class="green">01.05.2010</span>&nbsp;&nbsp;--&nbsp;&nbsp;
+            Добавлена поддержка формата EPUB.</p>
                 <b class="ctop"><b class="cb1"></b><b class="cb2"></b><b class="cb3"></b><b class="cb4"></b></b>
                 <div class="conv_box_content">
                     <div id="intro">
