@@ -504,6 +504,28 @@ class DB
         $this->_disconnect();
         return $list;
     }
+
+    function getFormatStats()
+    {
+        if (!$this->_connect())
+            return false;
+
+        $query = "SELECT f.title, count(*) AS count FROM ConvertedBooks AS c JOIN Formats AS f ON f.id=c.format WHERE converted>(NOW() - INTERVAL 1 MONTH) GROUP BY c.format ORDER BY f.title";
+
+        if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC))
+            $list[$count++] = $row;
+            
+        $this->_disconnect();
+        return $list;
+    }
       
     // Get list of format parameters
     function getFormat($format) 
