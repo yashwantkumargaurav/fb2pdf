@@ -15,14 +15,16 @@
      
             If you don't need to define a custom attribute, it is safe to remove this section.
             
-    <attributes>
-        <attribute name="com_Foo_YourAttrName" multivalued="true" type="CFString"/>
-    </attributes>
      
             
             To see the system's definitions for the builtin attributes and file types, look at the system schema,
             /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Resources/schema.xml
     -->
+
+    <attributes>
+        <attribute name="com_fb2pdf_fb2_title" multivalued="false" type="CFString"/>
+        <attribute name="com_fb2pdf_fb2_author" multivalued="true" type="CFString"/>
+    </attributes>
 
     <types>
         <type name="SUPPORTED_UTI_TYPE">  <!-- add one <type>...</type> entry for each UTI that you need to define. -->
@@ -30,9 +32,13 @@
             <!-- 'allattrs' is a whitespace separated list of all of the attributes that this UTI type normally has.
                  It does not have to be exhaustive. -->
             <allattrs> 
+                com_fb2pdf_fb2_title
+                com_fb2pdf_fb2_author
             </allattrs>
             <!-- 'displayattrs' is a whitespace separated list of the attributes that should normally be displayed when previewing files of this UTI type. -->
             <displayattrs>
+                com_fb2pdf_fb2_title
+                com_fb2pdf_fb2_author
             </displayattrs>
             
         </type>
