@@ -97,6 +97,12 @@
 			0FC095BA11AB9F8E00D84783 /* PBXTextBookmark */ = 0FC095BA11AB9F8E00D84783 /* PBXTextBookmark */;
 			0FC095BD11AB9F9D00D84783 /* PBXTextBookmark */ = 0FC095BD11AB9F9D00D84783 /* PBXTextBookmark */;
 			0FC095C011AB9FAE00D84783 /* PBXTextBookmark */ = 0FC095C011AB9FAE00D84783 /* PBXTextBookmark */;
+			0FC095C111ABA15500D84783 /* PBXTextBookmark */ = 0FC095C111ABA15500D84783 /* PBXTextBookmark */;
+			0FC095C411ABA1A400D84783 /* PBXTextBookmark */ = 0FC095C411ABA1A400D84783 /* PBXTextBookmark */;
+			0FC095C911ABA1EF00D84783 /* PBXTextBookmark */ = 0FC095C911ABA1EF00D84783 /* PBXTextBookmark */;
+			0FC095CC11ABA27D00D84783 /* PBXTextBookmark */ = 0FC095CC11ABA27D00D84783 /* PBXTextBookmark */;
+			0FC095CF11ABA2B200D84783 /* PBXTextBookmark */ = 0FC095CF11ABA2B200D84783 /* PBXTextBookmark */;
+			0FC095D211ABA2CE00D84783 /* PBXTextBookmark */ = 0FC095D211ABA2CE00D84783 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 0FC094C911AAE16800D84783 /* Source Control */;
 		userBuildSettings = {
@@ -307,7 +313,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 87";
 		rLen = 0;
-		rLoc = 4835;
+		rLoc = 4390;
 		rType = 0;
 		vrLen = 1338;
 		vrLoc = 2198;
@@ -317,7 +323,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 83";
 		rLen = 0;
-		rLoc = 3716;
+		rLoc = 3558;
 		rType = 0;
 		vrLen = 1343;
 		vrLoc = 2149;
@@ -327,7 +333,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 84";
 		rLen = 0;
-		rLoc = 4835;
+		rLoc = 4390;
 		rType = 0;
 		vrLen = 1432;
 		vrLoc = 2065;
@@ -337,7 +343,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 77";
 		rLen = 0;
-		rLoc = 3468;
+		rLoc = 3346;
 		rType = 0;
 		vrLen = 1431;
 		vrLoc = 2065;
@@ -347,7 +353,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 77";
 		rLen = 0;
-		rLoc = 3521;
+		rLoc = 3399;
 		rType = 0;
 		vrLen = 1438;
 		vrLoc = 2065;
@@ -357,7 +363,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 84";
 		rLen = 0;
-		rLoc = 3782;
+		rLoc = 3624;
 		rType = 0;
 		vrLen = 1474;
 		vrLoc = 2065;
@@ -377,7 +383,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 85";
 		rLen = 0;
-		rLoc = 3868;
+		rLoc = 3710;
 		rType = 0;
 		vrLen = 1530;
 		vrLoc = 2149;
@@ -387,7 +393,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 86";
 		rLen = 0;
-		rLoc = 3898;
+		rLoc = 3740;
 		rType = 0;
 		vrLen = 1518;
 		vrLoc = 2149;
@@ -397,7 +403,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 100";
 		rLen = 0;
-		rLoc = 4867;
+		rLoc = 4412;
 		rType = 0;
 		vrLen = 1182;
 		vrLoc = 2643;
@@ -407,7 +413,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 71";
 		rLen = 0;
-		rLoc = 3016;
+		rLoc = 2985;
 		rType = 0;
 		vrLen = 1198;
 		vrLoc = 2643;
@@ -427,7 +433,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 95";
 		rLen = 0;
-		rLoc = 3840;
+		rLoc = 3682;
 		rType = 0;
 		vrLen = 1160;
 		vrLoc = 2638;
@@ -437,7 +443,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 100";
 		rLen = 0;
-		rLoc = 4030;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 814;
 		vrLoc = 3084;
@@ -467,7 +473,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 109";
 		rLen = 0;
-		rLoc = 4833;
+		rLoc = 4388;
 		rType = 0;
 		vrLen = 906;
 		vrLoc = 3269;
@@ -477,7 +483,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 103";
 		rLen = 0;
-		rLoc = 4439;
+		rLoc = 4256;
 		rType = 0;
 		vrLen = 1019;
 		vrLoc = 3269;
@@ -487,7 +493,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 107";
 		rLen = 0;
-		rLoc = 4649;
+		rLoc = 4257;
 		rType = 0;
 		vrLen = 1006;
 		vrLoc = 3269;
@@ -497,7 +503,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 992;
 		vrLoc = 3476;
@@ -507,7 +513,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 991;
 		vrLoc = 3205;
@@ -516,8 +522,8 @@
 		isa = PBXTextBookmark;
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
-		rLen = 42;
-		rLoc = 4078;
+		rLen = 0;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 993;
 		vrLoc = 3205;
@@ -527,7 +533,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 1000;
 		vrLoc = 3205;
@@ -537,7 +543,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 114";
 		rLen = 0;
-		rLoc = 4635;
+		rLoc = 4257;
 		rType = 0;
 		vrLen = 946;
 		vrLoc = 3540;
@@ -547,7 +553,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4136;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 1077;
 		vrLoc = 3540;
@@ -557,7 +563,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 113";
 		rLen = 0;
-		rLoc = 4540;
+		rLoc = 4257;
 		rType = 0;
 		vrLen = 1077;
 		vrLoc = 3540;
@@ -567,7 +573,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 113";
 		rLen = 0;
-		rLoc = 4540;
+		rLoc = 4257;
 		rType = 0;
 		vrLen = 1103;
 		vrLoc = 3514;
@@ -577,7 +583,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 63";
 		rLen = 0;
-		rLoc = 2609;
+		rLoc = 2584;
 		rType = 0;
 		vrLen = 1410;
 		vrLoc = 2032;
@@ -587,7 +593,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 83";
 		rLen = 0;
-		rLoc = 3321;
+		rLoc = 3233;
 		rType = 0;
 		vrLen = 1348;
 		vrLoc = 2032;
@@ -597,7 +603,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 88";
 		rLen = 0;
-		rLoc = 3401;
+		rLoc = 3288;
 		rType = 0;
 		vrLen = 1233;
 		vrLoc = 2669;
@@ -607,7 +613,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 131";
 		rLen = 0;
-		rLoc = 4862;
+		rLoc = 4412;
 		rType = 0;
 		vrLen = 1092;
 		vrLoc = 3705;
@@ -617,7 +623,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 108";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 961;
 		vrLoc = 3705;
@@ -627,7 +633,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 108";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 964;
 		vrLoc = 3705;
@@ -637,7 +643,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 113";
 		rLen = 0;
-		rLoc = 4252;
+		rLoc = 4107;
 		rType = 0;
 		vrLen = 963;
 		vrLoc = 3705;
@@ -647,7 +653,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 120";
 		rLen = 0;
-		rLoc = 4362;
+		rLoc = 4198;
 		rType = 0;
 		vrLen = 962;
 		vrLoc = 3705;
@@ -657,7 +663,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 108";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 983;
 		vrLoc = 3615;
@@ -667,7 +673,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 108";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 982;
 		vrLoc = 3615;
@@ -677,7 +683,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 118";
 		rLen = 0;
-		rLoc = 4321;
+		rLoc = 4173;
 		rType = 0;
 		vrLen = 975;
 		vrLoc = 3621;
@@ -687,7 +693,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 108";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 968;
 		vrLoc = 3621;
@@ -697,7 +703,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 110";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 964;
 		vrLoc = 3621;
@@ -707,7 +713,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 110";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 984;
 		vrLoc = 3621;
@@ -717,7 +723,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 110";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 981;
 		vrLoc = 3621;
@@ -726,8 +732,8 @@
 		isa = PBXTextBookmark;
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 109";
-		rLen = 157;
-		rLoc = 4030;
+		rLen = 0;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 1005;
 		vrLoc = 3621;
@@ -737,7 +743,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 109";
 		rLen = 0;
-		rLoc = 4134;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 1000;
 		vrLoc = 3683;
@@ -747,7 +753,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 109";
 		rLen = 0;
-		rLoc = 4133;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 1007;
 		vrLoc = 3683;
@@ -757,7 +763,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 109";
 		rLen = 0;
-		rLoc = 4077;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 1012;
 		vrLoc = 3683;
@@ -767,16 +773,76 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 109";
 		rLen = 0;
-		rLoc = 4133;
+		rLoc = 4089;
 		rType = 0;
 		vrLen = 1016;
 		vrLoc = 3683;
 	};
+	0FC095C111ABA15500D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 118";
+		rLen = 0;
+		rLoc = 4180;
+		rType = 0;
+		vrLen = 1000;
+		vrLoc = 3683;
+	};
+	0FC095C411ABA1A400D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 127";
+		rLen = 0;
+		rLoc = 4389;
+		rType = 0;
+		vrLen = 866;
+		vrLoc = 3683;
+	};
+	0FC095C911ABA1EF00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 108";
+		rLen = 0;
+		rLoc = 3817;
+		rType = 0;
+		vrLen = 981;
+		vrLoc = 3523;
+	};
+	0FC095CC11ABA27D00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 62";
+		rLen = 0;
+		rLoc = 2579;
+		rType = 0;
+		vrLen = 1238;
+		vrLoc = 2506;
+	};
+	0FC095CF11ABA2B200D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 100";
+		rLen = 0;
+		rLoc = 4006;
+		rType = 0;
+		vrLen = 982;
+		vrLoc = 3207;
+	};
+	0FC095D211ABA2CE00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 100";
+		rLen = 0;
+		rLoc = 4001;
+		rType = 0;
+		vrLen = 1045;
+		vrLoc = 3207;
+	};
 	2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1179, 1937}}";
-			sepNavSelRange = "{4133, 0}";
-			sepNavVisRange = "{3683, 1016}";
+			sepNavIntBoundsRect = "{{0, 0}, {1762, 1768}}";
+			sepNavSelRange = "{4001, 0}";
+			sepNavVisRange = "{3207, 1045}";
 			sepNavWindowFrame = "{{38, 346}, {672, 656}}";
 		};
 	};
