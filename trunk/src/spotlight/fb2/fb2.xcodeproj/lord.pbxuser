@@ -30,21 +30,21 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 296413295;
-			PBXWorkspaceStateSaveDate = 296413295;
+			PBXPerProjectTemplateStateSaveDate = 296461258;
+			PBXWorkspaceStateSaveDate = 296461258;
 		};
 		perUserProjectItems = {
-			0FC094D511AAE86800D84783 /* PBXTextBookmark */ = 0FC094D511AAE86800D84783 /* PBXTextBookmark */;
-			0FC0952D11AB897400D84783 /* PBXTextBookmark */ = 0FC0952D11AB897400D84783 /* PBXTextBookmark */;
-			0FC0952E11AB897400D84783 /* PlistBookmark */ = 0FC0952E11AB897400D84783 /* PlistBookmark */;
-			0FC0952F11AB897400D84783 /* PBXBookmark */ = 0FC0952F11AB897400D84783 /* PBXBookmark */;
-			0FC0953111AB897400D84783 /* PBXTextBookmark */ = 0FC0953111AB897400D84783 /* PBXTextBookmark */;
-			0FC0953311AB897400D84783 /* PBXTextBookmark */ = 0FC0953311AB897400D84783 /* PBXTextBookmark */;
-			0FC0953611AB897400D84783 /* PBXTextBookmark */ = 0FC0953611AB897400D84783 /* PBXTextBookmark */;
-			0FC0955E11AB8E5400D84783 /* PBXTextBookmark */ = 0FC0955E11AB8E5400D84783 /* PBXTextBookmark */;
-			0FC0955F11AB8E5400D84783 /* PBXTextBookmark */ = 0FC0955F11AB8E5400D84783 /* PBXTextBookmark */;
-			0FC0957E11AB97C100D84783 /* PBXTextBookmark */ = 0FC0957E11AB97C100D84783 /* PBXTextBookmark */;
-			0FC095D311ABA32300D84783 /* PBXTextBookmark */ = 0FC095D311ABA32300D84783 /* PBXTextBookmark */;
+			0FC094D511AAE86800D84783 = 0FC094D511AAE86800D84783 /* PBXTextBookmark */;
+			0FC0952D11AB897400D84783 = 0FC0952D11AB897400D84783 /* PBXTextBookmark */;
+			0FC0952E11AB897400D84783 = 0FC0952E11AB897400D84783 /* PlistBookmark */;
+			0FC0952F11AB897400D84783 = 0FC0952F11AB897400D84783 /* PBXBookmark */;
+			0FC0953111AB897400D84783 = 0FC0953111AB897400D84783 /* PBXTextBookmark */;
+			0FC0953311AB897400D84783 = 0FC0953311AB897400D84783 /* PBXTextBookmark */;
+			0FC0953611AB897400D84783 = 0FC0953611AB897400D84783 /* PBXTextBookmark */;
+			0FC0955E11AB8E5400D84783 = 0FC0955E11AB8E5400D84783 /* PBXTextBookmark */;
+			0FC0955F11AB8E5400D84783 = 0FC0955F11AB8E5400D84783 /* PBXTextBookmark */;
+			0FC0957E11AB97C100D84783 = 0FC0957E11AB97C100D84783 /* PBXTextBookmark */;
+			0FC095D311ABA32300D84783 = 0FC095D311ABA32300D84783 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 0FC094C911AAE16800D84783 /* Source Control */;
 		userBuildSettings = {
@@ -108,7 +108,7 @@
 		);
 		name = /Users/lord/src/fb2pdf/src/spotlight/fb2/Info.plist;
 		rLen = 0;
-		rLoc = 9223372036854775807;
+		rLoc = 9223372036854775808;
 	};
 	0FC0952F11AB897400D84783 /* PBXBookmark */ = {
 		isa = PBXBookmark;
@@ -126,6 +126,7 @@
 	};
 	0FC0953211AB897400D84783 /* CGGeometry.h */ = {
 		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
 		name = CGGeometry.h;
 		path = /Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/ApplicationServices.framework/Headers/../Frameworks/CoreGraphics.framework/Headers/CGGeometry.h;
 		sourceTree = "<absolute>";
@@ -142,6 +143,7 @@
 	};
 	0FC0953411AB897400D84783 /* NSObjCRuntime.h */ = {
 		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
 		name = NSObjCRuntime.h;
 		path = /Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSObjCRuntime.h;
 		sourceTree = "<absolute>";
@@ -158,6 +160,7 @@
 	};
 	0FC0953711AB897400D84783 /* CFURL.h */ = {
 		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
 		name = CFURL.h;
 		path = /Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/CoreFoundation.framework/Versions/A/Headers/CFURL.h;
 		sourceTree = "<absolute>";
@@ -189,7 +192,7 @@
 		rLen = 0;
 		rLoc = 4257;
 		rType = 0;
-		vrLen = 1103;
+		vrLen = 917;
 		vrLoc = 3514;
 	};
 	0FC095D311ABA32300D84783 /* PBXTextBookmark */ = {
