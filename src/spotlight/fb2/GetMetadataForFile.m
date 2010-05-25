@@ -60,6 +60,7 @@ Boolean GetMetadataForURL(void* thisInterface,
     /* Return the attribute keys and attribute values in the dict */
     /* Return TRUE if successful, FALSE if there was no data provided */
     
+    NSLog(@"Importing ");
     
     NSXMLDocument *xmlDoc;
     NSError *err=nil;
@@ -72,14 +73,19 @@ Boolean GetMetadataForURL(void* thisInterface,
                                                       options:NSXMLDocumentTidyXML
                                                         error:&err];
     if (xmlDoc == nil)  
-        return FALSE;
-    
-    if (xmlDoc == nil || err)  
     {
+        NSLog(@"Parse = nil ");
+        return FALSE;
+    }
+    
+    if (err)  
+    {
+        NSLog(@"Parse err ");
         [xmlDoc release];
         return FALSE;
     }
 
+    NSLog(@"Parse OK");
     
     // Title
     NSArray *nodes = [xmlDoc nodesForXPath:@"/FictionBook/description/title-info/book-title/text()"
@@ -87,6 +93,7 @@ Boolean GetMetadataForURL(void* thisInterface,
     
     if(err || [nodes count]<=0)
     {
+        NSLog(@"No title nodes! ");
         [xmlDoc release];
         return FALSE;
     }
@@ -98,10 +105,20 @@ Boolean GetMetadataForURL(void* thisInterface,
     
     // Authors
 
-    nodes = [xmlDoc nodesForXPath:@"string-join(/FictionBook/description/title-info/author/first-name/text()|/FictionBook/description/title-info/author/middle-name/text()|/FictionBook/description/title-info/author/last-name/text(), ' ')" 
+//    nodes = [xmlDoc nodesForXPath:@"string-join(/FictionBook/description/title-info/author/*,' ')" 
+    nodes = [xmlDoc nodesForXPath:@"string-join(/FictionBook/description/title-info/author/*/text(),' ')" 
                                      error:&err];
-    if(err || [nodes count]<=0)
+    
+    if(err)
     {
+        NSLog(@"Author xpath err %@! ",err);
+        [xmlDoc release];
+        return FALSE;
+    }
+    
+    if([nodes count]<=0)
+    {
+        NSLog(@"0 author nodes! ");
         [xmlDoc release];
         return FALSE;
     }

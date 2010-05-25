@@ -76,6 +76,27 @@
 			0FC0957311AB94D100D84783 /* PBXTextBookmark */ = 0FC0957311AB94D100D84783 /* PBXTextBookmark */;
 			0FC0957411AB958D00D84783 /* PBXTextBookmark */ = 0FC0957411AB958D00D84783 /* PBXTextBookmark */;
 			0FC0957B11AB961A00D84783 /* PBXTextBookmark */ = 0FC0957B11AB961A00D84783 /* PBXTextBookmark */;
+			0FC0957E11AB97C100D84783 /* PBXTextBookmark */ = 0FC0957E11AB97C100D84783 /* PBXTextBookmark */;
+			0FC0957F11AB97C100D84783 /* PBXTextBookmark */ = 0FC0957F11AB97C100D84783 /* PBXTextBookmark */;
+			0FC0958211AB980D00D84783 /* PBXTextBookmark */ = 0FC0958211AB980D00D84783 /* PBXTextBookmark */;
+			0FC0958511AB983000D84783 /* PBXTextBookmark */ = 0FC0958511AB983000D84783 /* PBXTextBookmark */;
+			0FC0958611AB985C00D84783 /* PBXTextBookmark */ = 0FC0958611AB985C00D84783 /* PBXTextBookmark */;
+			0FC0958B11AB988A00D84783 /* PBXTextBookmark */ = 0FC0958B11AB988A00D84783 /* PBXTextBookmark */;
+			0FC0958E11AB99DF00D84783 /* PBXTextBookmark */ = 0FC0958E11AB99DF00D84783 /* PBXTextBookmark */;
+			0FC0959711AB9A3700D84783 /* PBXTextBookmark */ = 0FC0959711AB9A3700D84783 /* PBXTextBookmark */;
+			0FC0959811AB9A4300D84783 /* PBXTextBookmark */ = 0FC0959811AB9A4300D84783 /* PBXTextBookmark */;
+			0FC0959D11AB9A6E00D84783 /* PBXTextBookmark */ = 0FC0959D11AB9A6E00D84783 /* PBXTextBookmark */;
+			0FC095A011AB9A7900D84783 /* PBXTextBookmark */ = 0FC095A011AB9A7900D84783 /* PBXTextBookmark */;
+			0FC095A511AB9A8B00D84783 /* PBXTextBookmark */ = 0FC095A511AB9A8B00D84783 /* PBXTextBookmark */;
+			0FC095A811AB9AAE00D84783 /* PBXTextBookmark */ = 0FC095A811AB9AAE00D84783 /* PBXTextBookmark */;
+			0FC095A911AB9B5F00D84783 /* PBXTextBookmark */ = 0FC095A911AB9B5F00D84783 /* PBXTextBookmark */;
+			0FC095AE11AB9B9E00D84783 /* PBXTextBookmark */ = 0FC095AE11AB9B9E00D84783 /* PBXTextBookmark */;
+			0FC095B111AB9BB300D84783 /* PBXTextBookmark */ = 0FC095B111AB9BB300D84783 /* PBXTextBookmark */;
+			0FC095B411AB9D7D00D84783 /* PBXTextBookmark */ = 0FC095B411AB9D7D00D84783 /* PBXTextBookmark */;
+			0FC095B711AB9F7C00D84783 /* PBXTextBookmark */ = 0FC095B711AB9F7C00D84783 /* PBXTextBookmark */;
+			0FC095BA11AB9F8E00D84783 /* PBXTextBookmark */ = 0FC095BA11AB9F8E00D84783 /* PBXTextBookmark */;
+			0FC095BD11AB9F9D00D84783 /* PBXTextBookmark */ = 0FC095BD11AB9F9D00D84783 /* PBXTextBookmark */;
+			0FC095C011AB9FAE00D84783 /* PBXTextBookmark */ = 0FC095C011AB9FAE00D84783 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 0FC094C911AAE16800D84783 /* Source Control */;
 		userBuildSettings = {
@@ -286,7 +307,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 87";
 		rLen = 0;
-		rLoc = 4566;
+		rLoc = 4835;
 		rType = 0;
 		vrLen = 1338;
 		vrLoc = 2198;
@@ -296,7 +317,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 83";
 		rLen = 0;
-		rLoc = 3573;
+		rLoc = 3716;
 		rType = 0;
 		vrLen = 1343;
 		vrLoc = 2149;
@@ -306,7 +327,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 84";
 		rLen = 0;
-		rLoc = 4566;
+		rLoc = 4835;
 		rType = 0;
 		vrLen = 1432;
 		vrLoc = 2065;
@@ -316,7 +337,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 77";
 		rLen = 0;
-		rLoc = 3361;
+		rLoc = 3468;
 		rType = 0;
 		vrLen = 1431;
 		vrLoc = 2065;
@@ -326,7 +347,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 77";
 		rLen = 0;
-		rLoc = 3414;
+		rLoc = 3521;
 		rType = 0;
 		vrLen = 1438;
 		vrLoc = 2065;
@@ -336,7 +357,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 84";
 		rLen = 0;
-		rLoc = 3639;
+		rLoc = 3782;
 		rType = 0;
 		vrLen = 1474;
 		vrLoc = 2065;
@@ -356,7 +377,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 85";
 		rLen = 0;
-		rLoc = 3725;
+		rLoc = 3868;
 		rType = 0;
 		vrLen = 1530;
 		vrLoc = 2149;
@@ -366,7 +387,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 86";
 		rLen = 0;
-		rLoc = 3755;
+		rLoc = 3898;
 		rType = 0;
 		vrLen = 1518;
 		vrLoc = 2149;
@@ -376,7 +397,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 100";
 		rLen = 0;
-		rLoc = 4598;
+		rLoc = 4867;
 		rType = 0;
 		vrLen = 1182;
 		vrLoc = 2643;
@@ -386,7 +407,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 71";
 		rLen = 0;
-		rLoc = 2990;
+		rLoc = 3016;
 		rType = 0;
 		vrLen = 1198;
 		vrLoc = 2643;
@@ -406,7 +427,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 95";
 		rLen = 0;
-		rLoc = 3697;
+		rLoc = 3840;
 		rType = 0;
 		vrLen = 1160;
 		vrLoc = 2638;
@@ -416,7 +437,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 100";
 		rLen = 0;
-		rLoc = 3785;
+		rLoc = 4030;
 		rType = 0;
 		vrLen = 814;
 		vrLoc = 3084;
@@ -446,7 +467,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 109";
 		rLen = 0;
-		rLoc = 4564;
+		rLoc = 4833;
 		rType = 0;
 		vrLen = 906;
 		vrLoc = 3269;
@@ -456,7 +477,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 103";
 		rLen = 0;
-		rLoc = 4170;
+		rLoc = 4439;
 		rType = 0;
 		vrLen = 1019;
 		vrLoc = 3269;
@@ -466,7 +487,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 107";
 		rLen = 0;
-		rLoc = 4380;
+		rLoc = 4649;
 		rType = 0;
 		vrLen = 1006;
 		vrLoc = 3269;
@@ -476,7 +497,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4015;
+		rLoc = 4134;
 		rType = 0;
 		vrLen = 992;
 		vrLoc = 3476;
@@ -486,7 +507,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4021;
+		rLoc = 4134;
 		rType = 0;
 		vrLen = 991;
 		vrLoc = 3205;
@@ -495,8 +516,8 @@
 		isa = PBXTextBookmark;
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
-		rLen = 200;
-		rLoc = 3821;
+		rLen = 42;
+		rLoc = 4078;
 		rType = 0;
 		vrLen = 993;
 		vrLoc = 3205;
@@ -506,7 +527,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4015;
+		rLoc = 4134;
 		rType = 0;
 		vrLen = 1000;
 		vrLoc = 3205;
@@ -516,7 +537,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 114";
 		rLen = 0;
-		rLoc = 4366;
+		rLoc = 4635;
 		rType = 0;
 		vrLen = 946;
 		vrLoc = 3540;
@@ -526,7 +547,7 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 101";
 		rLen = 0;
-		rLoc = 4023;
+		rLoc = 4136;
 		rType = 0;
 		vrLen = 1077;
 		vrLoc = 3540;
@@ -536,16 +557,226 @@
 		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
 		name = "GetMetadataForFile.m: 113";
 		rLen = 0;
-		rLoc = 4271;
+		rLoc = 4540;
 		rType = 0;
 		vrLen = 1077;
 		vrLoc = 3540;
 	};
+	0FC0957E11AB97C100D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 113";
+		rLen = 0;
+		rLoc = 4540;
+		rType = 0;
+		vrLen = 1103;
+		vrLoc = 3514;
+	};
+	0FC0957F11AB97C100D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 63";
+		rLen = 0;
+		rLoc = 2609;
+		rType = 0;
+		vrLen = 1410;
+		vrLoc = 2032;
+	};
+	0FC0958211AB980D00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 83";
+		rLen = 0;
+		rLoc = 3321;
+		rType = 0;
+		vrLen = 1348;
+		vrLoc = 2032;
+	};
+	0FC0958511AB983000D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 88";
+		rLen = 0;
+		rLoc = 3401;
+		rType = 0;
+		vrLen = 1233;
+		vrLoc = 2669;
+	};
+	0FC0958611AB985C00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 131";
+		rLen = 0;
+		rLoc = 4862;
+		rType = 0;
+		vrLen = 1092;
+		vrLoc = 3705;
+	};
+	0FC0958B11AB988A00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 108";
+		rLen = 0;
+		rLoc = 4134;
+		rType = 0;
+		vrLen = 961;
+		vrLoc = 3705;
+	};
+	0FC0958E11AB99DF00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 108";
+		rLen = 0;
+		rLoc = 4078;
+		rType = 0;
+		vrLen = 964;
+		vrLoc = 3705;
+	};
+	0FC0959711AB9A3700D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 113";
+		rLen = 0;
+		rLoc = 4252;
+		rType = 0;
+		vrLen = 963;
+		vrLoc = 3705;
+	};
+	0FC0959811AB9A4300D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 120";
+		rLen = 0;
+		rLoc = 4362;
+		rType = 0;
+		vrLen = 962;
+		vrLoc = 3705;
+	};
+	0FC0959D11AB9A6E00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 108";
+		rLen = 0;
+		rLoc = 4078;
+		rType = 0;
+		vrLen = 983;
+		vrLoc = 3615;
+	};
+	0FC095A011AB9A7900D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 108";
+		rLen = 0;
+		rLoc = 4078;
+		rType = 0;
+		vrLen = 982;
+		vrLoc = 3615;
+	};
+	0FC095A511AB9A8B00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 118";
+		rLen = 0;
+		rLoc = 4321;
+		rType = 0;
+		vrLen = 975;
+		vrLoc = 3621;
+	};
+	0FC095A811AB9AAE00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 108";
+		rLen = 0;
+		rLoc = 4134;
+		rType = 0;
+		vrLen = 968;
+		vrLoc = 3621;
+	};
+	0FC095A911AB9B5F00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 110";
+		rLen = 0;
+		rLoc = 4134;
+		rType = 0;
+		vrLen = 964;
+		vrLoc = 3621;
+	};
+	0FC095AE11AB9B9E00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 110";
+		rLen = 0;
+		rLoc = 4134;
+		rType = 0;
+		vrLen = 984;
+		vrLoc = 3621;
+	};
+	0FC095B111AB9BB300D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 110";
+		rLen = 0;
+		rLoc = 4078;
+		rType = 0;
+		vrLen = 981;
+		vrLoc = 3621;
+	};
+	0FC095B411AB9D7D00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 109";
+		rLen = 157;
+		rLoc = 4030;
+		rType = 0;
+		vrLen = 1005;
+		vrLoc = 3621;
+	};
+	0FC095B711AB9F7C00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 109";
+		rLen = 0;
+		rLoc = 4134;
+		rType = 0;
+		vrLen = 1000;
+		vrLoc = 3683;
+	};
+	0FC095BA11AB9F8E00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 109";
+		rLen = 0;
+		rLoc = 4133;
+		rType = 0;
+		vrLen = 1007;
+		vrLoc = 3683;
+	};
+	0FC095BD11AB9F9D00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 109";
+		rLen = 0;
+		rLoc = 4077;
+		rType = 0;
+		vrLen = 1012;
+		vrLoc = 3683;
+	};
+	0FC095C011AB9FAE00D84783 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */;
+		name = "GetMetadataForFile.m: 109";
+		rLen = 0;
+		rLoc = 4133;
+		rType = 0;
+		vrLen = 1016;
+		vrLoc = 3683;
+	};
 	2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1678, 1716}}";
-			sepNavSelRange = "{4271, 0}";
-			sepNavVisRange = "{3540, 1077}";
+			sepNavIntBoundsRect = "{{0, 0}, {1179, 1937}}";
+			sepNavSelRange = "{4133, 0}";
+			sepNavVisRange = "{3683, 1016}";
 			sepNavWindowFrame = "{{38, 346}, {672, 656}}";
 		};
 	};
