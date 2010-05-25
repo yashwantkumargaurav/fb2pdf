@@ -97,7 +97,7 @@ Boolean GetMetadataForURL(void* thisInterface,
     
     
     // Authors
-    NSArray *result = [xmlDoc objectsForXQuery:@"string-join(/FictionBook/description/title-info/author/first-name/text()|/FictionBook/description/title-info/author/first-name/text()|/FictionBook/description/title-info/author/middle-name/text(),' ')"
+    NSArray *result = [xmlDoc objectsForXQuery:@"string-join(/FictionBook/description/title-info/author/first-name/text()|/FictionBook/description/title-info/author/middle-name/text()|/FictionBook/description/title-info/author/last-name/text(),' ')"
                                      constants:nil error:&err];
     
     if(err)
