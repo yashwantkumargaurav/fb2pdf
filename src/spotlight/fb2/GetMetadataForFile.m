@@ -1,5 +1,10 @@
+#import <Foundation/Foundation.h>
+
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h> 
+
+#import <Foundation/NSXMLDocument.h>
+#import <CoreFoundation/CFURL.h>
 
 /* -----------------------------------------------------------------------------
    Step 1
@@ -47,14 +52,74 @@
    ----------------------------------------------------------------------------- */
 
 Boolean GetMetadataForURL(void* thisInterface, 
-			   CFMutableDictionaryRef attributes, 
-			   CFStringRef contentTypeUTI,
-			   CFURLRef urlForFile)
+                          CFMutableDictionaryRef attributes, 
+                          CFStringRef contentTypeUTI,
+                          CFURLRef urlForFile)
 {
     /* Pull any available metadata from the file at the specified path */
     /* Return the attribute keys and attribute values in the dict */
     /* Return TRUE if successful, FALSE if there was no data provided */
     
-    #warning To complete your importer please implement the function GetMetadataForURL in GetMetadataForFile.c
-    return FALSE;
+    
+    NSXMLDocument *xmlDoc;
+    NSError *err=nil;
+    
+    xmlDoc = [[NSXMLDocument alloc] initWithContentsOfURL:(NSURL*)urlForFile
+                                                  options:(NSXMLNodePreserveWhitespace|NSXMLNodePreserveCDATA)
+                                                    error:&err];
+    if (xmlDoc == nil) 
+        xmlDoc = [[NSXMLDocument alloc] initWithContentsOfURL:(NSURL*)urlForFile
+                                                      options:NSXMLDocumentTidyXML
+                                                        error:&err];
+    if (xmlDoc == nil)  
+        return FALSE;
+    
+    if (xmlDoc == nil || err)  
+    {
+        [xmlDoc release];
+        return FALSE;
+    }
+
+    
+    // Title
+    NSArray *nodes = [xmlDoc nodesForXPath:@"/FictionBook/description/title-info/book-title/text()"
+                                          error:&err];
+    
+    if(err || [nodes count]<=0)
+    {
+        [xmlDoc release];
+        return FALSE;
+    }
+    
+    NSXMLNode *titleNode = [nodes objectAtIndex:0];
+    NSString *title = [titleNode stringValue];
+    [(NSMutableDictionary*)attributes setObject:title forKey:@"com_fb2pdf_fb2_title"];
+    
+    
+    // Authors
+
+    nodes = [xmlDoc nodesForXPath:@"string-join(/FictionBook/description/title-info/author/first-name/text()|/FictionBook/description/title-info/author/middle-name/text()|/FictionBook/description/title-info/author/last-name/text(), ' ')" 
+                                     error:&err];
+    if(err || [nodes count]<=0)
+    {
+        [xmlDoc release];
+        return FALSE;
+    }
+    
+    NSMutableArray* tempArray = [NSMutableArray array];
+
+    for(int i=0;i<[nodes count];i++)
+    {
+        NSXMLNode *authorNode = [nodes objectAtIndex:i];
+        NSString *author = [authorNode stringValue];
+        [tempArray addObject:author];
+    }
+    
+    [(NSMutableDictionary *)attributes setObject:tempArray
+                                          forKey:@"com_fb2pdf_fb2_author"];
+
+    
+    [xmlDoc release];
+    
+    return TRUE;
 }
