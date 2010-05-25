@@ -24,6 +24,7 @@
     <attributes>
         <attribute name="com_fb2pdf_fb2_title" multivalued="false" type="CFString"/>
         <attribute name="com_fb2pdf_fb2_author" multivalued="true" type="CFString"/>
+        <attribute name="com_fb2pdf_fb2_keywords" multivalued="true" type="CFString"/>
     </attributes>
 
     <types>
@@ -34,11 +35,13 @@
             <allattrs> 
                 com_fb2pdf_fb2_title
                 com_fb2pdf_fb2_author
+                com_fb2pdf_fb2_keywords
             </allattrs>
             <!-- 'displayattrs' is a whitespace separated list of the attributes that should normally be displayed when previewing files of this UTI type. -->
             <displayattrs>
                 com_fb2pdf_fb2_title
                 com_fb2pdf_fb2_author
+                com_fb2pdf_fb2_keywords
             </displayattrs>
             
         </type>

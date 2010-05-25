@@ -114,6 +114,37 @@ Boolean GetMetadataForURL(void* thisInterface,
     
     [(NSMutableDictionary *)attributes setObject:result
                                           forKey:@"com_fb2pdf_fb2_author"];
+    
+    
+    // Keywords (optional)
+    nodes = [xmlDoc nodesForXPath:@"/FictionBook/description/title-info/keywords/text()"
+                                     error:&err];
+    
+    if(!err && [nodes count]>0)
+    {
+        NSMutableArray* kwArray = [NSMutableArray array];
+
+        NSCharacterSet *separators = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+        for(int i=0;i<[nodes count];i++)
+        {   
+            NSXMLNode *keywordsNode = [nodes objectAtIndex:i];
+            NSString *keywords = [keywordsNode stringValue];
+            
+            NSScanner *scanner = [NSScanner scannerWithString:keywords];
+            [scanner setCharactersToBeSkipped:nil];
+            while([scanner isAtEnd] == NO) 
+            {
+                NSString *k;
+                if([scanner scanUpToCharactersFromSet:separators intoString:&k] == YES)
+                    [kwArray addObject:k];
+                if([scanner scanCharactersFromSet:separators intoString:&k]==YES)
+                    [k release];
+            }            
+        }
+        [separators release];
+        [(NSMutableDictionary*)attributes setObject:kwArray forKey:@"com_fb2pdf_fb2_keywords"];
+    }
+    
 
     [xmlDoc release];
     return TRUE;
