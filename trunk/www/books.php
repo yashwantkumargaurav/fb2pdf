@@ -45,7 +45,21 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
             global $dbServer, $dbName, $dbUser, $dbPassword;
                 
             $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
-            $list = $db->getBooksByAuthor($author, 0);
+            $list = $db->getNotInGroupBooksByAuthor($author, 0);
+            foreach ($list as $i => $value){
+            	$list[$i]["groups"] = array();
+            }
+            $groupsList = $db->getBookGroupsByAuthor($author, 0);
+            if($groupsList){
+            	foreach ($groupsList as $value){
+            		$books = $db->getBooksByGroup($value["book_group"], 0);
+            		if(count($books) > 1){
+	            		$element = $books[0];
+	            		$element["groups"] = array_slice($books, 1);
+	            		array_push($list, $element);
+            		}
+            	}
+            }
             if ($list)
             {
                 echo "<div class=\"author\"><br/>$author</div>";
@@ -77,6 +91,17 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
                                 $title = "Название неизвестно";
                             
                             echo "<a href=\"book.php?key=$key\">\"$title\"</a><br/>";
+                            
+                            if(count($list[$i]["groups"]) > 0){
+                            	foreach ($list[$i]["groups"] as $bookGroups){
+                            		$title  = $bookGroups["title"];
+		                            $key    = $bookGroups["storage_key"];
+		
+		                            if (!$title)
+		                                $title = "Название неизвестно";
+		                            echo "similar: <a href=\"book.php?key=$key\">\"$title\"</a><br/>";
+                            	}
+                            }
                         }
                         echo "</p>";
                     }

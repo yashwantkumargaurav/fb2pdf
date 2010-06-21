@@ -319,6 +319,108 @@ class DB
     
     // Get list of books by author.
     // if number == 0, no limit
+    function getNotInGroupBooksByAuthor($author, $number)
+    {
+        if (!is_numeric($number))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $author = mysql_real_escape_string($author);
+
+        //TODO: see if we can get rid of filesort in this query
+        // (see mysql EXPLAIN on it)
+        $query = "SELECT title, storage_key FROM OriginalBooks ".
+        " WHERE valid=TRUE" .
+        " AND author=\"$author\" AND book_group IS NULL ORDER BY title DESC";
+        if ($number > 0)
+            $query = $query . " LIMIT $number";
+            
+        if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
+            $list[$count++] = $row;
+        
+        $this->_disconnect();
+        return $list;
+    }
+    
+    // Get list of books by author.
+    // if number == 0, no limit
+    function getBookGroupsByAuthor($author, $number)
+    {
+        if (!is_numeric($number))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $author = mysql_real_escape_string($author);
+
+        $query = "SELECT book_group FROM OriginalBooks ".
+        " WHERE valid=TRUE" .
+        " AND author=\"$author\" AND book_group is not null group by book_group";
+        if ($number > 0)
+            $query = $query . " LIMIT $number";
+            
+        if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
+            $list[$count++] = $row;
+        
+        $this->_disconnect();
+        return $list;
+    }
+    
+    // Get list of books by group.
+    // if number == 0, no limit
+    function getBooksByGroup($groupId, $number)
+    {
+        if (!is_numeric($number))
+            return false;
+            
+        if (!is_numeric($groupId))
+            return false;
+            
+        if (!$this->_connect())
+            return false;
+            
+        $query = "SELECT title, storage_key FROM OriginalBooks ".
+        " WHERE valid=TRUE" .
+        " AND book_group=$groupId ORDER BY title DESC";
+        if ($number > 0)
+            $query = $query . " LIMIT $number";
+            
+        if (!$this->_execQuery($query))
+        {
+            $this->_disconnect();
+            return false;
+        }
+        
+        $list = array();
+        $count = 0;
+        while ($row = mysql_fetch_array($this->result, MYSQL_ASSOC)) 
+            $list[$count++] = $row;
+        
+        $this->_disconnect();
+        return $list;
+    }
+    
+    // Get list of books by author.
+    // if number == 0, no limit
     function getBooksByAuthorRSS($author, $number)
     {
         if (!is_numeric($number))
