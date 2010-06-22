@@ -21,6 +21,93 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
 <?php include 'searchstyle.inc.php'; ?>
 <?php include 'analytics.inc.php'; ?>
 <?php include 'searchstyle.inc.php'; ?>
+<script src="js/yahoo.js"></script>
+<script src="js/connection.js"></script>
+
+<script type="text/javascript">
+function bookTitles(groupId, totalNumber, excludedKey, divName, imgName)
+{
+    if ( document.getElementById(divName).style.display == 'none') 
+    {
+        // show progress indicator
+        var div = document.getElementById(divName);
+        div.innerHTML = '<img id="pimage" src="images/progress.gif" alt="progress bar"/>';
+        div.style.display="inline";
+        
+        // request url 
+        var baseUrl = 'query_similar_books.php';
+        var queryString = encodeURI('?group=' + groupId + '&' + 'count=' + 0 + '&' + 'excludedKey=' + excludedKey);
+        var url = baseUrl + queryString;
+
+        // callback
+        var callback =
+        {
+            success: successHandler,
+            failure: failureHandler,
+            argument: { divName: divName, imgName: imgName, groupId: groupId, totalNumber: totalNumber }
+        };
+        
+        // Initiate the HTTP GET request.
+        var request = YAHOO.util.Connect.asyncRequest('GET', url, callback);
+    }   
+    else
+    {
+        document.getElementById(divName).style.display="none";
+        document.getElementById(imgName).src = document.getElementById(imgName).src.replace('_minus', '_plus');
+    }
+}
+
+function successHandler(o)
+{
+    var div = document.getElementById(o.argument.divName);
+    var img = document.getElementById(o.argument.imgName);
+    var groupId = o.argument.groupId;
+    var totalNumber = o.argument.totalNumber;
+    
+    // format and display results.
+    var root = o.responseXML.documentElement;
+    var channel = root.getElementsByTagName("channel")[0];
+    
+    var items = channel.getElementsByTagName("item");
+    
+    div.innerHTML = '';
+    for (var i = 0; i < items.length; i++)
+    {
+        var title = items[i].getElementsByTagName("title")[0].firstChild.nodeValue;
+        var link  = items[i].getElementsByTagName("link")[0].firstChild.nodeValue;
+        
+        div.innerHTML +=  '<a href="' + link + '">' + title + '</a><br>';
+    }
+
+    // display list
+    div.style.display = "inline";
+    img.src = img.src.replace('_plus', '_minus');
+}
+
+function failureHandler(o)
+{
+    alert("Внутренняя ошибка системы (" + o.status + " " + o.statusText + ")");
+    
+    var div = document.getElementById(o.argument.divName);
+    var img = document.getElementById(o.argument.imgName);
+    
+    div.innerHTML = '';
+    div.style.display = "none";
+    img.src = img.src.replace('_minus', '_plus');
+}
+
+function rollOver(imgName)
+{
+    if (document.getElementById(imgName).src.search('_off') > 0)
+    {
+        document.getElementById(imgName).src = document.getElementById(imgName).src.replace('_off', '_on');
+    }
+    else
+    {
+        document.getElementById(imgName).src = document.getElementById(imgName).src.replace('_on', '_off');
+    }
+}
+</script>
 </head>
 
 <body>
@@ -45,21 +132,7 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
             global $dbServer, $dbName, $dbUser, $dbPassword;
                 
             $db = new DB($dbServer, $dbName, $dbUser, $dbPassword);
-            $list = $db->getNotInGroupBooksByAuthor($author, 0);
-            foreach ($list as $i => $value){
-            	$list[$i]["groups"] = array();
-            }
-            $groupsList = $db->getBookGroupsByAuthor($author, 0);
-            if($groupsList){
-            	foreach ($groupsList as $value){
-            		$books = $db->getBooksByGroup($value["book_group"], 0);
-            		if(count($books) > 1){
-	            		$element = $books[0];
-	            		$element["groups"] = array_slice($books, 1);
-	            		array_push($list, $element);
-            		}
-            	}
-            }
+            $list = $db->getBooksByAuthor($author, 0);            
             if ($list)
             {
                 echo "<div class=\"author\"><br/>$author</div>";
@@ -90,17 +163,19 @@ $link    =  (isset($author)) ? "$base?author=$author" : $base;
                             if (!$title)
                                 $title = "Название неизвестно";
                             
-                            echo "<a href=\"book.php?key=$key\">\"$title\"</a><br/>";
-                            
-                            if(count($list[$i]["groups"]) > 0){
-                            	foreach ($list[$i]["groups"] as $bookGroups){
-                            		$title  = $bookGroups["title"];
-		                            $key    = $bookGroups["storage_key"];
-		
-		                            if (!$title)
-		                                $title = "Название неизвестно";
-		                            echo "similar: <a href=\"book.php?key=$key\">\"$title\"</a><br/>";
-                            	}
+                            if($list[$i]["group"]){
+                            	$title_md5 = md5($title);
+                            	$groupId = $list[$i]["group"];
+                            	echo "<img id=\"bt$title_md5\" src=\"images/bt_plus_off.gif\" style=\"cursor:pointer\"";
+	                            echo " onclick=\"bookTitles('$groupId', 0, '$key', '$title_md5', 'bt$title_md5');\"";
+	                            echo " onmouseover=\"rollOver('bt$title_md5');\"";
+	                            echo " onmouseout=\"rollOver('bt$title_md5');\"/>";
+	                            echo "&nbsp;&nbsp;<a href=\"book.php?key=$key\">\"$title\"</a>&nbsp;&nbsp;<br/>"; 
+	                            echo "<div id=\"$title_md5\" style=\"display:none;\">";
+	                            echo "</div>";
+                            }
+                            else{
+                            	echo "<a href=\"book.php?key=$key\">\"$title\"</a><br/>";
                             }
                         }
                         echo "</p>";
