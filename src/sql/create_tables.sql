@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS OriginalBooks
         -- book group. In case there are
         -- similar books they should be
         -- in a single group
-        book_group INT
+        book_group INT,
 
         INDEX   storage_key_idx (storage_key),
         INDEX   author_idx (valid, author),
