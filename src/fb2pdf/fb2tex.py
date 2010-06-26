@@ -11,7 +11,7 @@ __copyright__ = "Copyright (C) 2007 Vadim Zaliva"
 __version__ = "3.14"
 
 import logging
-import os, os.path, sys
+import os, os.path, sys, subprocess
 import string, re
 import binascii
 from xml.dom.minidom import parse, Node
@@ -810,6 +810,13 @@ def findEnclosures(fb, outdir, outname):
         f.write(binascii.a2b_base64(e.childNodes[0].data))
         f.close()
         try:
+            if ct == 'image/png':
+                # Pre-process PNG images that may have alpha channel, which PIL 
+                # doesn't process properly in some cases
+                result = subprocess.call(["/usr/bin/fb2pdf_mixpng", fullfname])
+                if result != 0:
+                    raise Exception("Error processing PNG image")
+
             # convert to grayscale, 166dpi (native resolution for Sony Reader)
             Image.open(fullfname).convert("L").save(fullfname, dpi=(166,166))
             #TODO: scale down large images        
