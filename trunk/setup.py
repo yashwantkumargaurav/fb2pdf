@@ -10,6 +10,6 @@ setup(name='fb2pdf',
       url='http://code.google.com/p/fb2pdf/',
       packages=['fb2pdf'],
       package_dir={'fb2pdf': 'src/fb2pdf'},
-      scripts=['scripts/fbmerge','scripts/fb2pdf_queue_send','scripts/fb2pdf_queue_clear','scripts/fb2pdf_queue_receive','scripts/fbdaemon','scripts/fb2tex'],
+      scripts=['scripts/fbmerge','scripts/fb2pdf_queue_send','scripts/fb2pdf_queue_clear','scripts/fb2pdf_queue_receive','scripts/fbdaemon','scripts/fb2tex','scripts/fb2pdf_mixpng'],
       data_files=[('share/texmf-local/', ['src/TeX/verse.sty', 'src/TeX/epigraph.sty','src/TeX/sectsty.dtx', 'src/TeX/sectsty.ins']),('share/fb2pdf',['etc/broken-image.png','lib/epubgen-0.5.0.jar'])]
      )

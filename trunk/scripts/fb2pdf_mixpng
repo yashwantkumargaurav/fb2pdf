@@ -1,0 +1,6 @@
+#!/bin/sh
+
+TEMP_FILE=$(basename $1).pnm
+
+/usr/bin/pngtopnm -mix $1 > $TEMP_FILE &&
+	/usr/bin/pnmtopng $TEMP_FILE > $1
